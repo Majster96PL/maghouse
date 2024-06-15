@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: warehouse-service
+
+server:
+  port: 8081
+
+cloud:
+  discovery:
+    client:
+      service-url:
+        defaultZone: http://localhost:8761/eureka
