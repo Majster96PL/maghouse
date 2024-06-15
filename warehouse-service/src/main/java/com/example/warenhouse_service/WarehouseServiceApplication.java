@@ -2,12 +2,14 @@ package com.example.warenhouse_service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication
-public class WarenhouseServiceApplication {
+@EnableDiscoveryClient
+public class WarehouseServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(WarenhouseServiceApplication.class, args);
+		SpringApplication.run(WarehouseServiceApplication.class, args);
 	}
 
 }
