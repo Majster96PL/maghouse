@@ -19,6 +19,7 @@
 		<module>eureka-server</module>
 		<module>user-service</module>
 		<module>warehouse-service</module>
+		<module>items-service</module>
 	</modules>
 	<properties>
 		<java.version>22</java.version>
