@@ -1,8 +1,6 @@
 spring:
   application:
-    name: user-service
-  profiler:
-    active: default
+    name: warehouse-service
 
 server:
   port: 8081
