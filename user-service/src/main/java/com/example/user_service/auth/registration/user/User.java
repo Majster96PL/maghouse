@@ -17,13 +17,15 @@ import java.util.Set;
 @Data
 @Table(name = "users")
 @AllArgsConstructor
-@NoArgsConstructor
 @EqualsAndHashCode
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
+    @NotBlank(message = "Firstname required!")
+    @Size(max = 20)
+    private String firstname;
     @NotBlank(message = "Username required!")
     @Size(max = 20)
     private String username;
@@ -40,4 +42,17 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "roleId")
     )
     private Set<Role> roles;
+
+
+    public User(String firstname,
+                String username,
+                String password,
+                String email,
+                Set<Role> roles) {
+        this.firstname = firstname;
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.roles = roles;
+    }
 }
