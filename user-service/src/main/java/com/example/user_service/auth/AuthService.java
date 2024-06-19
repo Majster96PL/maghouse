@@ -18,7 +18,7 @@ public class AuthService {
     private UserService userService;
     private RoleService roleService;
 
-    private String registerUser(UserRequest userRequest) {
+    public String registerUser(UserRequest userRequest) {
         RoleEnum roleEnum = RoleEnum.USER;
         Role role = roleService.getAllRoles().stream()
                         .filter(r ->r.getRoleEnum().equals(roleEnum.toString()))
