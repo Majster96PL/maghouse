@@ -1,5 +1,6 @@
 package com.example.user_service.registration.user;
 
+import com.example.user_service.security.PasswordEncoder;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +17,7 @@ public class UserService implements UserDetailsService {
 
     private static final String MESSAGE_EXCEPTON = "User with username not found";
     private UserRepository userRepository;
+    private PasswordEncoder passwordEncoder;
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
@@ -41,7 +43,8 @@ public class UserService implements UserDetailsService {
         if (isUserExits) {
             throw new UsernameNotFoundException(MESSAGE_EXCEPTON);
         }
-        String password = user.getPassword();
+        String password = passwordEncoder.bCryptPasswordEncoder()
+                .encode(user.getPassword());
         user.setPassword(password);
         userRepository.save(user);
         return " Create new user successfully!";
