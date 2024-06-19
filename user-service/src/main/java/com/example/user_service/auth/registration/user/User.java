@@ -43,7 +43,6 @@ public class User {
     )
     private Set<Role> roles;
 
-
     public User(String firstname,
                 String username,
                 String password,

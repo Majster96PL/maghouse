@@ -14,7 +14,7 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roleId;
-    @Enumerated(EnumType.STRING)
+    @ElementCollection(fetch = FetchType.EAGER)
     @Column(length = 25)
     private RoleEnum roleEnum;
 }
