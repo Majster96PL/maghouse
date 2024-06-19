@@ -1,4 +1,4 @@
-package com.example.user_service.registration.user;
+package com.example.user_service.auth.registration.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

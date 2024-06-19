@@ -1,4 +1,4 @@
-package com.example.user_service.registration.role;
+package com.example.user_service.auth.registration.role;
 
 
 import jakarta.persistence.*;

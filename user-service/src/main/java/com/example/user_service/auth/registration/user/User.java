@@ -1,6 +1,6 @@
-package com.example.user_service.registration.user;
+package com.example.user_service.auth.registration.user;
 
-import com.example.user_service.registration.role.Role;
+import com.example.user_service.auth.registration.role.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
