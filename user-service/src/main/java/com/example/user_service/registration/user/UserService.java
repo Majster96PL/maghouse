@@ -34,4 +34,16 @@ public class UserService implements UserDetailsService {
             );
         }
     }
+
+    private String getNewUser(User user) {
+        boolean isUserExits = userRepository
+                .findUserByUsername(user.getUsername()).isPresent();
+        if (isUserExits) {
+            throw new UsernameNotFoundException(MESSAGE_EXCEPTON);
+        }
+        String password = user.getPassword();
+        user.setPassword(password);
+        userRepository.save(user);
+        return " Create new user successfully!";
+    }
 }
