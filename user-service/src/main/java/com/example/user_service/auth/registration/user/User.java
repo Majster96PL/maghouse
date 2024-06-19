@@ -10,13 +10,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
 import java.util.Set;
 
 
 @Entity
 @Data
 @Table(name = "users")
-@AllArgsConstructor
 @EqualsAndHashCode
 public class User {
 
@@ -41,8 +41,12 @@ public class User {
             joinColumns = @JoinColumn(name = "userId"),
             inverseJoinColumns = @JoinColumn(name = "roleId")
     )
-    private Set<Role> roles;
+    private Set<Role> roles = new HashSet<>();
 
+    public User()
+    {
+
+    }
     public User(String firstname,
                 String username,
                 String password,
