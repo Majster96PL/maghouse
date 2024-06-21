@@ -1,20 +1,34 @@
 package com.example.user_service.auth.registration.role;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import java.util.Set;
 
-@Data
-@Entity
-@Table(name = "role")
-@AllArgsConstructor
-public class Role {
+@RequiredArgsConstructor
+public enum Role {
+    ADMIN(
+            Set.of(
+                    Permission.ADMIN_READ,
+                    Permission.ADMIN_CREATE,
+                    Permission.ADMIN_UPDATE,
+                    Permission.ADMIN_DELETE
+            )
+    ),
+    SUPERVISOR(
+            Set.of(
+                    Permission.SUPERVISOR_CREATE,
+                    Permission.SUPERVISOR_UPDATE,
+                    Permission.SUPERVISOR_READ
+            )
+    ),
+    USER(
+            Set.of(
+                    Permission.USER_READ
+            )
+    );
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long roleId;
-    @Enumerated(EnumType.STRING)
-    @Column(length = 25)
-    private RoleEnum roleEnum;
+    @Getter
+    private final Set<Permission> permissions;
+
 }
