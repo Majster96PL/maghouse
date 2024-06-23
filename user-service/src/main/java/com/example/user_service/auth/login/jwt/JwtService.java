@@ -20,7 +20,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class JwtService {
 
-    private final SecretPropiertiesReader secretPropertiesReader;
+    private final SecretPropertiesReader secretPropertiesReader;
 
     public String getToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);

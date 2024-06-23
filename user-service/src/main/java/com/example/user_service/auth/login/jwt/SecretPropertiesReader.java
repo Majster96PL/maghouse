@@ -8,7 +8,7 @@ import java.util.Base64;
 import java.util.Properties;
 
 @Component
-public class SecretPropiertiesReader {
+public class SecretPropertiesReader {
 
     private final ClassPathResource classPathResource = new ClassPathResource("properties.secret");
     private final Properties properties = new Properties();
