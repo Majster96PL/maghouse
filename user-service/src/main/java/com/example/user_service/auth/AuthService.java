@@ -1,6 +1,8 @@
 package com.example.user_service.auth;
 
 import com.example.user_service.auth.login.jwt.JwtService;
+import com.example.user_service.auth.mapper.TokenResponseToTokenMapper;
+import com.example.user_service.auth.mapper.UserRequestToUserMapper;
 import com.example.user_service.auth.registration.role.Role;
 import com.example.user_service.auth.registration.token.Token;
 import com.example.user_service.auth.registration.token.TokenRepository;
@@ -21,20 +23,15 @@ public class AuthService {
     private UserRepository userRepository;
     private JwtService jwtService;
     private TokenRepository tokenRepository;
+    private UserRequestToUserMapper userRequestToUserMapper;
+    private TokenResponseToTokenMapper tokenResponseToTokenMapper;
 
     public TokenResponse registerUser(UserRequest userRequest) {
-        var user = User.builder()
-                .firstname(userRequest.getFirstname())
-                .lastname(userRequest.getLastname())
-                .email(userRequest.getEmail())
-                .password(passwordEncoder.bCryptPasswordEncoder().encode(userRequest.getPassword()))
-                .role(Role.USER)
-                .build();
-        userRepository.save(user);
-        var jwtToken = jwtService.getToken(user);
-       return TokenResponse.builder()
-               .token(jwtToken)
-               .build();
+        var user = userRequestToUserMapper.map(userRequest);
+        var savedUser = userRepository.save(user);
+        var jwtToken = jwtService.getToken(savedUser);
+        savedUserToken(savedUser, jwtToken);
+        return tokenResponseToTokenMapper.map(jwtToken, null);
     }
 
     public void savedUserToken(User user, String jwtToken) {
@@ -45,6 +42,7 @@ public class AuthService {
                 .revoked(false)
                 .user(user)
                 .build();
+        tokenRepository.save(token);
     }
     private void revokeAllUserTokens(User user) {
         var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getUserId());
