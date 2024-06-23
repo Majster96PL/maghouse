@@ -6,19 +6,20 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
 
 
 @Entity
 @Data
 @Table(name = "users")
-@EqualsAndHashCode
-public class User {
+@AllArgsConstructor
+@Builder
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,36 +27,50 @@ public class User {
     @NotBlank(message = "Firstname required!")
     @Size(max = 20)
     private String firstname;
-    @NotBlank(message = "Username required!")
+    @NotBlank(message = "Lastname required!")
     @Size(max = 20)
-    private String username;
-    @NotBlank(message = "Password required!")
-    @Size(max = 120)
-    private String password;
+    private String lastname;
     @NotBlank(message = "Email required!")
     @Size(max = 20)
     @Email
     private String email;
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "user_roles",
-            joinColumns = @JoinColumn(name = "userId"),
-            inverseJoinColumns = @JoinColumn(name = "roleId")
-    )
-    private Set<Role> roles = new HashSet<>();
+    @NotBlank(message = "Password required!")
+    @Size(max = 120)
+    private String password;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
-    public User()
-    {
-
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return role.getAuthorities();
     }
-    public User(String firstname,
-                String username,
-                String password,
-                String email,
-                Set<Role> roles) {
-        this.firstname = firstname;
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.roles = roles;
+
+    @Override
+    public String getUsername(){
+        return email;
+    }
+
+    @Override
+    public String getPassword(){
+        return password;
+    }
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
