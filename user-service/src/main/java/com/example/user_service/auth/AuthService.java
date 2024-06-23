@@ -11,15 +11,19 @@ import com.example.user_service.auth.registration.token.TokenType;
 import com.example.user_service.auth.registration.user.User;
 import com.example.user_service.auth.registration.user.UserRepository;
 import com.example.user_service.auth.registration.user.UserRequest;
-import com.example.user_service.security.PasswordEncoder;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 @Service
 @AllArgsConstructor
 public class AuthService {
 
-    private PasswordEncoder passwordEncoder;
     private UserRepository userRepository;
     private JwtService jwtService;
     private TokenRepository tokenRepository;
@@ -30,8 +34,9 @@ public class AuthService {
         var user = userRequestToUserMapper.map(userRequest);
         var savedUser = userRepository.save(user);
         var jwtToken = jwtService.getToken(savedUser);
+        var refreshToken = jwtService.generateRefreshToken(user);
         savedUserToken(savedUser, jwtToken);
-        return tokenResponseToTokenMapper.map(jwtToken, null);
+        return tokenResponseToTokenMapper.map(jwtToken, refreshToken);
     }
 
     public void savedUserToken(User user, String jwtToken) {
@@ -44,8 +49,37 @@ public class AuthService {
                 .build();
         tokenRepository.save(token);
     }
+
+    public void refreshToken(
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
+        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return;
+        }
+        final String refreshToken = authHeader.substring(7);
+        final String userEmail = jwtService.extractUserEmail(refreshToken);
+        if (userEmail != null) {
+            var user = userRepository.findUserByEmail(userEmail)
+                    .orElseThrow();
+            if (jwtService.isValidToken(refreshToken, user)) {
+                refreshAndRespond(user, refreshToken, response);
+            }
+        }
+    }
+
+    private void refreshAndRespond(User user,
+                                   String refreshToken,
+                                   HttpServletResponse response) throws IOException {
+        var accesToken = jwtService.getToken(user);
+        revokeAllUserTokens(user);
+        savedUserToken(user, refreshToken);
+        var authResponse = tokenResponseToTokenMapper.map(accesToken, refreshToken);
+        new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
+    }
+
     private void revokeAllUserTokens(User user) {
-        var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getUserId());
+        var validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
         if (validUserTokens.isEmpty())
             return;
         validUserTokens.forEach(token -> {

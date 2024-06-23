@@ -33,6 +33,7 @@ public class JWTFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         if (request.getServletPath().contains("/user-service/auth")) {
             filterChain.doFilter(request, response);
+            return;
         }
         final String header = request.getHeader("Authorization");
         if(header == null ||!header.startsWith("Bearer ")){

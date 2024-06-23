@@ -1,5 +1,6 @@
 package com.example.user_service.auth.mapper;
 
+import com.example.user_service.auth.registration.role.Role;
 import com.example.user_service.auth.registration.user.User;
 import com.example.user_service.auth.registration.user.UserRequest;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ public class UserRequestToUserMapper implements UserMapper<UserRequest, User> {
                 .lastname(userRequest.getLastname())
                 .email(userRequest.getEmail())
                 .password(userRequest.getPassword())
-                .role(userRequest.getRole())
+                .role(Role.USER)
                 .build();
     }
 }
