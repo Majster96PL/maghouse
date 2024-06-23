@@ -27,7 +27,7 @@ public class User implements UserDetails {
     @NotBlank(message = "Firstname required!")
     @Size(max = 20)
     private String firstname;
-    @NotBlank(message = "Username required!")
+    @NotBlank(message = "Lastname required!")
     @Size(max = 20)
     private String lastname;
     @NotBlank(message = "Email required!")
