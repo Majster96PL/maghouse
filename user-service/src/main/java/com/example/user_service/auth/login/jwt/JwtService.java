@@ -15,10 +15,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.LongSupplier;
 
 @Service
 @RequiredArgsConstructor
 public class JwtService {
+
+    private static final long DEFAULT_JWT_EXPIRATION = 0 ;
+    private static final long DEFAULT_REFRESH_EXPIRATION = 0;
 
     private final SecretPropertiesReader secretPropertiesReader;
 
@@ -28,14 +32,25 @@ public class JwtService {
     public String generateToken(
             Map<String, Object> extraClaims,
             UserDetails userDetails) {
+        return buildToken(extraClaims, userDetails, getJwtExpiration());
+    }
+
+    public String buildToken(
+            Map<String, Object> extraClaims,
+            UserDetails userDetails,
+            long expiration) {
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigntInKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public String generateRefreshToken (UserDetails userDetails) {
+        return buildToken(new HashMap<>(), userDetails, getRefreshExpiration());
     }
 
     public boolean isValidToken(String token, UserDetails userDetails) {
@@ -83,6 +98,35 @@ public class JwtService {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Unexpected error while getting sign-in key", e);
+        }
+    }
+
+    private long getJwtExpiration() {
+        return handleException(() -> {
+            try {
+                return Long.parseLong(secretPropertiesReader.readJwtExpiration());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, DEFAULT_JWT_EXPIRATION);
+    }
+
+    private long getRefreshExpiration() {
+        return handleException(() -> {
+            try {
+                return Long.parseLong(secretPropertiesReader.readRefreshExpiration());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, DEFAULT_REFRESH_EXPIRATION);
+    }
+
+    private long handleException(LongSupplier supplier, long defaultValue) {
+        try {
+            return supplier.getAsLong();
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return defaultValue;
         }
     }
 }
