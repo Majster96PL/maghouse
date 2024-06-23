@@ -5,9 +5,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,9 +17,10 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
 
-    private static final String SECRET_KEY = " ";
+    private final SecretPropiertiesReader secretPropertiesReader;
 
     public String getToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
@@ -53,7 +56,19 @@ public class JwtService {
     }
 
     private Key getSigntInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes);
+        try {
+            String secretKey = secretPropertiesReader.readSecretKey();
+            byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+            return Keys.hmacShaKeyFor(keyBytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("IOException while reading secret key", e);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Invalid secret key format", e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Unexpected error while getting sign-in key", e);
+        }
     }
 }

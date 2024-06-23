@@ -14,6 +14,9 @@ spring:
       ddl-auto: create-drop
     show-sql: true
     open-in-view: true
+  config:
+    import:
+      classpath: properties.secret
 
 server:
   port: 8080
