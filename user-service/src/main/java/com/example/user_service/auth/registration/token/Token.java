@@ -16,7 +16,7 @@ public class Token {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long tokenId;
+    private Long id;
     @Column(unique = true)
     private String token;
     @Enumerated(EnumType.STRING)
@@ -24,6 +24,6 @@ public class Token {
     private boolean expired;
     private boolean revoked;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "user_Id")
     private User user;
 }

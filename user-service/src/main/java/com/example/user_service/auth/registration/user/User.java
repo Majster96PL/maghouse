@@ -23,7 +23,7 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long id;
     @NotBlank(message = "Firstname required!")
     @Size(max = 20)
     private String firstname;
