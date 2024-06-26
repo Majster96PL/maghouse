@@ -1,9 +1,9 @@
 package com.example.user_service.auth;
 
+import com.example.user_service.auth.login.LoginRequest;
 import com.example.user_service.auth.login.jwt.JwtService;
 import com.example.user_service.auth.mapper.TokenResponseToTokenMapper;
 import com.example.user_service.auth.mapper.UserRequestToUserMapper;
-import com.example.user_service.auth.registration.role.Role;
 import com.example.user_service.auth.registration.token.Token;
 import com.example.user_service.auth.registration.token.TokenRepository;
 import com.example.user_service.auth.registration.token.TokenResponse;
@@ -16,6 +16,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -29,6 +31,7 @@ public class AuthService {
     private TokenRepository tokenRepository;
     private UserRequestToUserMapper userRequestToUserMapper;
     private TokenResponseToTokenMapper tokenResponseToTokenMapper;
+    private AuthenticationManager authenticationManager;
 
     public TokenResponse registerUser(UserRequest userRequest) {
         var user = userRequestToUserMapper.map(userRequest);
@@ -36,6 +39,26 @@ public class AuthService {
         var jwtToken = jwtService.getToken(savedUser);
         var refreshToken = jwtService.generateRefreshToken(user);
         savedUserToken(savedUser, jwtToken);
+        return tokenResponseToTokenMapper.map(jwtToken, refreshToken);
+    }
+
+    public TokenResponse login(LoginRequest loginRequest) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getEmail(),
+                        loginRequest.getPassword()
+                )
+        );
+        var user = userRepository.findUserByEmail(loginRequest.getEmail())
+                .orElseThrow();
+        return generatedAndRespondToken(user);
+    }
+
+    private TokenResponse generatedAndRespondToken(User user) {
+        var jwtToken = jwtService.getToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
+        revokeAllUserTokens(user);
+        savedUserToken(user, jwtToken);
         return tokenResponseToTokenMapper.map(jwtToken, refreshToken);
     }
 
@@ -71,10 +94,10 @@ public class AuthService {
     private void refreshAndRespond(User user,
                                    String refreshToken,
                                    HttpServletResponse response) throws IOException {
-        var accesToken = jwtService.getToken(user);
+        var accessToken = jwtService.getToken(user);
         revokeAllUserTokens(user);
         savedUserToken(user, refreshToken);
-        var authResponse = tokenResponseToTokenMapper.map(accesToken, refreshToken);
+        var authResponse = tokenResponseToTokenMapper.map(accessToken, refreshToken);
         new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
     }
 

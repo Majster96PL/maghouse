@@ -1,6 +1,7 @@
 package com.example.user_service.auth.controller;
 
 import com.example.user_service.auth.AuthService;
+import com.example.user_service.auth.login.LoginRequest;
 import com.example.user_service.auth.registration.token.TokenResponse;
 import com.example.user_service.auth.registration.user.UserRequest;
 import lombok.RequiredArgsConstructor;
@@ -21,5 +22,10 @@ public class AuthController {
     @PreAuthorize("hasAuthority('USER')")
     public TokenResponse registerUser( @RequestBody UserRequest userRequest) {
        return authService.registerUser(userRequest);
+    }
+
+    @PostMapping("/login")
+    public TokenResponse login(@RequestBody LoginRequest loginRequest){
+        return authService.login(loginRequest);
     }
 }
