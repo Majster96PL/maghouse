@@ -4,6 +4,8 @@ import com.example.user_service.auth.AuthService;
 import com.example.user_service.auth.login.LoginRequest;
 import com.example.user_service.auth.registration.token.TokenResponse;
 import com.example.user_service.auth.registration.user.UserRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,5 +29,12 @@ public class AuthController {
     @PostMapping("/login")
     public TokenResponse login(@RequestBody LoginRequest loginRequest){
         return authService.login(loginRequest);
+    }
+
+    @PostMapping("/refresh")
+    public void refreshToken(
+            HttpServletRequest request,
+            HttpServletResponse response) throws Exception {
+        authService.refreshToken(request, response);
     }
 }
