@@ -25,7 +25,7 @@ public class SecurityConfigWithJwtTest {
     private SecretPropertiesReader secretPropertiesReader;
 
     @Test
-    void whenAccessProtectedEndpointWithValiJwt_thenSuccess() throws Exception {
+    void whenAccessProtectedEndpointWithValidJwt_thenSuccess() throws Exception {
         String jwtSecret = secretPropertiesReader.readSecretKey();
         String jwtToken = Jwts.builder()
                 .setSubject("user")
