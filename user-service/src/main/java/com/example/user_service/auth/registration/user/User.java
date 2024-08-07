@@ -1,5 +1,6 @@
 package com.example.user_service.auth.registration.user;
 
+import com.example.items_service.item.Item;
 import com.example.user_service.auth.registration.role.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -13,6 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.List;
 
 
 @Entity
@@ -41,6 +43,8 @@ public class User implements UserDetails {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
+    @OneToMany(mappedBy = "creator")
+    private List<Item> itemsCreated;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
