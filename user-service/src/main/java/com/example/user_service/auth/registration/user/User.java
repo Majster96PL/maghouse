@@ -43,8 +43,8 @@ public class User implements UserDetails {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToMany(mappedBy = "creator")
-    private List<Item> itemsCreated;
+    @OneToMany(mappedBy = "warehouse")
+    private List<Item> items;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

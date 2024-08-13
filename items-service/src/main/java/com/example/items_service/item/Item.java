@@ -29,7 +29,7 @@ public class Item {
     private String itemCode;
     private int quantity;
     @ManyToOne
-    @JoinColumn(name = "firstname", nullable = false)
-    private User firstname;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
 }
