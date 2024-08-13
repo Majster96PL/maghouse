@@ -3,15 +3,13 @@ package com.example.user_service.auth.controller;
 import com.example.user_service.auth.AuthService;
 import com.example.user_service.auth.login.LoginRequest;
 import com.example.user_service.auth.registration.token.TokenResponse;
+import com.example.user_service.auth.registration.user.User;
 import com.example.user_service.auth.registration.user.UserRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequestMapping(path = "/user-service/auth")
 @RestController
@@ -36,5 +34,10 @@ public class AuthController {
             HttpServletRequest request,
             HttpServletResponse response) throws Exception {
         authService.refreshToken(request, response);
+    }
+
+    @GetMapping("/users/{id}")
+    public User getUserById(@PathVariable("id") Long id){
+        return authService.getUserById(id);
     }
 }
