@@ -1,14 +1,13 @@
-package com.example.user_service;
+package com.example.maghouse;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-
 @SpringBootTest
-class UserServiceApplicationTests {
+class MagHouseApplicationTests {
 
 	@Test
-	void Loads() {
+	void contextLoads() {
 	}
 
 }

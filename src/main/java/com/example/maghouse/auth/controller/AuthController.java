@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping(path = "/user-service/auth")
+@RequestMapping(path = "/auth/")
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
@@ -19,7 +19,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    @PreAuthorize("hasAuthority('USER')")
+    // @PreAuthorize("hasAuthority('USER')")
     public TokenResponse registerUser(@RequestBody UserRequest userRequest) {
        return authService.registerUser(userRequest);
     }
