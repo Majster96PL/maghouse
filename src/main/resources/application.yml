@@ -14,6 +14,7 @@ spring:
       ddl-auto: update
     show-sql: true
     open-in-view: true
+
   config:
     import:
       classpath: properties.secret
