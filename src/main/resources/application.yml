@@ -1,6 +1,6 @@
 spring:
   application:
-    name: user-service
+    name: Mag House
   datasource:
     url: jdbc:postgresql://localhost:5432/maghouse
     username: postgres
