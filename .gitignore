@@ -3,7 +3,6 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-user-service/src/main/**/properties.secret
 
 ### STS ###
 .apt_generated
@@ -13,6 +12,7 @@ user-service/src/main/**/properties.secret
 .settings
 .springBeans
 .sts4-cache
+.properties.secret
 
 ### IntelliJ IDEA ###
 .idea
