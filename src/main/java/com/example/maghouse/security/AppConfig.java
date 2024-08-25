@@ -11,6 +11,8 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.util.Random;
+
 @Configuration
 @RequiredArgsConstructor
 public class AppConfig {
@@ -36,5 +38,10 @@ public class AppConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
             throws Exception {
         return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    public Random random(){
+        return new Random();
     }
 }
