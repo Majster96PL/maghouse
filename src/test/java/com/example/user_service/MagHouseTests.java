@@ -5,7 +5,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 
 @SpringBootTest
-class UserServiceApplicationTests {
+class MagHouseTests {
 
 	@Test
 	void Loads() {
