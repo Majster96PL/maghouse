@@ -6,6 +6,7 @@ import com.example.maghouse.item.ItemRequest;
 import com.example.maghouse.item.ItemResponse;
 import com.example.maghouse.item.ItemService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping(path = "/auth/item/")
@@ -19,5 +20,16 @@ public class ItemController {
     //@PreAuthorize("hasAuthority('USER')")
     public Item create(@RequestBody ItemRequest itemRequest, ItemResponse itemResponse) {
         return itemService.createItem(itemRequest, itemResponse);
+    }
+
+    @PutMapping("/update/{itemId}")
+    public ResponseEntity<Item> updateItemQuantity(@PathVariable Long itemId, @RequestBody ItemRequest itemRequest) {
+        Item updatedItem = itemService.updateItemQuantity(itemId, itemRequest);
+        return ResponseEntity.ok(updatedItem);
+    }
+
+    @DeleteMapping("/delete/{itemId}")
+    public void deleteItem(@PathVariable Long itemId) {
+         itemService.deleteItem(itemId);
     }
 }
