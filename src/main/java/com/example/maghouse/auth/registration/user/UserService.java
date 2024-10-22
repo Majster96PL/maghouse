@@ -25,6 +25,12 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public User updateUser (Long id, UserRequest userRequest) {
+        var user = getUserById(id);
+        userRequestToUserMapper.updatedUserFromUserRequest(userRequest, user);
+        return userRepository.save(user);
+    }
+
     public User findByEmail(String email) {
         return userRepository.findUserByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found!"));

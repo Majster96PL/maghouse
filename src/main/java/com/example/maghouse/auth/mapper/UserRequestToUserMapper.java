@@ -22,4 +22,14 @@ public class UserRequestToUserMapper implements UserMapper<UserRequest, User> {
                 .role(Role.USER)
                 .build();
     }
+
+    @Override
+    public void updatedUserFromUserRequest(UserRequest userRequest, User user) {
+        user.setFirstname(userRequest.getFirstname());
+        user.setLastname(userRequest.getLastname());
+        user.setEmail(userRequest.getEmail());
+        user.setPassword(passwordEncoder.bCryptPasswordEncoder().encode(userRequest.getPassword()));
+    }
+
+
 }
