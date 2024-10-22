@@ -1,7 +1,12 @@
 package com.example.maghouse.security;
 
+import com.example.maghouse.auth.AuthService;
+import com.example.maghouse.auth.registration.role.Role;
+import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
+import com.example.maghouse.auth.registration.user.UserRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,5 +48,21 @@ public class AppConfig {
     @Bean
     public Random random(){
         return new Random();
+    }
+
+    @Bean
+    public CommandLineRunner commandLineRunner(AuthService authService){
+        return args -> {
+            var admin = UserRequest.builder()
+                    .firstname("Admin")
+                    .lastname("Admin")
+                    .email("admin@maghouse.pl")
+                    .password(passwordEncoder.bCryptPasswordEncoder().encode("admin"))
+                    .role(Role.ADMIN)
+                    .build();
+
+            System.out.println("Admin token: " + authService.registerUser(admin).getAccessToken());
+
+        };
     }
 }
