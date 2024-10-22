@@ -11,6 +11,7 @@ import com.example.maghouse.auth.registration.token.TokenType;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.auth.registration.user.UserRequest;
+import com.example.maghouse.auth.registration.user.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,7 +28,7 @@ import java.io.IOException;
 @AllArgsConstructor
 public class AuthService {
 
-    private UserRepository userRepository;
+    private UserService userService;
     private JwtService jwtService;
     private TokenRepository tokenRepository;
     private UserRequestToUserMapper userRequestToUserMapper;
@@ -35,11 +36,10 @@ public class AuthService {
     private AuthenticationManager authenticationManager;
 
     public TokenResponse registerUser(UserRequest userRequest) {
-        var user = userRequestToUserMapper.map(userRequest);
-        var savedUser = userRepository.save(user);
-        var jwtToken = jwtService.getToken(savedUser);
+        var user = userService.registerUser(userRequest);
+        var jwtToken = jwtService.getToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
-        savedUserToken(savedUser, jwtToken);
+        savedUserToken(user, jwtToken);
         return tokenResponseToTokenMapper.map(jwtToken, refreshToken);
     }
 
@@ -50,8 +50,7 @@ public class AuthService {
                         loginRequest.getPassword()
                 )
         );
-        var user = userRepository.findUserByEmail(loginRequest.getEmail())
-                .orElseThrow();
+        var user = userService.findByEmail(loginRequest.getEmail());
         return generatedAndRespondToken(user);
     }
 
@@ -84,8 +83,7 @@ public class AuthService {
         final String refreshToken = authHeader.substring(7);
         final String userEmail = jwtService.extractUserEmail(refreshToken);
         if (userEmail != null) {
-            var user = userRepository.findUserByEmail(userEmail)
-                    .orElseThrow();
+            var user = userService.findByEmail(userEmail);
             if (jwtService.isValidToken(refreshToken, user)) {
                 refreshAndRespond(user, refreshToken, response);
             }
@@ -113,8 +111,4 @@ public class AuthService {
         tokenRepository.saveAll(validUserTokens);
     }
 
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow( () -> new UsernameNotFoundException("User not found!"));
-    }
 }

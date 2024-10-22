@@ -11,9 +11,15 @@ public enum Permission {
     ADMIN_UPDATE("admin:update"),
     ADMIN_DELETE("admin:delete"),
 
-    SUPERVISOR_CREATE("admin:create"),
-    SUPERVISOR_READ("admin:read"),
-    SUPERVISOR_UPDATE("admin:update"),
+    MANAGER_CREATE("admin:create"),
+    MANAGER_READ("admin:read"),
+    MANAGER_UPDATE("admin:update"),
+
+    WAREHOUSEMAN_READ("warehouseman:read"),
+    WAREHOUSEMAN_UPDATE("warehouseman:update"),
+
+    DRIVER_READ("river:read"),
+
     USER_READ("user:read");
 
 
