@@ -73,6 +73,7 @@ public class ItemService {
         String firstPart = String.format("%02d", random.nextInt(100));
         String secondPart = String.format("%03d", random.nextInt(1000));
         String thirdPart = String.format("%04d", random.nextInt(10000));
-        return firstPart + secondPart + thirdPart;
+        String sign = "-";
+        return firstPart + sign + secondPart + sign + thirdPart;
     }
 }
