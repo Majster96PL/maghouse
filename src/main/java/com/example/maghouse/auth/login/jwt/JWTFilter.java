@@ -63,6 +63,24 @@ public class JWTFilter extends OncePerRequestFilter {
                             new WebAuthenticationDetailsSource().buildDetails(request)
                     );
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                    System.out.println("User authenticated: " + userEmail);
+
+
+                    userDetails.getAuthorities().forEach(grantedAuthority -> {
+                        System.out.println("Role: " + grantedAuthority.getAuthority());
+                    });
+
+
+                    boolean isAdmin = userDetails.getAuthorities().stream()
+                            .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+                    boolean isUser = userDetails.getAuthorities().stream()
+                            .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_USER"));
+
+                    if (isAdmin) {
+                        System.out.println("Logged in user is an Admin");
+                    } else if (isUser) {
+                        System.out.println("Logged in user is a User");
+                    }
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);

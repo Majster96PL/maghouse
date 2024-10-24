@@ -50,7 +50,7 @@ public class AppConfig {
         return new Random();
     }
 
-    @Bean
+   /* @Bean
     public CommandLineRunner commandLineRunner(AuthService authService){
         return args -> {
             var admin = UserRequest.builder()
@@ -66,5 +66,5 @@ public class AppConfig {
             System.out.println("Admin Access Token: " + tokenResponse.getAccessToken());
             System.out.println("Admin Refresh Token: " + tokenResponse.getRefreshToken());
         };
-    }
+    }*/
 }
