@@ -8,13 +8,16 @@ import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.LongSupplier;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +26,14 @@ public class JwtService {
     private final SecretPropertiesReader secretPropertiesReader;
 
     public String getToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        Map<String, Object> extraClaims = new HashMap<>();
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+        extraClaims.put("roles", roles);
+        return generateToken(extraClaims, userDetails);
     }
+
     public String generateToken(
             Map<String, Object> extraClaims,
             UserDetails userDetails) {
@@ -41,7 +50,7 @@ public class JwtService {
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSigntInKey(), SignatureAlgorithm.HS256)
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -51,7 +60,9 @@ public class JwtService {
 
     public boolean isValidToken(String token, UserDetails userDetails) {
         final String userEmail = extractUserEmail(token);
-        return (userEmail.equals(userDetails.getUsername())) && !isExpiredToken(token);
+        String role = extractClaim(token, claims -> claims.get("role", String.class));
+        return (userEmail.equals(userDetails.getUsername()))
+                && role.equals(userDetails.getAuthorities().iterator().next().getAuthority()) && !isExpiredToken(token);
     }
 
     private boolean isExpiredToken(String token) {
@@ -78,7 +89,7 @@ public class JwtService {
         try {
             return Jwts
                     .parserBuilder()
-                    .setSigningKey(getSigntInKey())
+                    .setSigningKey(getSignInKey())
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
@@ -87,7 +98,7 @@ public class JwtService {
         }
     }
 
-    private Key getSigntInKey() {
+    private Key getSignInKey() {
         try {
             String secretKey = secretPropertiesReader.readSecretKey();
             if (secretKey == null) {

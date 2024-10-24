@@ -11,24 +11,26 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(path = "/auth/admin/")
 @AllArgsConstructor
-@PreAuthorize("hasAuthority('ADMIN)")
 public class AdminController {
 
     private final AdminService adminService;
 
-    @PutMapping("update/{id}")
+    @PutMapping("/update/{id}")
+    @PreAuthorize("hasRole('ADMIN)")
     public TokenResponse updateUser( @PathVariable("id") Long id,
                                      @RequestBody UserRequest userRequest) {
         return adminService.updatedUserByAdmin(id, userRequest);
     }
 
-    @PutMapping("change")
+    @PutMapping("/change")
+    @PreAuthorize("hasRole('ADMIN)")
     public void changeUserRoleByAdmin(String email, Role role){
         adminService.changeUserRoleByAdmin(email, role);
     }
 
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN)")
     public void deleteUserByAdmin(@PathVariable("id") Long id) {
         adminService.deleteUserByAdmin(id);
     }

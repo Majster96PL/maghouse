@@ -19,7 +19,7 @@ public class UserRequestToUserMapper implements UserMapper<UserRequest, User> {
                 .lastname(userRequest.getLastname())
                 .email(userRequest.getEmail())
                 .password(passwordEncoder.bCryptPasswordEncoder().encode(userRequest.getPassword()))
-                .role(Role.USER)
+                .role(userRequest.getRole() != null ? userRequest.getRole() : Role.USER)
                 .build();
     }
 

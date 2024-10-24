@@ -61,8 +61,10 @@ public class AppConfig {
                     .role(Role.ADMIN)
                     .build();
 
-            System.out.println("Admin token: " + authService.registerUser(admin).getAccessToken());
+            var tokenResponse = authService.registerUser(admin);
 
+            System.out.println("Admin Access Token: " + tokenResponse.getAccessToken());
+            System.out.println("Admin Refresh Token: " + tokenResponse.getRefreshToken());
         };
     }
 }

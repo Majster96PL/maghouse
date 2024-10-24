@@ -3,13 +3,12 @@ package com.example.maghouse.auth;
 import com.example.maghouse.auth.login.LoginRequest;
 import com.example.maghouse.auth.login.jwt.JwtService;
 import com.example.maghouse.auth.mapper.TokenResponseToTokenMapper;
-import com.example.maghouse.auth.mapper.UserRequestToUserMapper;
+import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.token.Token;
 import com.example.maghouse.auth.registration.token.TokenRepository;
 import com.example.maghouse.auth.registration.token.TokenResponse;
 import com.example.maghouse.auth.registration.token.TokenType;
 import com.example.maghouse.auth.registration.user.User;
-import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.auth.registration.user.UserRequest;
 import com.example.maghouse.auth.registration.user.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +18,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -31,11 +29,13 @@ public class AuthService {
     private UserService userService;
     private JwtService jwtService;
     private TokenRepository tokenRepository;
-    private UserRequestToUserMapper userRequestToUserMapper;
     private TokenResponseToTokenMapper tokenResponseToTokenMapper;
     private AuthenticationManager authenticationManager;
 
     public TokenResponse registerUser(UserRequest userRequest) {
+        if (userRequest.getRole() == null || !userRequest.getRole().equals(Role.ADMIN)) {
+            userRequest.setRole(Role.USER);
+        }
         var user = userService.registerUser(userRequest);
         var jwtToken = jwtService.getToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
