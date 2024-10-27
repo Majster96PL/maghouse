@@ -59,14 +59,19 @@ public class AppConfig {
     @Bean
     public CommandLineRunner commandLineRunner(){
         return args -> {
-            var admin = User.builder()
-                    .firstname("Admin")
-                    .lastname("Admin")
-                    .email("admin@maghouse.pl")
-                    .password(passwordEncoder.bCryptPasswordEncoder().encode("admin"))
-                    .role(Role.ADMIN)
-                    .build();
-            userRepository.save(admin);
+            if(userRepository.findUserByEmail("admin@maghouse.pl").isEmpty()){
+                var admin = User.builder()
+                        .firstname("Admin")
+                        .lastname("Admin")
+                        .email("admin@maghouse.pl")
+                        .password(passwordEncoder.bCryptPasswordEncoder().encode("admin"))
+                        .role(Role.ADMIN)
+                        .build();
+                userRepository.save(admin);
+            } else {
+                System.out.println("Admin user already exists!");
+            }
+
         };
     }
 }
