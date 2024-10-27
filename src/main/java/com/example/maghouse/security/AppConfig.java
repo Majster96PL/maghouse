@@ -27,8 +27,14 @@ public class AppConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> userRepository.findUserByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User with email not found!"));
+        return username -> {
+            User user = userRepository.findUserByEmail(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User with email not found!"));
+            if (user.getRole().equals("ADMIN")) {
+                System.out.println("Admin found: " + user.getEmail());
+        }
+        return user;
+        };
     }
 
     @Bean
@@ -50,21 +56,17 @@ public class AppConfig {
         return new Random();
     }
 
-   /* @Bean
-    public CommandLineRunner commandLineRunner(AuthService authService){
+    @Bean
+    public CommandLineRunner commandLineRunner(){
         return args -> {
-            var admin = UserRequest.builder()
+            var admin = User.builder()
                     .firstname("Admin")
                     .lastname("Admin")
                     .email("admin@maghouse.pl")
                     .password(passwordEncoder.bCryptPasswordEncoder().encode("admin"))
                     .role(Role.ADMIN)
                     .build();
-
-            var tokenResponse = authService.registerUser(admin);
-
-            System.out.println("Admin Access Token: " + tokenResponse.getAccessToken());
-            System.out.println("Admin Refresh Token: " + tokenResponse.getRefreshToken());
+            userRepository.save(admin);
         };
-    }*/
+    }
 }
