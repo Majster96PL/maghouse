@@ -15,6 +15,9 @@ import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.auth.registration.user.UserRequest;
 import com.example.maghouse.auth.registration.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -61,14 +64,21 @@ public class AdminService {
     }
 
     public void deleteUserByAdmin(Long id){
-        Optional<User> optionalUser= Optional.ofNullable(userService.getUserById(id));
-        if(optionalUser.isPresent()) {
-            var user = optionalUser.get();
-            userRepository.delete(user);
-            deleteTokenByAdmin(user);
-        } else {
-            throw new UsernameNotFoundException("User with ID " + id + " not found");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("User is not authenticated");
         }
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        User adminUser = userRepository.findUserByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("Admin user not found"));
+
+        if (!adminUser.getRole().equals(Role.ADMIN)) {
+            throw new SecurityException("User is not authorized to perform this action");
+        }
+
+        deleteTokenByAdmin(userService.deleteUserByAdmin(id));
+        userRepository.deleteById(id);
     }
 
     protected void deleteTokenByAdmin(User user) {

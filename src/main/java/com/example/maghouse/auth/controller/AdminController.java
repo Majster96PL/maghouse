@@ -3,7 +3,6 @@ package com.example.maghouse.auth.controller;
 import com.example.maghouse.auth.login.AdminService;
 import com.example.maghouse.auth.registration.role.ChangeRoleRequest;
 import com.example.maghouse.auth.registration.role.ChangeRoleResponse;
-import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.token.TokenResponse;
 import com.example.maghouse.auth.registration.user.UserRequest;
 import lombok.AllArgsConstructor;
