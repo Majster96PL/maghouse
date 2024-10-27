@@ -4,6 +4,8 @@ import com.example.maghouse.auth.AuthService;
 import com.example.maghouse.auth.login.jwt.JwtService;
 import com.example.maghouse.auth.mapper.TokenResponseToTokenMapper;
 import com.example.maghouse.auth.mapper.UserRequestToUserMapper;
+import com.example.maghouse.auth.registration.role.ChangeRoleRequest;
+import com.example.maghouse.auth.registration.role.ChangeRoleResponse;
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.token.Token;
 import com.example.maghouse.auth.registration.token.TokenRepository;
@@ -35,8 +37,9 @@ public class AdminService {
         return userRepository.findAll();
     }
 
-    public void changeUserRoleByAdmin(String email, Role role) {
-        userService.changeUserRole(email, role);
+    public ChangeRoleResponse changeUserRoleByAdmin(ChangeRoleRequest changeRoleRequest) {
+       return userService.changeUserRole(changeRoleRequest);
+
     }
 
     public TokenResponse updatedUserByAdmin(Long id, UserRequest userRequest) {

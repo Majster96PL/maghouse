@@ -2,6 +2,8 @@ package com.example.maghouse.auth.registration.user;
 
 
 import com.example.maghouse.auth.mapper.UserRequestToUserMapper;
+import com.example.maghouse.auth.registration.role.ChangeRoleRequest;
+import com.example.maghouse.auth.registration.role.ChangeRoleResponse;
 import com.example.maghouse.auth.registration.role.Role;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,10 +21,11 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public void changeUserRole(String email, Role role) {
-        var user = findByEmail(email);
-        user.setRole(role);
+    public ChangeRoleResponse changeUserRole(ChangeRoleRequest changeRoleRequest) {
+        var user = findByEmail(changeRoleRequest.getEmail());
+        user.setRole(changeRoleRequest.getRole());
         userRepository.save(user);
+        return new ChangeRoleResponse(changeRoleRequest.getEmail(), changeRoleRequest.getRole());
     }
 
     public User updateUser (Long id, UserRequest userRequest) {
