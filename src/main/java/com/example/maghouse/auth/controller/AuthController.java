@@ -5,6 +5,7 @@ import com.example.maghouse.auth.login.LoginRequest;
 import com.example.maghouse.auth.registration.token.TokenResponse;
 import com.example.maghouse.auth.registration.user.UserRequest;
 import com.example.maghouse.auth.registration.user.User;
+import com.example.maghouse.auth.registration.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +18,9 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserService userService;
 
     @PostMapping("/register")
-    // @PreAuthorize("hasAuthority('USER')")
     public TokenResponse registerUser(@RequestBody UserRequest userRequest) {
        return authService.registerUser(userRequest);
     }
@@ -38,6 +39,6 @@ public class AuthController {
 
     @GetMapping("/users/{id}")
     public User getUserById(@PathVariable("id") Long id){
-        return authService.getUserById(id);
+        return userService.getUserById(id);
     }
 }
