@@ -30,9 +30,7 @@ public class AdminService {
 
     private final UserService userService;
     private final UserRepository userRepository;
-    private final UserRequestToUserMapper userRequestToUserMapper;
     private final TokenResponseToTokenMapper tokenResponseToTokenMapper;
-    private final TokenRepository tokenRepository;
     private final JwtService jwtService;
     private final AuthService authService;
 
@@ -64,25 +62,6 @@ public class AdminService {
     }
 
     public void deleteUserByAdmin(Long id){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new SecurityException("User is not authenticated");
-        }
-
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User adminUser = userRepository.findUserByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("Admin user not found"));
-
-        if (!adminUser.getRole().equals(Role.ADMIN)) {
-            throw new SecurityException("User is not authorized to perform this action");
-        }
-
-        deleteTokenByAdmin(userService.deleteUserByAdmin(id));
-        userRepository.deleteById(id);
-    }
-
-    protected void deleteTokenByAdmin(User user) {
-        List<Token> userToken = tokenRepository.findByUser(user);
-        tokenRepository.deleteAll(userToken);
+        userService.deleteUser(id);
     }
 }

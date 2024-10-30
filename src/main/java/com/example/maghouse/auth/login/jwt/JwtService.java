@@ -1,5 +1,7 @@
 package com.example.maghouse.auth.login.jwt;
 
+import com.example.maghouse.auth.registration.token.TokenRepository;
+import com.example.maghouse.auth.registration.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 public class JwtService {
 
     private final SecretPropertiesReader secretPropertiesReader;
+    private final TokenRepository tokenRepository;
 
     public String getToken(UserDetails userDetails) {
         Map<String, Object> extraClaims = new HashMap<>();
@@ -66,6 +69,11 @@ public class JwtService {
                 .collect(Collectors.toList());
         return (userEmail.equals(userDetails.getUsername()))
                 && roles.containsAll(userRoles) && !isExpiredToken(token);
+    }
+
+    public void deleteTokenByUser(User user) {
+        var tokens = tokenRepository.findByUser(user);
+        tokenRepository.deleteAll(tokens);
     }
 
     private boolean isExpiredToken(String token) {
