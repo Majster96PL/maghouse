@@ -38,7 +38,7 @@ public class ItemService {
         itemResponse.setItemCode(itemCode);
         itemResponse.setQuantity(itemRequest.getQuantity());
         itemResponse.setUser(user);
-        Item item = itemRequestToItemMapper.map(itemResponse);
+        Item item = itemRequestToItemMapper.mapToItem(itemResponse);
         return itemRepository.save(item) ;
     }
 
@@ -55,6 +55,7 @@ public class ItemService {
                 .orElseThrow(() -> new IllegalArgumentException("Item not found"));
 
         item.setQuantity(itemRequest.getQuantity());
+        item.setUser(user);
         return itemRepository.save(item);
     }
 

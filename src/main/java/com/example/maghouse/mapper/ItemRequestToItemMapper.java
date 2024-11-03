@@ -11,7 +11,7 @@ public class ItemRequestToItemMapper implements ItemMapper<ItemResponse, Item>{
 
 
     @Override
-    public Item map(ItemResponse itemResponse) {
+    public Item mapToItem(ItemResponse itemResponse) {
         return Item.builder()
                 .name(itemResponse.getName())
                 .itemCode(itemResponse.getItemCode())
