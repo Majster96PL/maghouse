@@ -1,6 +1,6 @@
 package com.example.maghouse.item;
 
-import com.example.maghouse.auth.mapper.ItemRequestToItemMapper;
+import com.example.maghouse.mapper.ItemRequestToItemMapper;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
 import lombok.AllArgsConstructor;

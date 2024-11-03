@@ -1,5 +1,6 @@
 package com.example.maghouse.warehouse;
 
+import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.item.Item;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -28,6 +29,14 @@ public class Warehouse {
     @NotBlank(message = "Location required!")
     @Size(max = 50)
     private String location;
-    @OneToMany(mappedBy = "warehouse")
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+    @ManyToMany
+    @JoinTable(
+            name = "ItemWarehouse",
+            joinColumns = @JoinColumn(name = "warehouse_id"),
+            inverseJoinColumns = @JoinColumn(name = "item_id")
+    )
     private List<Item> items;
 }

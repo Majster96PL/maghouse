@@ -2,7 +2,7 @@ package com.example.maghouse.auth;
 
 import com.example.maghouse.auth.login.LoginRequest;
 import com.example.maghouse.auth.login.jwt.JwtService;
-import com.example.maghouse.auth.mapper.TokenResponseToTokenMapper;
+import com.example.maghouse.mapper.TokenResponseToTokenMapper;
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.token.Token;
 import com.example.maghouse.auth.registration.token.TokenRepository;

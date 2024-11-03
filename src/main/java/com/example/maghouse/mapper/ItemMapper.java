@@ -1,4 +1,4 @@
-package com.example.maghouse.auth.mapper;
+package com.example.maghouse.mapper;
 
 
 public interface ItemMapper <From, To>{

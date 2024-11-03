@@ -1,4 +1,4 @@
-package com.example.maghouse.auth.mapper;
+package com.example.maghouse.mapper;
 
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.UserRequest;

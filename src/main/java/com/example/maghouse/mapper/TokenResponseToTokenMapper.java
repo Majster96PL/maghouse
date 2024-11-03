@@ -1,4 +1,4 @@
-package com.example.maghouse.auth.mapper;
+package com.example.maghouse.mapper;
 
 import com.example.maghouse.auth.registration.token.TokenResponse;
 import org.springframework.stereotype.Component;

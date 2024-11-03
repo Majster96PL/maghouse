@@ -2,22 +2,15 @@ package com.example.maghouse.auth.login;
 
 import com.example.maghouse.auth.AuthService;
 import com.example.maghouse.auth.login.jwt.JwtService;
-import com.example.maghouse.auth.mapper.TokenResponseToTokenMapper;
-import com.example.maghouse.auth.mapper.UserRequestToUserMapper;
+import com.example.maghouse.mapper.TokenResponseToTokenMapper;
 import com.example.maghouse.auth.registration.role.ChangeRoleRequest;
 import com.example.maghouse.auth.registration.role.ChangeRoleResponse;
-import com.example.maghouse.auth.registration.role.Role;
-import com.example.maghouse.auth.registration.token.Token;
-import com.example.maghouse.auth.registration.token.TokenRepository;
 import com.example.maghouse.auth.registration.token.TokenResponse;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.auth.registration.user.UserRequest;
 import com.example.maghouse.auth.registration.user.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 

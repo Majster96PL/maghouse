@@ -2,7 +2,7 @@ package com.example.maghouse.auth.registration.user;
 
 
 import com.example.maghouse.auth.login.jwt.JwtService;
-import com.example.maghouse.auth.mapper.UserRequestToUserMapper;
+import com.example.maghouse.mapper.UserRequestToUserMapper;
 import com.example.maghouse.auth.registration.role.ChangeRoleRequest;
 import com.example.maghouse.auth.registration.role.ChangeRoleResponse;
 import lombok.AllArgsConstructor;
