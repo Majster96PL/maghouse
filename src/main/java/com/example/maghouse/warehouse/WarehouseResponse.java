@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -16,5 +18,5 @@ public class WarehouseResponse {
     private WarehouseSpaceType warehouseSpaceType;
     private String location;
     private User user;
-    private Item item;
+    private List<Item> items;
 }
