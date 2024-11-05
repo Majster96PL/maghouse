@@ -93,10 +93,10 @@ public class WarehouseService {
 
         for(int index = 1; ; index++){
             for (char position: positions){
-                String locationCode =  String.format("%s%s%02d%c", locationPrefix, baseLocation, spaceUsage);
+                String locationCode =  String.format("%s%s%02d%c", locationPrefix, baseLocation, index, position);
 
-                if(spaceUsage.getOrDefault(locationCode, 0) > 1) {
-                    spaceUsage.put(locationCode, spaceUsage.getOrDefault(locationCode, 0) + 1);
+                if(spaceUsage.getOrDefault(locationCode, 0) == 0) {
+                    spaceUsage.put(locationCode, 1);
                     return locationCode;
                 }
             }
