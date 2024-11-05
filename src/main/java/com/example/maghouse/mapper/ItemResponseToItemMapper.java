@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ItemRequestToItemMapper implements ItemMapper<ItemResponse, Item>{
+public class ItemResponseToItemMapper implements ItemMapper<ItemResponse, Item>{
 
 
     @Override

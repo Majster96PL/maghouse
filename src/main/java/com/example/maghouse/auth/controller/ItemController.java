@@ -17,8 +17,8 @@ public class ItemController {
 
     @PostMapping("/create")
     //@PreAuthorize("hasAuthority('USER')")
-    public Item create(@RequestBody ItemRequest itemRequest, ItemResponse itemResponse) {
-        return itemService.createItem(itemRequest, itemResponse);
+    public Item create(@RequestBody ItemRequest itemRequest) {
+        return itemService.createItem(itemRequest);
     }
 
     @PutMapping("/update/{itemId}")
