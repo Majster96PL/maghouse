@@ -27,8 +27,8 @@ public class Warehouse {
     @Enumerated(EnumType.STRING)
     private WarehouseSpaceType warehouseSpaceType;
     @NotBlank(message = "Location required!")
-    @Size(max = 50)
-    private String location;
+    @Enumerated(EnumType.STRING)
+    private WarehouseLocation location;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
