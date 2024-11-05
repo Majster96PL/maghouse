@@ -16,6 +16,7 @@ public class ItemRequestToItemMapper implements ItemMapper<ItemResponse, Item>{
                 .name(itemResponse.getName())
                 .itemCode(itemResponse.getItemCode())
                 .quantity(itemResponse.getQuantity())
+                .locationCode(null)
                 .user(itemResponse.getUser())
                 .build();
     }
