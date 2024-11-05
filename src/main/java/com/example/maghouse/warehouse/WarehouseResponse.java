@@ -16,7 +16,7 @@ import java.util.List;
 public class WarehouseResponse {
     private long id;
     private WarehouseSpaceType warehouseSpaceType;
-    private String location;
+    private WarehouseLocation location;
     private User user;
     private List<Item> items;
 }

@@ -1,14 +1,10 @@
 package com.example.maghouse.mapper;
 
-
-import com.example.maghouse.auth.registration.user.User;
-import com.example.maghouse.item.Item;
 import com.example.maghouse.warehouse.Warehouse;
 import com.example.maghouse.warehouse.WarehouseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -17,6 +13,7 @@ public class WarehouseRequestToWarehouseMapper implements WarehouseMapper<Wareho
     @Override
     public Warehouse mapToEntity(WarehouseResponse warehouseResponse) {
         return Warehouse.builder()
+                .id(warehouseResponse.getId())
                 .warehouseSpaceType(warehouseResponse.getWarehouseSpaceType())
                 .location(warehouseResponse.getLocation())
                 .user(warehouseResponse.getUser())
