@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ItemRequestToItemMapper implements ItemMapper<ItemResponse, Item>{
+public class ItemResponseToItemMapper implements ItemMapper<ItemResponse, Item>{
 
 
     @Override
@@ -16,6 +16,7 @@ public class ItemRequestToItemMapper implements ItemMapper<ItemResponse, Item>{
                 .name(itemResponse.getName())
                 .itemCode(itemResponse.getItemCode())
                 .quantity(itemResponse.getQuantity())
+                .locationCode(null)
                 .user(itemResponse.getUser())
                 .build();
     }

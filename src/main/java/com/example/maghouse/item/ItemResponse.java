@@ -12,6 +12,7 @@ public class ItemResponse {
     private String name;
     private String itemCode;
     private int quantity;
+    private String locationCode;
     private User user;
 
 }
