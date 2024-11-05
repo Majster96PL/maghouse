@@ -1,4 +1,4 @@
-package com.example.maghouse.warehouse;
+package com.example.maghouse.warehouse.spacetype;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

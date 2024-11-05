@@ -1,4 +1,4 @@
-package com.example.maghouse.warehouse;
+package com.example.maghouse.warehouse.location;
 
 public enum WarehouseLocation {
     Warsaw, Krakow, Rzeszow

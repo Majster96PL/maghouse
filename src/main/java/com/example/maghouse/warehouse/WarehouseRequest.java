@@ -1,5 +1,7 @@
 package com.example.maghouse.warehouse;
 
+import com.example.maghouse.warehouse.location.WarehouseLocation;
+import com.example.maghouse.warehouse.spacetype.WarehouseSpaceType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
