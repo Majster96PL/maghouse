@@ -28,7 +28,11 @@ public class Item {
     @Size(max = 50)
     @NotBlank(message = "Code required!")
     private String itemCode;
+    @Size(max = 10)
+    @NotBlank(message = "Quantity required!")
     private int quantity;
+    @Size(max = 50)
+    private String locationCode;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
