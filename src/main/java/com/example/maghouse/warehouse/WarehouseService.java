@@ -38,7 +38,7 @@ public class WarehouseService {
         return null;
     }
 
-    public void assignItemsToWarehouseLocation(Long id, WarehouseLocationRequest warehouseLocationRequest, Long itemId){
+    public Item assignItemsToWarehouseLocation( WarehouseLocationRequest warehouseLocationRequest, Long itemId){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new SecurityException("User is not authenticated!");
@@ -48,11 +48,7 @@ public class WarehouseService {
         var user = userRepository.findUserByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("User with email not found!"));
 
-        Warehouse warehouse = warehouseRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Warehouse not found!"));
-
         String locationPrefix = generateLocationPrefix(warehouseLocationRequest.getWarehouseLocation());
-        warehouse.setLocation(warehouseLocationRequest.getWarehouseLocation());
 
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found!"));
@@ -62,7 +58,7 @@ public class WarehouseService {
         item.setUser(user);
         itemRepository.save(item);
 
-        warehouseRepository.save(warehouse);
+        return item;
     }
 
     public Item assignLocationCode(WarehouseSpaceTypeRequest warehouseSpaceTypeRequest, Long id){
@@ -74,7 +70,7 @@ public class WarehouseService {
         var user = userRepository.findUserByEmail(userDetails.getUsername())
                 .orElseThrow( () -> new IllegalArgumentException("User with email not found!"));
         String baseLocation = generateBaseCodeSpaceType(warehouseSpaceTypeRequest.getWarehouseSpaceType());
-        Map<String, Integer> spaceUsage= new HashMap<>();
+        Map<String, Integer> spaceUsage = new HashMap<>();
         Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found!"));
 
