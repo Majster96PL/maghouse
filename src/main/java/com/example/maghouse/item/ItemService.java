@@ -10,7 +10,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.util.Random;
 
 @Service
 @AllArgsConstructor
@@ -18,7 +17,7 @@ public class ItemService {
 
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
-    private final ItemResponseToItemMapper itemResposeToItemMapper;
+    private final ItemResponseToItemMapper itemResponseToItemMapper;
     private final ItemCodeGenerator itemCodeGenerator;
     private static final ItemResponse itemResponse = new ItemResponse();
 
@@ -40,9 +39,8 @@ public class ItemService {
 
         itemResponse.setItemCode(code);
 
-        var item = itemResposeToItemMapper.mapToItem(itemResponse);
-        var savedItem = itemRepository.save(item);
-        return savedItem;
+        var item = itemResponseToItemMapper.mapToItem(itemResponse);
+        return itemRepository.save(item);
     }
 
     public Item updateItemQuantity(Long itemId, ItemRequest itemRequest) {

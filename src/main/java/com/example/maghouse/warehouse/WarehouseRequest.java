@@ -13,5 +13,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class WarehouseRequest {
     private WarehouseSpaceType warehouseSpaceType;
-    private WarehouseLocation location;
+    private WarehouseLocation warehouseLocation;
 }

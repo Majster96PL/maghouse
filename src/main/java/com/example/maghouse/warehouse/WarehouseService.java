@@ -3,11 +3,12 @@ package com.example.maghouse.warehouse;
 import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.item.Item;
 import com.example.maghouse.item.ItemRepository;
-import com.example.maghouse.mapper.WarehouseRequestToWarehouseMapper;
+import com.example.maghouse.mapper.WarehouseResponseToWarehouseMapper;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
 import com.example.maghouse.warehouse.location.WarehouseLocationRequest;
 import com.example.maghouse.warehouse.spacetype.WarehouseSpaceType;
 import com.example.maghouse.warehouse.spacetype.WarehouseSpaceTypeRequest;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,13 +22,15 @@ import java.util.Map;
 @AllArgsConstructor
 public class WarehouseService {
 
-    private final WarehouseRequestToWarehouseMapper warehouseRequestToWarehouseMapper;
+    private final WarehouseResponseToWarehouseMapper warehouseResponseToWarehouseMapper;
     private final UserRepository userRepository;
     private final WarehouseRepository warehouseRepository;
     private final ItemRepository itemRepository;
+    private static final WarehouseResponse warehouseResponse = new WarehouseResponse();
 
 
-    public Warehouse createWarehouse(WarehouseRequest warehouseRequest, WarehouseResponse warehouseResponse) {
+    @Transactional
+    public Warehouse createWarehouse(WarehouseRequest warehouseRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()){
             throw new SecurityException("User is not authenticated!");
@@ -35,7 +38,12 @@ public class WarehouseService {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         var user = userRepository.findUserByEmail(userDetails.getUsername())
                 .orElseThrow( () -> new IllegalArgumentException("User with email not found!"));
-        return null;
+
+        warehouseResponse.setWarehouseSpaceType(warehouseRequest.getWarehouseSpaceType());
+        warehouseResponse.setWarehouseLocation(warehouseRequest.getWarehouseLocation());
+        warehouseResponse.setUser(user);
+        var warehouse = warehouseResponseToWarehouseMapper.mapToEntity(warehouseResponse);
+        return warehouseRepository.save(warehouse);
     }
 
     public Item assignItemsToWarehouseLocation( WarehouseLocationRequest warehouseLocationRequest, Long itemId){

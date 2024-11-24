@@ -8,14 +8,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class WarehouseRequestToWarehouseMapper implements WarehouseMapper<WarehouseResponse, Warehouse> {
+public class WarehouseResponseToWarehouseMapper implements WarehouseMapper<WarehouseResponse, Warehouse> {
 
     @Override
     public Warehouse mapToEntity(WarehouseResponse warehouseResponse) {
         return Warehouse.builder()
                 .id(warehouseResponse.getId())
                 .warehouseSpaceType(warehouseResponse.getWarehouseSpaceType())
-                .location(warehouseResponse.getLocation())
+                .warehouseLocation(warehouseResponse.getWarehouseLocation())
                 .user(warehouseResponse.getUser())
                 .items(warehouseResponse.getItems())
                 .build();
@@ -24,7 +24,7 @@ public class WarehouseRequestToWarehouseMapper implements WarehouseMapper<Wareho
     @Override
     public void updateEntityFromRequest(WarehouseResponse warehouseRequest, Warehouse warehouseResponse) {
         warehouseResponse.setWarehouseSpaceType(warehouseRequest.getWarehouseSpaceType());
-        warehouseResponse.setLocation(warehouseRequest.getLocation());
+        warehouseResponse.setWarehouseLocation(warehouseRequest.getWarehouseLocation());
     }
 }
 
