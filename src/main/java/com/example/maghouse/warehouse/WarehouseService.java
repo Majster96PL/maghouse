@@ -73,9 +73,10 @@ public class WarehouseService {
         var item = itemRepository.findById(id)
                 .orElseThrow( () -> new IllegalArgumentException("Item not found!"));
 
-        String newPrefix = generateLocationPrefix(warehouseLocationRequest.getWarehouseLocation());
         String currentLocation = item.getLocationCode();
-        String newLocation = newPrefix + currentLocation.substring(1);
+        String restOfString = currentLocation.substring(1);
+        String newPrefix = generateLocationPrefix(warehouseLocationRequest.getWarehouseLocation());
+        String newLocation = newPrefix + restOfString;
         item.setLocationCode(newLocation);
         item.setUser(user);
         itemRepository.save(item);

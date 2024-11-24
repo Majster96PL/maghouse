@@ -21,10 +21,16 @@ public class WarehouseController {
 
     }
 
-    @PutMapping("/assign-location/{itemId}")
+    @PostMapping("/assign-location/{itemId}")
     public Item assignWarehouseLocation (@RequestBody  WarehouseLocationRequest warehouseLocationRequest,
                                          @PathVariable Long itemId){
          return warehouseService.assignItemsToWarehouseLocation( warehouseLocationRequest, itemId);
+    }
+
+    @PutMapping("/update-location/{itemId}")
+    public Item updateWarehouseLocation(@RequestBody  WarehouseLocationRequest warehouseLocationRequest,
+                                        @PathVariable Long itemId){
+        return warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId);
     }
 
 }
