@@ -63,6 +63,36 @@ public class JWTFilter extends OncePerRequestFilter {
                             new WebAuthenticationDetailsSource().buildDetails(request)
                     );
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                    System.out.println("User authenticated: " + userEmail);
+
+
+                    userDetails.getAuthorities().forEach(grantedAuthority -> {
+                        System.out.println("Role: " + grantedAuthority.getAuthority());
+                    });
+
+
+                    boolean isAdmin = userDetails.getAuthorities().stream()
+                            .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+                    boolean isUser = userDetails.getAuthorities().stream()
+                            .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_USER"));
+                    boolean isDriver = userDetails.getAuthorities().stream()
+                            .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_DRIVER"));
+                    boolean isManager = userDetails.getAuthorities().stream()
+                            .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_MANAGER"));
+                    boolean isWarehouseman = userDetails.getAuthorities().stream()
+                            .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_WAREHOUSEMAN"));
+
+                    if (isAdmin) {
+                        System.out.println("Logged in user is an Admin");
+                    } else if (isUser) {
+                        System.out.println("Logged in user is a User");
+                    } else if (isDriver) {
+                        System.out.println("Logged in user is a Driver");
+                    } else if (isManager) {
+                        System.out.println("Logged in user is a Manager");
+                    } else if (isWarehouseman) {
+                        System.out.println("Logged in user is a Warehouseman");
+                    }
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);

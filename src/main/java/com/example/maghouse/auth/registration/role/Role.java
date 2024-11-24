@@ -18,13 +18,24 @@ public enum Role {
                     Permission.ADMIN_DELETE
             )
     ),
-    SUPERVISOR(
+    MANAGER(
             Set.of(
-                    Permission.SUPERVISOR_CREATE,
-                    Permission.SUPERVISOR_UPDATE,
-                    Permission.SUPERVISOR_READ
+                    Permission.MANAGER_CREATE,
+                    Permission.MANAGER_UPDATE,
+                    Permission.MANAGER_READ
             )
     ),
+
+    WAREHOUSEMAN(
+            Set.of(
+                    Permission.WAREHOUSEMAN_READ,
+                    Permission.WAREHOUSEMAN_UPDATE)
+    ),
+
+    DRIVER(
+            Set.of(Permission.DRIVER_READ)
+    ),
+
     USER(
             Set.of(
                     Permission.USER_READ

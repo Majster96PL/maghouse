@@ -1,6 +1,7 @@
 package com.example.maghouse.item;
 
 import com.example.maghouse.auth.registration.user.User;
+import com.example.maghouse.warehouse.Warehouse;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -27,9 +28,16 @@ public class Item {
     @Size(max = 50)
     @NotBlank(message = "Code required!")
     private String itemCode;
+    @Size(max = 10)
+    @NotBlank(message = "Quantity required!")
     private int quantity;
+    @Size(max = 50)
+    private String locationCode;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+    @ManyToOne
+    @JoinColumn(name = "warehouse_id")
+    private Warehouse warehouse;
 
 }

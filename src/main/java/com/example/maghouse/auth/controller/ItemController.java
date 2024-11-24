@@ -1,6 +1,5 @@
 package com.example.maghouse.auth.controller;
 
-import com.example.maghouse.auth.mapper.ItemRequestToItemMapper;
 import com.example.maghouse.item.Item;
 import com.example.maghouse.item.ItemRequest;
 import com.example.maghouse.item.ItemResponse;
@@ -18,8 +17,8 @@ public class ItemController {
 
     @PostMapping("/create")
     //@PreAuthorize("hasAuthority('USER')")
-    public Item create(@RequestBody ItemRequest itemRequest, ItemResponse itemResponse) {
-        return itemService.createItem(itemRequest, itemResponse);
+    public Item create(@RequestBody ItemRequest itemRequest) {
+        return itemService.createItem(itemRequest);
     }
 
     @PutMapping("/update/{itemId}")
