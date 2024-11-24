@@ -61,6 +61,27 @@ public class WarehouseService {
         return item;
     }
 
+    public Item updatedItemsToWarehouseLocation(WarehouseLocationRequest warehouseLocationRequest, Long id){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()){
+            throw new SecurityException("User is not authenticated!");
+        }
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        var user = userRepository.findUserByEmail(userDetails.getUsername())
+                .orElseThrow( () -> new IllegalArgumentException("User with email not found!"));
+
+        var item = itemRepository.findById(id)
+                .orElseThrow( () -> new IllegalArgumentException("Item not found!"));
+
+        String newPrefix = generateLocationPrefix(warehouseLocationRequest.getWarehouseLocation());
+        String currentLocation = item.getLocationCode();
+        String newLocation = newPrefix + currentLocation.substring(1);
+        item.setLocationCode(newLocation);
+        item.setUser(user);
+        itemRepository.save(item);
+        return item;
+    }
+
     public Item assignLocationCode(WarehouseSpaceTypeRequest warehouseSpaceTypeRequest, Long id){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()){

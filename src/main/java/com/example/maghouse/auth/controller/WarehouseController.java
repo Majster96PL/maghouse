@@ -21,7 +21,7 @@ public class WarehouseController {
 
     }
 
-    @PostMapping("/assign-location/{itemId}")
+    @PutMapping("/assign-location/{itemId}")
     public Item assignWarehouseLocation (@RequestBody  WarehouseLocationRequest warehouseLocationRequest,
                                          @PathVariable Long itemId){
          return warehouseService.assignItemsToWarehouseLocation( warehouseLocationRequest, itemId);
