@@ -1,7 +1,9 @@
 package com.example.maghouse.delivery;
 
+import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.item.Item;
 import com.example.maghouse.warehouse.Warehouse;
+import com.example.maghouse.warehouse.location.WarehouseLocation;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -34,6 +36,7 @@ public class Delivery {
     private int quantity;
     @Enumerated(EnumType.STRING)
     private DeliveryStatus deliveryStatus;
-    private String warehouseLocation;
+    private WarehouseLocation warehouseLocation;
+    private User user;
 
 }
