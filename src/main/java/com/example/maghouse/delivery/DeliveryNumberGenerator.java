@@ -19,8 +19,7 @@ public class DeliveryNumberGenerator {
         int month = actualDate.getMonthValue();
         int year = actualDate.getYear();
 
-        List<Delivery> deliveries = deliveryRepository.findByMonthAndYear(month, year);
-        int deliveryCount = deliveries.size() + 1;
+        int deliveryCount = deliveryRepository.countByMonthAndYear(month, year) + 1;
 
         return deliveryCount  + "/" + month + "/" + year;
     }

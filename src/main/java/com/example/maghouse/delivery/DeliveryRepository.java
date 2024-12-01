@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
 
-    @Query("SELECT d FROM Delivery d WHERE FUNCTION('MONTH', d.date) = :month AND FUNCTION('YEAR', d.date) = :year ")
-    List<Delivery> findByMonthAndYear(@Param("month") int month, @Param("year") int year);
+    @Query("SELECT COUNT(d) FROM Delivery d WHERE EXTRACT(MONTH FROM d.date) = :month AND EXTRACT(YEAR FROM d.date) = :year")
+    int countByMonthAndYear(@Param("month") int month, @Param("year") int year);
 }
