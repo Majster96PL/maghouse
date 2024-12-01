@@ -4,7 +4,7 @@ import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.delivery.Delivery;
 import com.example.maghouse.delivery.DeliveryRequest;
 import com.example.maghouse.delivery.DeliveryResponse;
-import com.example.maghouse.delivery.DeliveryStatus;
+import com.example.maghouse.delivery.status.DeliveryStatus;
 import org.springframework.stereotype.Component;
 
 

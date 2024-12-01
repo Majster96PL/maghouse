@@ -2,6 +2,7 @@ package com.example.maghouse.delivery;
 
 
 import com.example.maghouse.auth.registration.user.UserRepository;
+import com.example.maghouse.delivery.status.DeliveryStatusRequest;
 import com.example.maghouse.mapper.DeliveryResponseToDeliveryMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -36,6 +37,21 @@ public class DeliveryService {
         var deliveryResponse = deliveryResponseToDeliveryMapper.mapToDeliveryResponse(
                 deliveryRequest, numberDelivery, data, user);
         var delivery = deliveryResponseToDeliveryMapper.mapToDelivery(deliveryResponse);
+
+        return deliveryRepository.save(delivery);
+    }
+
+    public Delivery updateDeliveryStatus(DeliveryStatusRequest deliveryStatusRequest, Long id){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new SecurityException("User is not authenticated");
+        }
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        var user = userRepository.findUserByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("User with email not found!"));
+        var delivery = deliveryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Delivery not found!"));
+        delivery.setDeliveryStatus(deliveryStatusRequest.getDeliveryStatus());
 
         return deliveryRepository.save(delivery);
     }

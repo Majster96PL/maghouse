@@ -1,6 +1,7 @@
 package com.example.maghouse.delivery;
 
 import com.example.maghouse.auth.registration.user.User;
+import com.example.maghouse.delivery.status.DeliveryStatus;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

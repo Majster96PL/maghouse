@@ -1,6 +1,7 @@
 package com.example.maghouse.delivery;
 
 import com.example.maghouse.auth.registration.user.User;
+import com.example.maghouse.delivery.status.DeliveryStatus;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
