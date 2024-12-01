@@ -5,11 +5,13 @@ import com.example.maghouse.delivery.Delivery;
 import com.example.maghouse.delivery.DeliveryRequest;
 import com.example.maghouse.delivery.DeliveryResponse;
 import com.example.maghouse.delivery.DeliveryStatus;
+import org.springframework.stereotype.Component;
 
 
 import java.sql.Date;
 import java.time.LocalDate;
 
+@Component
 public class DeliveryResponseToDeliveryMapper implements DeliveryMapper<DeliveryRequest, DeliveryResponse> {
 
     @Override

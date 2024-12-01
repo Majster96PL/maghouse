@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class DeliveryController {
 
-    private static DeliveryService deliveryService;
+    private final DeliveryService deliveryService;
 
     @PostMapping("/create")
     public Delivery create(@RequestBody  DeliveryRequest deliveryRequest){
-        return deliveryService.createDelivery(deliveryRequest) ;
+        return deliveryService.createDelivery(deliveryRequest);
     }
 }

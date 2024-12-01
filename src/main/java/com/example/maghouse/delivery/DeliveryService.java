@@ -3,6 +3,7 @@ package com.example.maghouse.delivery;
 
 import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.mapper.DeliveryResponseToDeliveryMapper;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,11 +16,12 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class DeliveryService {
 
-    private static UserRepository userRepository;
-    private static DeliveryNumberGenerator deliveryNumberGenerator;
-    private static DeliveryResponseToDeliveryMapper deliveryResponseToDeliveryMapper;
-    private static DeliveryRepository deliveryRepository;
+    private final UserRepository userRepository;
+    private final DeliveryNumberGenerator deliveryNumberGenerator;
+    private final DeliveryResponseToDeliveryMapper deliveryResponseToDeliveryMapper;
+    private final DeliveryRepository deliveryRepository;
 
+    @Transactional
     public Delivery createDelivery(DeliveryRequest deliveryRequest){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
