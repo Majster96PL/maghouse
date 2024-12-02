@@ -19,7 +19,7 @@ public class DeliveryController {
         return deliveryService.createDelivery(deliveryRequest);
     }
 
-    @PostMapping("/update-delivery-status/{id}")
+    @PutMapping("/update-delivery-status/{id}")
     public Delivery updateDeliveryStatus(@RequestBody DeliveryStatusRequest deliveryStatusRequest,
                                          @PathVariable Long id){
         return deliveryService.updateDeliveryStatus(deliveryStatusRequest, id);
