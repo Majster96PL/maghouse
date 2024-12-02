@@ -17,6 +17,7 @@ public class ItemCodeGenerator {
 
         return String.format("%04d-%02d-%03d-%04d", firstPart, secondPart, thirdPart, fourthPart);
     }
+
     private int generateRandomNumber(int min, int max){
         return RANDOM.nextInt((max - min) + 1) + min;
     }

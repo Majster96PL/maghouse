@@ -1,7 +1,9 @@
 package com.example.maghouse.item;
 
 import com.example.maghouse.auth.registration.user.User;
+import com.example.maghouse.delivery.Delivery;
 import com.example.maghouse.warehouse.Warehouse;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -9,6 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 
 @Entity
@@ -39,5 +43,8 @@ public class Item {
     @ManyToOne
     @JoinColumn(name = "warehouse_id")
     private Warehouse warehouse;
+    @OneToMany(mappedBy = "item")
+    @JsonManagedReference
+    private List<Delivery> deliveries;
 
 }
