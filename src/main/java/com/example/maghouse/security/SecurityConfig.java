@@ -28,6 +28,7 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/auth/**").permitAll()
+                                .requestMatchers("/h2-console/**").permitAll()
                                 .requestMatchers("auth/item/**").hasAnyRole("USER", "ADMIN", "MANAGER", "WAREHOUSEMAN", "DRIVER")
                                 .requestMatchers("auth/warehouse/**").hasAnyRole("USER", "ADMIN", "MANAGER", "WAREHOUSEMAN", "DRIVER")
                                 .requestMatchers("auth/delivery/**").hasAnyRole("USER", "ADMIN", "MANAGER", "WAREHOUSEMAN", "DRIVER")

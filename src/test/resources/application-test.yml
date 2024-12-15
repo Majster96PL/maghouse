@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:maghousetestdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -9,9 +9,10 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
     open-in-view: false
   h2:
     console:
       enabled: true
+      path: /h2-console

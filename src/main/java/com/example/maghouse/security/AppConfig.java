@@ -1,10 +1,8 @@
 package com.example.maghouse.security;
 
-import com.example.maghouse.auth.AuthService;
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
-import com.example.maghouse.auth.registration.user.UserRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
