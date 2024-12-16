@@ -35,13 +35,16 @@ public class SecurityConfig {
                                 .requestMatchers("auth/delivery/**").hasAnyRole("USER", "ADMIN", "MANAGER", "WAREHOUSEMAN", "DRIVER")
                                 .requestMatchers("auth/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(sess ->
+                        sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout ->
                         logout.logoutUrl("/auth/logout")
                                 .addLogoutHandler(logoutHandler)
-                                .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
+                                .logoutSuccessHandler((request,
+                                                       response,
+                                                       authentication) -> SecurityContextHolder.clearContext())
                 );
         http.headers( headers ->
                 headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
