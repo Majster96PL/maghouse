@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: dev
   application:
     name: Mag House
   datasource:
@@ -14,11 +16,6 @@ spring:
       ddl-auto: update
     show-sql: true
     open-in-view: true
-  profiles:
-    active: dev
-  h2:
-    console:
-      enabled: true
   config:
     import:
       classpath: properties.secret
