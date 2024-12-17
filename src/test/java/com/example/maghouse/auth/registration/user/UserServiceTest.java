@@ -11,12 +11,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.ArrayList;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
@@ -89,5 +89,75 @@ public class UserServiceTest {
         verify(userRepository, times(1)).save(user);
     }
 
+    @Test
+    void shouldThrowExceptionWhenUserNotFoundWhileChangingRole(){
+        when(userRepository.findUserByEmail(changeRoleRequest.getEmail())).thenReturn(Optional.empty());
 
+        assertThrows(UsernameNotFoundException.class, () -> userService.changeUserRole(changeRoleRequest));
+        verify(userRepository, times(1)).findUserByEmail(changeRoleRequest.getEmail());
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void shouldUpdatedUserSuccessfully(){
+        Long userId = 1l;
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        doNothing().when(userRequestToUserMapper).updatedUserFromUserRequest(userRequest, user);
+        when(userRepository.save(user)).thenReturn(user);
+
+        User updatedUser = userService.updateUser(userId, userRequest);
+
+        assertNotNull(updatedUser);
+        verify(userRepository, times(1)).findById(userId);
+        verify(userRequestToUserMapper, times(1)).updatedUserFromUserRequest(userRequest, user);
+        verify(userRepository, times(1)).save(user);
+
+    }
+
+    @Test
+    void shouldFindUserByEmailSuccessfully(){
+        String email = "john.kovalsky@maghouse.com";
+        when(userRepository.findUserByEmail(email)).thenReturn(Optional.of(user));
+
+        User foundUser = userService.findByEmail(email);
+
+        assertNotNull(foundUser);
+        assertEquals(email, foundUser.getEmail());
+        verify(userRepository, times(1)).findUserByEmail(email);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserNotFoundByEmail(){
+        String email = "unknown@maghouse.com";
+        when(userRepository.findUserByEmail(email)).thenReturn(Optional.empty());
+
+        assertThrows(UsernameNotFoundException.class, () -> userService.findByEmail(email));
+        verify(userRepository, times(1)).findUserByEmail(email);
+    }
+
+    @Test
+    void shouldDeleteUserSuccessfully(){
+        Long id = 1L;
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+        doNothing().when(jwtService).deleteTokenByUser(user);
+        doNothing().when(userRepository).delete(user);
+
+        userService.deleteUser(id);
+
+        verify(userRepository, times(1)).findById(id);
+        verify(jwtService, times(1)).deleteTokenByUser(user);
+        verify(userRepository, times(1)).delete(user);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserNotFoundWhileDeleting(){
+        Long id = 1L;
+        when(userRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(UsernameNotFoundException.class, () -> userService.deleteUser(id));
+        verify(userRepository, times(1)).findById(id);
+        verify(jwtService, never()).deleteTokenByUser(any(User.class));
+        verify(userRepository, never()).delete(any(User.class));
+
+    }
 }
