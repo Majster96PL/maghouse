@@ -1,10 +1,8 @@
 package com.example.maghouse;
 
-import org.junit.jupiter.api.AfterAll;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.platform.suite.api.IncludeClassNamePatterns;
-import org.junit.platform.suite.api.SelectPackages;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -20,8 +18,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @ActiveProfiles("test")
 @TestPropertySource("classpath:application-test.yml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-@SelectPackages({"com.example.unit", "com.example.integration"})
-@IncludeClassNamePatterns(".*Test")
 class MagHouseApplicationTests {
 
 	@Value("${spring.datasource.url}")
@@ -31,10 +27,5 @@ class MagHouseApplicationTests {
 	void contextLoads() {
 		assertThat(datasourceUrl).isNotNull();
 		System.out.println("Datasource URL: " + datasourceUrl);
-	}
-
-	@AfterAll
-    static void keepApplicationRunning() throws InterruptedException {
-		Thread.sleep(Long.MAX_VALUE);
 	}
 }
