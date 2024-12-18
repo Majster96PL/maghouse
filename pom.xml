@@ -131,6 +131,7 @@
 					<argLine>-Dspring.profiles.active=test</argLine>
 					<includes>
 						<include>/**/*Test.java</include>
+						<include>/**/*Tests.java</include>
 					</includes>
 					<properties>
 						<property>
