@@ -8,8 +8,8 @@ import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping(path = "/auth/")
@@ -21,7 +21,7 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public TokenResponse registerUser(@RequestBody UserRequest userRequest) {
+    public TokenResponse registerUser(@Valid @RequestBody UserRequest userRequest) {
        return authService.registerUser(userRequest);
     }
 
