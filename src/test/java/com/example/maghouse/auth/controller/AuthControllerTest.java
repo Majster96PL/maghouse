@@ -172,12 +172,13 @@ public class AuthControllerTest {
 
     @Test
     void shouldGetUserByIdSuccessfully() throws Exception {
-        User user = new User();
-        user.setId(1L);
-        user.setFirstname("John");
-        user.setLastname("Doe");
-        user.setEmail("john.doe@example.com");
-        user.setRole(Role.USER);
+        User user = User.builder()
+                .id(1L)
+                .firstname("John")
+                .lastname("Doe")
+                .email("john.doe@example.com")
+                .role(Role.USER)
+                .build();
 
         when(userService.getUserById(1L)).thenReturn(user);
 
