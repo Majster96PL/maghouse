@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping(path = "/auth/")
@@ -37,8 +38,12 @@ public class AuthController {
         authService.refreshToken(request, response);
     }
 
-    @GetMapping("/users/{id}")
-    public User getUserById(@PathVariable("id") Long id){
-        return userService.getUserById(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        return ResponseEntity.ok(user);
     }
 }
