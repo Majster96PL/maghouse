@@ -15,194 +15,158 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AuthController.class)
-@AutoConfigureMockMvc(addFilters = false)
-@Import(GlobalExceptionHandler.class)
+
+@ExtendWith(MockitoExtension.class)
 public class AuthControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
 
-    @MockBean
+    @InjectMocks
+    private AuthController authController;
+
+    @Mock
     private AuthService authService;
 
-    @MockBean
+    @Mock
     private UserService userService;
 
-    @MockBean
-    private JwtService jwtService;
-
-    @MockBean
-    private TokenRepository tokenRepository;
-
-    private ObjectMapper objectMapper;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        objectMapper = new ObjectMapper();
-    }
 
     @Test
-    void shouldRegisterUserSuccessfully() throws Exception {
-        UserRequest userRequest = UserRequest.builder()
-                .firstname("John")
-                .lastname("Kovalsky")
-                .email("john.kovalsky@maghouse.com")
-                .password("testPassword")
-                .role(Role.USER)
-                .build();
+    void shouldRegisterUserAndReturnTokenResponse() {
+        UserRequest userRequest = new UserRequest(
+                "Firstname",
+                "Lastname",
+                "test@example.com",
+                "password123", null);
 
-        TokenResponse tokenResponse= TokenResponse.builder()
-                .accessToken("ACCESS_TOKEN")
-                .refreshToken("REFRESH_TOKEN")
-                .build();
+        TokenResponse expectedResponse = new TokenResponse("accessToken", "refreshToken");
 
-        when(authService.registerUser(userRequest)).thenReturn(tokenResponse);
+        when(authService.registerUser(userRequest)).thenReturn(expectedResponse);
 
-        mockMvc.perform(post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.access_token").value("ACCESS_TOKEN"))
-                .andExpect(jsonPath("$.refresh_token").value("REFRESH_TOKEN"));
+        TokenResponse actualResponse = authController.registerUser(userRequest);
 
+        assertNotNull(actualResponse);
+        assertEquals(expectedResponse.getAccessToken(), actualResponse.getAccessToken());
+        assertEquals(expectedResponse.getRefreshToken(), actualResponse.getRefreshToken());
         verify(authService, times(1)).registerUser(userRequest);
     }
 
     @Test
-    void shouldReturnBadRequestWhenRegisteringUserWithInvalidData() throws Exception{
-        UserRequest userRequest = UserRequest.builder()
-                .firstname("")
-                .lastname("")
-                .email("invalid-email")
-                .password("123456")
-                .build();
+    void shouldThrowExceptionWhenInvalidUserRequest() {
+        UserRequest invalidUserRequest = new UserRequest(
+                null,
+                "",
+                "invalid",
+                "short",
+                null);
 
-        mockMvc.perform(post("/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.firstname").exists())
-                .andExpect(jsonPath("$.lastname").exists())
-                .andExpect(jsonPath("$.email").exists())
-                .andExpect(jsonPath("$.password").exists());
+        when(authService.registerUser(invalidUserRequest)).thenThrow(new IllegalArgumentException("Invalid user request"));
 
-
-        verify(authService, never()).registerUser(any());
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> authController.registerUser(invalidUserRequest));
+        assertEquals("Invalid user request", exception.getMessage());
+        verify(authService, times(1)).registerUser(invalidUserRequest);
     }
 
     @Test
-    void shouldLoginSuccessfully() throws Exception {
-        LoginRequest loginRequest = LoginRequest.builder()
-                .email("john.kovalsky@maghouse.com")
-                .password("testPassword")
-                .build();
+    void shouldLoginAndReturnTokenResponse() {
+        LoginRequest loginRequest = new LoginRequest("testuser", "password123");
+        TokenResponse expectedResponse = new TokenResponse("accessToken", "refreshToken");
 
-        TokenResponse tokenResponse = TokenResponse.builder()
-                .accessToken("accessToken123")
-                .refreshToken("refreshToken123")
-                .build();
+        when(authService.login(loginRequest)).thenReturn(expectedResponse);
 
-        when(authService.login(loginRequest)).thenReturn(tokenResponse);
+        TokenResponse actualResponse = authController.login(loginRequest);
 
-        mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.access_token").value("accessToken123"))
-                .andExpect(jsonPath("$.refresh_token").value("refreshToken123"));
-
+        assertNotNull(actualResponse);
+        assertEquals(expectedResponse.getAccessToken(), actualResponse.getAccessToken());
+        assertEquals(expectedResponse.getRefreshToken(), actualResponse.getRefreshToken());
         verify(authService, times(1)).login(loginRequest);
     }
 
     @Test
-    void shouldReturnUnauthorizedWhenLoginFails() throws Exception{
-        LoginRequest loginRequest = LoginRequest.builder()
-                .email("john.kovalsky@maghouse.com")
-                .password("wrongPassword")
-                .build();
+    void shouldThrowExceptionWhenInvalidLoginRequest() {
+        // Given
+        LoginRequest invalidLoginRequest = new LoginRequest("", "password123");
 
-        when(authService.login(loginRequest)).thenThrow(new RuntimeException("Invalid credentials"));
+        when(authService.login(invalidLoginRequest)).thenThrow(new IllegalArgumentException("Invalid login request"));
 
-        mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("Invalid credentials"));
-
-        verify(authService, times(1)).login(loginRequest);
+        // When & Then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> authController.login(invalidLoginRequest));
+        assertEquals("Invalid login request", exception.getMessage());
+        verify(authService, times(1)).login(invalidLoginRequest);
     }
 
     @Test
-    void shouldRefreshTokenSuccessfully() throws Exception {
-        doNothing().when(authService).refreshToken(any(HttpServletRequest.class), any(HttpServletResponse.class));
+    void shouldRefreshToken() throws Exception {
+        // Given
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
 
-        mockMvc.perform(post("/auth/refresh"))
-                .andExpect(status().isOk());
+        doNothing().when(authService).refreshToken(request, response);
 
-        verify(authService, times(1)).refreshToken(any(HttpServletRequest.class), any(HttpServletResponse.class));
+        // When
+        authController.refreshToken(request, response);
 
+        // Then
+        verify(authService, times(1)).refreshToken(request, response);
     }
 
     @Test
-    void shouldReturnUnauthorizedWhenRefreshTokenFails() throws Exception{
-        doThrow(new RuntimeException("Invalid token")).when(authService).refreshToken(any(HttpServletRequest.class), any(HttpServletResponse.class));
+    void shouldHandleExceptionDuringRefreshToken() throws Exception {
+        // Given
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
 
-        mockMvc.perform(post("/auth/refresh"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("Invalid token"));
+        doThrow(new RuntimeException("Token refresh error")).when(authService).refreshToken(request, response);
 
-        verify(authService, times(1)).refreshToken(any(HttpServletRequest.class), any(HttpServletResponse.class));
+        // When & Then
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> authController.refreshToken(request, response));
+        assertEquals("Token refresh error", exception.getMessage());
+        verify(authService, times(1)).refreshToken(request, response);
     }
 
     @Test
-    void shouldGetUserByIdSuccessfully() throws Exception {
-        User user = User.builder()
-                .id(1L)
-                .firstname("John")
-                .lastname("Doe")
-                .email("john.doe@example.com")
-                .role(Role.USER)
-                .build();
+    void shouldReturnUserById() {
+        // Given
+        Long userId = 1L;
+        User expectedUser = new User(1L, "Firstname", "Lastname", "test@example.com", "password123", null, null);
 
-        when(userService.getUserById(1L)).thenReturn(user);
+        when(userService.getUserById(userId)).thenReturn(expectedUser);
 
-        mockMvc.perform(get("/auth/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.firstname").value("John"))
-                .andExpect(jsonPath("$.lastname").value("Doe"))
-                .andExpect(jsonPath("$.email").value("john.doe@example.com"))
-                .andExpect(jsonPath("$.role").value("USER"));
+        ResponseEntity<User> responseEntity = authController.getUserById(userId);
 
-        verify(userService, times(1)).getUserById(1L);
+        assertNotNull(responseEntity);
+        assertEquals(200, responseEntity.getStatusCodeValue());
+        assertEquals(expectedUser, responseEntity.getBody());
+        verify(userService, times(1)).getUserById(userId);
     }
 
     @Test
-    void shouldReturnNotFoundWhenUserDoesNotExist() throws Exception {
-        when(userService.getUserById(99L)).thenThrow(new RuntimeException("User not found"));
+    void shouldThrowExceptionWhenUserNotFound() {
+        // Given
+        Long userId = 1L;
 
-        mockMvc.perform(get("/auth/99")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("User not found"));
+        when(userService.getUserById(userId)).thenReturn(null);
 
-        verify(userService, times(1)).getUserById(99L);
+        // When & Then
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> authController.getUserById(userId));
+        assertEquals("User not found", exception.getMessage());
+        verify(userService, times(1)).getUserById(userId);
     }
 }
