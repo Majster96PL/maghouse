@@ -1,6 +1,5 @@
 package com.example.maghouse.auth.login;
 
-
 import com.example.maghouse.auth.registration.role.ChangeRoleRequest;
 import com.example.maghouse.auth.registration.role.ChangeRoleResponse;
 import com.example.maghouse.auth.registration.role.Role;
