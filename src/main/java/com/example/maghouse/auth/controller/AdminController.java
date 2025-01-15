@@ -20,12 +20,18 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     public TokenResponse updateUser( @PathVariable("id") Long id,
                                      @RequestBody UserRequest userRequest) {
+        if (userRequest == null) {
+            throw new IllegalArgumentException("User request cannot be null");
+        }
         return adminService.updatedUserByAdmin(id, userRequest);
     }
 
     @PutMapping("/change")
     @PreAuthorize("hasRole('ADMIN')")
     public ChangeRoleResponse changeUserRoleByAdmin(@RequestBody ChangeRoleRequest changeRoleRequest){
+        if (changeRoleRequest.getRole() == null) {
+            throw new IllegalArgumentException("Role cannot be null");
+        }
          return adminService.changeUserRoleByAdmin(changeRoleRequest);
     }
 

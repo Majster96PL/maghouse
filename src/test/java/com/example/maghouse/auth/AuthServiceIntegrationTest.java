@@ -3,7 +3,6 @@ package com.example.maghouse.auth;
 import com.example.maghouse.auth.login.LoginRequest;
 import com.example.maghouse.auth.login.jwt.JwtService;
 import com.example.maghouse.auth.registration.role.Role;
-import com.example.maghouse.auth.registration.token.TokenRepository;
 import com.example.maghouse.auth.registration.token.TokenResponse;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRequest;
