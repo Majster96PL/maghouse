@@ -101,12 +101,10 @@ public class AuthControllerTest {
 
     @Test
     void shouldThrowExceptionWhenInvalidLoginRequest() {
-        // Given
         LoginRequest invalidLoginRequest = new LoginRequest("", "password123");
 
         when(authService.login(invalidLoginRequest)).thenThrow(new IllegalArgumentException("Invalid login request"));
 
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> authController.login(invalidLoginRequest));
         assertEquals("Invalid login request", exception.getMessage());
         verify(authService, times(1)).login(invalidLoginRequest);
@@ -114,28 +112,23 @@ public class AuthControllerTest {
 
     @Test
     void shouldRefreshToken() throws Exception {
-        // Given
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
 
         doNothing().when(authService).refreshToken(request, response);
 
-        // When
         authController.refreshToken(request, response);
 
-        // Then
         verify(authService, times(1)).refreshToken(request, response);
     }
 
     @Test
     void shouldHandleExceptionDuringRefreshToken() throws Exception {
-        // Given
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
 
         doThrow(new RuntimeException("Token refresh error")).when(authService).refreshToken(request, response);
 
-        // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class, () -> authController.refreshToken(request, response));
         assertEquals("Token refresh error", exception.getMessage());
         verify(authService, times(1)).refreshToken(request, response);
@@ -143,7 +136,6 @@ public class AuthControllerTest {
 
     @Test
     void shouldReturnUserById() {
-        // Given
         Long userId = 1L;
         User expectedUser = new User(1L, "Firstname", "Lastname", "test@example.com", "password123", null, null);
 
@@ -159,12 +151,10 @@ public class AuthControllerTest {
 
     @Test
     void shouldThrowExceptionWhenUserNotFound() {
-        // Given
         Long userId = 1L;
 
         when(userService.getUserById(userId)).thenReturn(null);
 
-        // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class, () -> authController.getUserById(userId));
         assertEquals("User not found", exception.getMessage());
         verify(userService, times(1)).getUserById(userId);
