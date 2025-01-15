@@ -3,7 +3,6 @@ package com.example.maghouse.auth;
 import com.example.maghouse.auth.login.LoginRequest;
 import com.example.maghouse.auth.login.jwt.JwtService;
 import com.example.maghouse.auth.registration.role.Role;
-import com.example.maghouse.auth.registration.token.TokenRepository;
 import com.example.maghouse.auth.registration.token.TokenResponse;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRequest;
@@ -25,6 +24,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -42,9 +43,6 @@ public class AuthServiceIntegrationTest {
 
     @MockBean
     private JwtService jwtService;
-
-    @MockBean
-    private TokenRepository tokenRepository;
 
     @MockBean
     private TokenResponseToTokenMapper tokenResponseToTokenMapper;
@@ -73,6 +71,10 @@ public class AuthServiceIntegrationTest {
                 .build();
     }
 
+    private String generatedUniqueToken(){
+        return UUID.randomUUID().toString();
+    }
+
     @Test
     void shouldRegisterUserSuccessfully() {
         UserRequest userRequest = new UserRequest(
@@ -87,10 +89,8 @@ public class AuthServiceIntegrationTest {
         when(tokenResponseToTokenMapper.map("jwt_token", "refresh_token"))
                 .thenReturn(new TokenResponse("jwt_token", "refresh_token"));
 
-        // Act
         TokenResponse tokenResponse = authService.registerUser(userRequest);
 
-        // Assert
         assertNotNull(tokenResponse);
         assertEquals("jwt_token", tokenResponse.getAccessToken());
         assertEquals("refresh_token", tokenResponse.getRefreshToken());
@@ -108,17 +108,20 @@ public class AuthServiceIntegrationTest {
                 "password",
                 null);
 
+        String jwtToken = generatedUniqueToken();
+        String refreshToken = generatedUniqueToken();
+
         when(userService.registerUser(userRequest)).thenReturn(user);
-        when(jwtService.getToken(user)).thenReturn("jwt_token");
-        when(jwtService.generateRefreshToken(user)).thenReturn("refresh_token");
-        when(tokenResponseToTokenMapper.map("jwt_token", "refresh_token"))
-                .thenReturn(new TokenResponse("jwt_token", "refresh_token"));
+        when(jwtService.getToken(user)).thenReturn(jwtToken);
+        when(jwtService.generateRefreshToken(user)).thenReturn(refreshToken);
+        when(tokenResponseToTokenMapper.map(jwtToken, refreshToken))
+                .thenReturn(new TokenResponse(jwtToken, refreshToken));
 
         TokenResponse tokenResponse = authService.registerUser(userRequest);
 
         assertNotNull(tokenResponse);
-        assertEquals("jwt_token", tokenResponse.getAccessToken());
-        assertEquals("refresh_token", tokenResponse.getRefreshToken());
+        assertEquals(jwtToken, tokenResponse.getAccessToken());
+        assertEquals(refreshToken, tokenResponse.getRefreshToken());
         verify(userService, times(1)).registerUser(userRequest);
         verify(jwtService, times(1)).getToken(user);
         verify(jwtService, times(1)).generateRefreshToken(user);
@@ -140,6 +143,7 @@ public class AuthServiceIntegrationTest {
     @Test
     void shouldThrowExceptionWhenLoginWithNonExistingUser() {
         LoginRequest loginRequest = new LoginRequest("non.existing@example.com", "password");
+
         when(userService.findByEmail("non.existing@example.com")).thenReturn(null);
 
         assertThrows(NullPointerException.class, () -> authService.login(loginRequest));
@@ -164,7 +168,6 @@ public class AuthServiceIntegrationTest {
 
     @Test
     void shouldNotRefreshTokenWhenNoAuthorizationHeader() throws Exception {
-        HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(null);
 
         authService.refreshToken(request, mock(HttpServletResponse.class));
