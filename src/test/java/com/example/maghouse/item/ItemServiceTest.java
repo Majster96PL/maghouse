@@ -47,13 +47,15 @@ public class ItemServiceTest {
     @InjectMocks
     private ItemService itemService;
 
+    private User user;
+
     @BeforeEach
     void setUp() {
         SecurityContextHolder.setContext(securityContext);
         lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
         lenient().when(authentication.isAuthenticated()).thenReturn(true);
         lenient().when(authentication.getPrincipal()).thenReturn(userDetails);
-        User user = User.builder()
+        user = User.builder()
                 .id(1L)
                 .firstname("John")
                 .lastname("Doe")
@@ -68,12 +70,10 @@ public class ItemServiceTest {
 
     @Test
     void shouldCreateItemSuccessfully() {
-        // Arrange
         ItemRequest itemRequest = new ItemRequest();
         itemRequest.setName("Test Item");
         itemRequest.setQuantity(10);
 
-        User user = new User();
         user.setEmail("test@example.com");
 
         when(userDetails.getUsername()).thenReturn("test@example.com");
@@ -89,10 +89,8 @@ public class ItemServiceTest {
         when(itemResponseToItemMapper.mapToItem(any(ItemResponse.class))).thenReturn(item);
         when(itemRepository.save(any(Item.class))).thenReturn(item);
 
-        // Act
         Item createdItem = itemService.createItem(itemRequest);
 
-        // Assert
         assertNotNull(createdItem);
         verify(userRepository).findUserByEmail("test@example.com");
         verify(itemCodeGenerator).generateItemCode();
@@ -102,22 +100,18 @@ public class ItemServiceTest {
 
     @Test
     void shouldThrowSecurityExceptionWhenUserNotAuthenticatedOnCreate() {
-        // Arrange
         when(authentication.isAuthenticated()).thenReturn(false);
 
         ItemRequest itemRequest = new ItemRequest();
 
-        // Act & Assert
         assertThrows(SecurityException.class, () -> itemService.createItem(itemRequest));
     }
 
     @Test
     void shouldUpdateItemQuantitySuccessfully() {
-        // Arrange
         ItemRequest itemRequest = new ItemRequest();
         itemRequest.setQuantity(20);
 
-        User user = new User();
         user.setEmail("test@example.com");
 
         Item item = new Item();
@@ -129,10 +123,8 @@ public class ItemServiceTest {
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
         when(itemRepository.save(any(Item.class))).thenReturn(item);
 
-        // Act
         Item updatedItem = itemService.updateItemQuantity(1L, itemRequest);
 
-        // Assert
         assertNotNull(updatedItem);
         assertEquals(20, updatedItem.getQuantity());
         verify(itemRepository).findById(1L);
@@ -141,27 +133,21 @@ public class ItemServiceTest {
 
     @Test
     void shouldThrowIllegalArgumentExceptionWhenItemNotFoundOnUpdate() {
-        // Arrange
         ItemRequest itemRequest = new ItemRequest();
         when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThrows(IllegalArgumentException.class, () -> itemService.updateItemQuantity(1L, itemRequest));
     }
 
     @Test
     void shouldDeleteItemSuccessfully() {
-        // Arrange
-        User user = new User();
         user.setEmail("test@example.com");
 
         when(userDetails.getUsername()).thenReturn("test@example.com");
         when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(user));
 
-        // Act
         itemService.deleteItem(1L);
 
-        // Assert
         verify(itemRepository).deleteById(1L);
     }
 
@@ -169,6 +155,6 @@ public class ItemServiceTest {
     void shouldThrowSecurityExceptionWhenUserNotAuthenticatedOnDelete() {
        when(authentication.isAuthenticated()).thenReturn(false);
 
-        assertThrows(SecurityException.class, () -> itemService.deleteItem(1L));
+       assertThrows(SecurityException.class, () -> itemService.deleteItem(1L));
     }
 }
