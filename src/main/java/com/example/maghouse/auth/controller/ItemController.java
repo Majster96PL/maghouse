@@ -15,6 +15,7 @@ public class ItemController {
 
     private final ItemService itemService;
 
+    @PostMapping("/create")
     public ResponseEntity<Item> create(@RequestBody ItemRequest itemRequest) {
         Item item = itemService.createItem(itemRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(item);
