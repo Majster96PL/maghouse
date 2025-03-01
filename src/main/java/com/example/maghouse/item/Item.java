@@ -6,6 +6,7 @@ import com.example.maghouse.warehouse.Warehouse;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,8 +33,7 @@ public class Item {
     @Size(max = 50)
     @NotBlank(message = "Code required!")
     private String itemCode;
-    @Size(max = 10)
-    @NotBlank(message = "Quantity required!")
+    @NotNull(message = "Quantity required!")
     private int quantity;
     @Size(max = 50)
     private String locationCode;
