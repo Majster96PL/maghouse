@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -23,8 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -132,6 +130,15 @@ public class WarehouseServiceTest {
         verify(warehouseRepository, times(1)).save(any(Warehouse.class));
         verify(warehouseResponseToWarehouseMapper, times(1)).mapToEntity(any(WarehouseResponse.class));
 
+    }
+
+    @Test
+    void shouldThrowSecurityExceptionWhenUserIsNotAuthenticated(){
+        when(authentication.isAuthenticated()).thenReturn(false);
+
+        WarehouseRequest warehouseRequest = new WarehouseRequest();
+
+        assertThrows(SecurityException.class, () -> warehouseService.createWarehouse(warehouseRequest));
     }
 
 }
