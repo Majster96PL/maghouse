@@ -56,10 +56,14 @@ public class WarehouseService {
         var user = userRepository.findUserByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("User with email not found!"));
 
-        String locationPrefix = generateLocationPrefix(warehouseLocationRequest.getWarehouseLocation());
-
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found!"));
+
+        Warehouse warehouse = warehouseRepository.findByWarehouseLocation(warehouseLocationRequest.getWarehouseLocation())
+                .orElseThrow(() -> new IllegalArgumentException("Warehouse not found!"));
+
+        String locationPrefix = generateLocationPrefix(warehouseLocationRequest.getWarehouseLocation());
+
 
         String newLocation = locationPrefix + item.getLocationCode();
         item.setLocationCode(newLocation);

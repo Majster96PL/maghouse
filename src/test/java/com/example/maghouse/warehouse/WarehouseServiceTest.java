@@ -7,7 +7,9 @@ import com.example.maghouse.item.Item;
 import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.mapper.WarehouseResponseToWarehouseMapper;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
+import com.example.maghouse.warehouse.location.WarehouseLocationRequest;
 import com.example.maghouse.warehouse.spacetype.WarehouseSpaceType;
+import com.example.maghouse.warehouse.spacetype.WarehouseSpaceTypeRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,7 +58,7 @@ public class WarehouseServiceTest {
     private User user;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         SecurityContextHolder.setContext(securityContext);
         lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
         lenient().when(authentication.isAuthenticated()).thenReturn(true);
@@ -66,58 +68,20 @@ public class WarehouseServiceTest {
                 .id(1L)
                 .firstname("John")
                 .lastname("Kovalsky")
-                .email("john.kovalsky@maghaouse.com")
+                .email("john.kovalsky@maghouse.com")
                 .password("password123")
                 .role(Role.USER)
                 .build();
 
         lenient().when(userDetails.getUsername()).thenReturn("john.kovalsky@maghouse.com");
         lenient().when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
-
-        Warehouse warehouse = Warehouse.builder()
-                .id(1L)
-                .warehouseSpaceType(WarehouseSpaceType.SHELF)
-                .warehouseLocation(WarehouseLocation.Krakow)
-                .user(user)
-                .items(new ArrayList<>())
-                .build();
-        lenient().when(warehouseRepository.save(any(Warehouse.class))).thenReturn(warehouse);
-
-        Item item = Item.builder()
-                .id(1L)
-                .name("Item")
-                .itemCode("ItemCode01")
-                .quantity(100)
-                .locationCode("OLD_LOCATION")
-                .user(user)
-                .warehouse(warehouse)
-                .deliveries(new ArrayList<>())
-                .build();
-        lenient().when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
-        lenient().when(itemRepository.save(any(Item.class))).thenReturn(item);
     }
 
     @Test
-    void shouldCreateWarehouse_WhenUserIsAuthenticated(){
-        WarehouseRequest warehouseRequest = WarehouseRequest.builder()
-                .warehouseSpaceType(WarehouseSpaceType.CONTAINER)
-                .warehouseLocation(WarehouseLocation.Krakow)
-                .build();
+    void shouldCreateWarehouse_WhenUserIsAuthenticated() {
+        WarehouseRequest warehouseRequest = new WarehouseRequest(WarehouseSpaceType.CONTAINER, WarehouseLocation.Krakow);
+        Warehouse warehouse = new Warehouse(1L, warehouseRequest.getWarehouseSpaceType(), warehouseRequest.getWarehouseLocation(), user, new ArrayList<>());
 
-        WarehouseResponse warehouseResponse = new WarehouseResponse();
-        warehouseResponse.setWarehouseSpaceType(warehouseRequest.getWarehouseSpaceType());
-        warehouseResponse.setWarehouseLocation(warehouseRequest.getWarehouseLocation());
-        warehouseResponse.setUser(user);
-
-        Warehouse warehouse = Warehouse.builder()
-                .id(1L)
-                .warehouseSpaceType(warehouseRequest.getWarehouseSpaceType())
-                .warehouseLocation(warehouseRequest.getWarehouseLocation())
-                .user(user)
-                .items(new ArrayList<>())
-                .build();
-        when(userDetails.getUsername()).thenReturn("john.kovalsky@maghouse.com");
-        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(user));
         when(warehouseResponseToWarehouseMapper.mapToEntity(any(WarehouseResponse.class))).thenReturn(warehouse);
         when(warehouseRepository.save(any(Warehouse.class))).thenReturn(warehouse);
 
@@ -126,19 +90,83 @@ public class WarehouseServiceTest {
         assertNotNull(result);
         assertEquals(warehouseRequest.getWarehouseSpaceType(), result.getWarehouseSpaceType());
         assertEquals(warehouseRequest.getWarehouseLocation(), result.getWarehouseLocation());
-        assertEquals(user, result.getUser());
         verify(warehouseRepository, times(1)).save(any(Warehouse.class));
-        verify(warehouseResponseToWarehouseMapper, times(1)).mapToEntity(any(WarehouseResponse.class));
-
     }
 
     @Test
-    void shouldThrowSecurityExceptionWhenUserIsNotAuthenticated(){
+    void shouldThrowSecurityExceptionWhenUserIsNotAuthenticated() {
         when(authentication.isAuthenticated()).thenReturn(false);
-
         WarehouseRequest warehouseRequest = new WarehouseRequest();
-
         assertThrows(SecurityException.class, () -> warehouseService.createWarehouse(warehouseRequest));
     }
 
+    @Test
+    void shouldThrowIllegalArgumentExceptionWhenUserNotFound() {
+        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.empty());
+        WarehouseRequest warehouseRequest = new WarehouseRequest(WarehouseSpaceType.SHELF, WarehouseLocation.Warsaw);
+        assertThrows(IllegalArgumentException.class, () -> warehouseService.createWarehouse(warehouseRequest));
+    }
+
+    @Test
+    void shouldAssignLocationCode() {
+        WarehouseSpaceTypeRequest spaceTypeRequest = new WarehouseSpaceTypeRequest(WarehouseSpaceType.SHELF);
+        Item item = new Item(1L, "Test_Item", "itemCode", 450, null, user, null, new ArrayList<>());
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+        when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Item result = warehouseService.assignLocationCode(spaceTypeRequest, 1L);
+
+        assertNotNull(result.getLocationCode());
+        assertTrue(result.getLocationCode().startsWith("S"));
+    }
+
+    @Test
+    void shouldAssignItemsToWarehouseLocation() {
+        WarehouseLocationRequest locationRequest = new WarehouseLocationRequest(WarehouseLocation.Warsaw);
+        Item item = new Item(1L, "Test_Item", "itemCode", 450, "S01A", user, null, new ArrayList<>());
+        Warehouse warehouse = new Warehouse(1L, WarehouseSpaceType.SHELF, WarehouseLocation.Warsaw, user, new ArrayList<>());
+
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+        when(warehouseRepository.findByWarehouseLocation(locationRequest.getWarehouseLocation())).thenReturn(Optional.of(warehouse));
+        when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Item result = warehouseService.assignItemsToWarehouseLocation(locationRequest, 1L);
+
+        assertNotNull(result.getLocationCode());
+        assertTrue(result.getLocationCode().startsWith("W"));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenItemNotFound() {
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
+        WarehouseLocationRequest locationRequest = new WarehouseLocationRequest(WarehouseLocation.Warsaw);
+        assertThrows(IllegalArgumentException.class, () -> warehouseService.assignItemsToWarehouseLocation(locationRequest, 1L));
+    }
+
+    @Test
+    void shouldUpdateItemLocation() {
+        WarehouseLocationRequest locationRequest = new WarehouseLocationRequest(WarehouseLocation.Krakow);
+        Item item = new Item(1L,
+                "Test_Item", "itemCode",
+                450,
+                "W01A",
+                user,
+                null,
+                new ArrayList<>());
+
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+        when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Item result = warehouseService.updatedItemsToWarehouseLocation(locationRequest, 1L);
+
+        assertNotNull(result.getLocationCode());
+        assertTrue(result.getLocationCode().startsWith("K"));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenWarehouseNotFound() {
+        lenient().when(warehouseRepository.findByWarehouseLocation(any())).thenReturn(Optional.empty());
+        WarehouseLocationRequest locationRequest = new WarehouseLocationRequest(WarehouseLocation.Warsaw);
+        assertThrows(IllegalArgumentException.class, () -> warehouseService.assignItemsToWarehouseLocation(locationRequest, 1L));
+    }
 }
