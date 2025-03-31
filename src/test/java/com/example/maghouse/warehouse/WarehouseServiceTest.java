@@ -149,7 +149,7 @@ public class WarehouseServiceTest {
         Item item = new Item(1L,
                 "Test_Item", "itemCode",
                 450,
-                "W01A",
+                "WS01A",
                 user,
                 null,
                 new ArrayList<>());
