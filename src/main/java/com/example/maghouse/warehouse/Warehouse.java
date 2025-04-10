@@ -5,7 +5,7 @@ import com.example.maghouse.item.Item;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
 import com.example.maghouse.warehouse.spacetype.WarehouseSpaceType;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,10 +24,10 @@ public class Warehouse {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotBlank(message = "Type required!")
+    @NotNull(message = "Type required!")
     @Enumerated(EnumType.STRING)
     private WarehouseSpaceType warehouseSpaceType;
-    @NotBlank(message = "Location required!")
+    @NotNull(message = "Location required!")
     @Enumerated(EnumType.STRING)
     private WarehouseLocation warehouseLocation;
     @ManyToOne
