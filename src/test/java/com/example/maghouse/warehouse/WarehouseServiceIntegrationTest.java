@@ -3,9 +3,13 @@ package com.example.maghouse.warehouse;
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
+import com.example.maghouse.item.Item;
+import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.security.PasswordEncoder;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
+import com.example.maghouse.warehouse.location.WarehouseLocationRequest;
 import com.example.maghouse.warehouse.spacetype.WarehouseSpaceType;
+import com.example.maghouse.warehouse.spacetype.WarehouseSpaceTypeRequest;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,8 +23,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.ArrayList;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestPropertySource("classpath:application-test.yml")
@@ -43,6 +49,9 @@ public class WarehouseServiceIntegrationTest {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private ItemRepository itemRepository;
 
     private User user;
 
@@ -74,6 +83,31 @@ public class WarehouseServiceIntegrationTest {
         userRepository.save(user);
     }
 
+    private Item createAndSaveTestItem(){
+        Item item = Item.builder()
+                .id(1L)
+                .name("Test Name")
+                .itemCode("WS01A")
+                .quantity(10)
+                .user(user)
+                .warehouse(null)
+                .build();
+
+        return itemRepository.save(item);
+    }
+
+    private Warehouse createAndSaveTestWarehouse(){
+        Warehouse warehouse = Warehouse.builder()
+                .id(1L)
+                .warehouseSpaceType(WarehouseSpaceType.SHELF)
+                .warehouseLocation(WarehouseLocation.Warsaw)
+                .user(user)
+                .items(new ArrayList<>())
+                .build();
+
+        return warehouseRepository.save(warehouse);
+    }
+
     @Test
     void shouldCreateWarehousePersistInDatabase(){
         WarehouseRequest request = new WarehouseRequest();
@@ -84,5 +118,26 @@ public class WarehouseServiceIntegrationTest {
 
         assertNotNull(result.getId());
         assertEquals(1, warehouseRepository.count());
+    }
+
+    @Test
+    void shouldAssignCorrectLocation(){
+        Item item = createAndSaveTestItem();
+        Warehouse warehouse = createAndSaveTestWarehouse();
+
+        WarehouseSpaceTypeRequest warehouseSpaceTypeRequest =
+                new WarehouseSpaceTypeRequest(WarehouseSpaceType.SHELF);
+
+        Item itemWithSpaceType = warehouseService.assignLocationCode(warehouseSpaceTypeRequest, 1L);
+
+        WarehouseLocationRequest locationRequest =
+                new WarehouseLocationRequest(WarehouseLocation.Warsaw);
+
+        Item assignResultItem = warehouseService.assignItemsToWarehouseLocation(locationRequest, 1L);
+
+        assertNotNull(assignResultItem);
+        assertTrue(assignResultItem.getLocationCode().matches("^WS\\d{2}[A-C]$"));
+        assertEquals(user, assignResultItem.getUser());
+        assertEquals(warehouse, assignResultItem.getWarehouse());
     }
 }

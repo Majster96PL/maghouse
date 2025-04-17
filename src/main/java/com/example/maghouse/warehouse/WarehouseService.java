@@ -68,6 +68,7 @@ public class WarehouseService {
         String newLocation = locationPrefix + item.getLocationCode();
         item.setLocationCode(newLocation);
         item.setUser(user);
+        item.setWarehouse(warehouse);
         itemRepository.save(item);
 
         return item;
