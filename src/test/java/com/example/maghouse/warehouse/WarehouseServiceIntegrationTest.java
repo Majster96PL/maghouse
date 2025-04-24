@@ -11,6 +11,7 @@ import com.example.maghouse.warehouse.location.WarehouseLocationRequest;
 import com.example.maghouse.warehouse.spacetype.WarehouseSpaceType;
 import com.example.maghouse.warehouse.spacetype.WarehouseSpaceTypeRequest;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,11 @@ public class WarehouseServiceIntegrationTest {
         authenticateTestUser();
     }
 
+    @AfterEach
+    void tearDown(){
+        SecurityContextHolder.clearContext();
+    }
+
     private void authenticateTestUser() {
         user = userRepository.findUserByEmail(user.getEmail())
                    .orElseThrow(() -> new RuntimeException("User not found!"));
@@ -87,7 +93,7 @@ public class WarehouseServiceIntegrationTest {
         Item item = Item.builder()
                 .id(1L)
                 .name("Test Name")
-                .itemCode("WS01A")
+                .itemCode("TEST123")
                 .quantity(10)
                 .user(user)
                 .warehouse(null)
@@ -139,5 +145,34 @@ public class WarehouseServiceIntegrationTest {
         assertTrue(assignResultItem.getLocationCode().matches("^WS\\d{2}[A-C]$"));
         assertEquals(user, assignResultItem.getUser());
         assertEquals(warehouse, assignResultItem.getWarehouse());
+    }
+
+    @Test
+    void shouldThrowWhenUserNotAuthenticated(){
+        WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(WarehouseLocation.Krakow);
+
+        SecurityContextHolder.getContext().setAuthentication(null);
+
+        assertThrows(SecurityException.class,
+                () -> warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, 1L)
+        );
+    }
+
+    @Test
+    void shouldUpdateLocationPrefix(){
+        Warehouse warehouse = createAndSaveTestWarehouse();
+
+        Item item = createAndSaveTestItem();
+
+        WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(WarehouseLocation.Krakow);
+
+//        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+
+        Item result = warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, item.getId());
+
+        assertNotNull(result);
+        assertTrue(result.getLocationCode().matches("^KS\\d{2}[A-C]$"));
+        assertEquals(user, result.getUser());
+        assertEquals(warehouse, result.getWarehouse());
     }
 }
