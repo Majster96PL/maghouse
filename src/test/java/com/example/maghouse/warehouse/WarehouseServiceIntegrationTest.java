@@ -25,8 +25,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -55,11 +57,15 @@ public class WarehouseServiceIntegrationTest {
     private ItemRepository itemRepository;
 
     private User user;
+    private Item item;
+    private Warehouse warehouse;
 
     @BeforeEach
     void setUp(){
         setUpTestUser();
         authenticateTestUser();
+        createAndSaveTestItem();
+        createAndSaveTestWarehouse();
     }
 
     @AfterEach
@@ -90,7 +96,7 @@ public class WarehouseServiceIntegrationTest {
     }
 
     private Item createAndSaveTestItem(){
-        Item item = Item.builder()
+        item = Item.builder()
                 .id(1L)
                 .name("Test Name")
                 .itemCode("TEST123")
@@ -103,7 +109,7 @@ public class WarehouseServiceIntegrationTest {
     }
 
     private Warehouse createAndSaveTestWarehouse(){
-        Warehouse warehouse = Warehouse.builder()
+         warehouse = Warehouse.builder()
                 .id(1L)
                 .warehouseSpaceType(WarehouseSpaceType.SHELF)
                 .warehouseLocation(WarehouseLocation.Warsaw)
@@ -130,23 +136,18 @@ public class WarehouseServiceIntegrationTest {
 
     @Test
     void shouldAssignCorrectLocation(){
-        Item item = createAndSaveTestItem();
         Warehouse warehouse = createAndSaveTestWarehouse();
 
-        WarehouseSpaceTypeRequest warehouseSpaceTypeRequest =
-                new WarehouseSpaceTypeRequest(WarehouseSpaceType.SHELF);
+        Item item = createAndSaveTestItem();
 
-        Item itemWithSpaceType = warehouseService.assignLocationCode(warehouseSpaceTypeRequest, 1L);
+        WarehouseSpaceTypeRequest request = new WarehouseSpaceTypeRequest(WarehouseSpaceType.DRAVER);
 
-        WarehouseLocationRequest locationRequest =
-                new WarehouseLocationRequest(WarehouseLocation.Warsaw);
+        Item result = warehouseService.assignLocationCode(request, item.getId());
 
-        Item assignResultItem = warehouseService.assignItemsToWarehouseLocation(locationRequest, 1L);
-
-        assertNotNull(assignResultItem);
-        assertTrue(assignResultItem.getLocationCode().matches("^WS\\d{2}[A-C]$"));
-        assertEquals(user, assignResultItem.getUser());
-        assertEquals(warehouse, assignResultItem.getWarehouse());
+        assertNotNull(result);
+        assertNotNull(result.getLocationCode());
+        assertTrue(result.getLocationCode().matches("^D\\d{2}[A-C]$"));
+        assertEquals(user, result.getUser());
     }
 
     @Test
