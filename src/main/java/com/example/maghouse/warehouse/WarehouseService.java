@@ -87,6 +87,9 @@ public class WarehouseService {
                 .orElseThrow( () -> new IllegalArgumentException("Item not found!"));
 
         String currentLocation = item.getLocationCode();
+        if (currentLocation == null || currentLocation.length() <= 1) {
+            throw new IllegalStateException("Item location code is invalid or too short for update");
+        }
         String restOfString = currentLocation.substring(1);
         String newPrefix = generateLocationPrefix(warehouseLocationRequest.getWarehouseLocation());
         String newLocation = newPrefix + restOfString;
