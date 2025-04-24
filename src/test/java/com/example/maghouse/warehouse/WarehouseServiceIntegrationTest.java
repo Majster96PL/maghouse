@@ -123,7 +123,9 @@ public class WarehouseServiceIntegrationTest {
         Warehouse result = warehouseService.createWarehouse(request);
 
         assertNotNull(result.getId());
-        assertEquals(1, warehouseRepository.count());
+        assertEquals(WarehouseSpaceType.SHELF, result.getWarehouseSpaceType());
+        assertEquals(WarehouseLocation.Rzeszow, result.getWarehouseLocation());
+        assertEquals(user, result.getUser());
     }
 
     @Test
