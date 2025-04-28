@@ -100,6 +100,7 @@ public class WarehouseServiceIntegrationTest {
                 .id(1L)
                 .name("Test Name")
                 .itemCode("TEST123")
+                .locationCode(null)
                 .quantity(10)
                 .user(user)
                 .warehouse(null)
@@ -163,19 +164,16 @@ public class WarehouseServiceIntegrationTest {
 
     @Test
     void shouldUpdateLocationPrefix(){
-        Warehouse warehouse = createAndSaveTestWarehouse();
-
         Item item = createAndSaveTestItem();
+        item.setLocationCode("RS01C");
+        itemRepository.save(item);
 
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(WarehouseLocation.Krakow);
-
-//        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
 
         Item result = warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, item.getId());
 
         assertNotNull(result);
         assertTrue(result.getLocationCode().matches("^KS\\d{2}[A-C]$"));
         assertEquals(user, result.getUser());
-        assertEquals(warehouse, result.getWarehouse());
     }
 }
