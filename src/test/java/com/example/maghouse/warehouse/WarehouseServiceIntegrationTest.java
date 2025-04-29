@@ -165,6 +165,22 @@ public class WarehouseServiceIntegrationTest {
     }
 
     @Test
+    void shouldAssignItemsToWarehouseLocation(){
+        Warehouse warehouse = createAndSaveTestWarehouse();
+
+        Item item = createAndSaveTestItem();
+        item.setLocationCode("S02B");
+        itemRepository.save(item);
+
+        WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(WarehouseLocation.Warsaw);
+
+        Item result = warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId());
+
+        assertEquals("KS02B", result.getLocationCode());
+        assertEquals(warehouse, result.getWarehouse());
+    }
+
+    @Test
     void shouldThrowAllWhenUserNotAuthenticated(){
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(WarehouseLocation.Krakow);
 
