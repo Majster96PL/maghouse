@@ -25,10 +25,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -152,17 +150,6 @@ public class WarehouseServiceIntegrationTest {
     }
 
     @Test
-    void shouldThrowWhenUserNotAuthenticated(){
-        WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(WarehouseLocation.Krakow);
-
-        SecurityContextHolder.getContext().setAuthentication(null);
-
-        assertThrows(SecurityException.class,
-                () -> warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, 1L)
-        );
-    }
-
-    @Test
     void shouldUpdateLocationPrefix(){
         Item item = createAndSaveTestItem();
         item.setLocationCode("RS01C");
@@ -175,5 +162,20 @@ public class WarehouseServiceIntegrationTest {
         assertNotNull(result);
         assertTrue(result.getLocationCode().matches("^KS\\d{2}[A-C]$"));
         assertEquals(user, result.getUser());
+    }
+
+    @Test
+    void shouldThrowAllWhenUserNotAuthenticated(){
+        WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(WarehouseLocation.Krakow);
+
+        SecurityContextHolder.getContext().setAuthentication(null);
+
+        assertThrows(SecurityException.class,
+                () -> warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, 1L)
+        );
+
+        assertThrows(SecurityException.class,
+                () -> warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, 1L)
+        );
     }
 }
