@@ -59,7 +59,7 @@ public class WarehouseService {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found!"));
 
-        Warehouse warehouse = warehouseRepository.findByWarehouseLocation(warehouseLocationRequest.getWarehouseLocation())
+        Warehouse warehouse = warehouseRepository.findFirstByWarehouseLocation(warehouseLocationRequest.getWarehouseLocation())
                 .orElseThrow(() -> new IllegalArgumentException("Warehouse not found!"));
 
         String locationPrefix = generateLocationPrefix(warehouseLocationRequest.getWarehouseLocation());

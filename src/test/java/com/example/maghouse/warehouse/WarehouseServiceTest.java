@@ -127,7 +127,7 @@ public class WarehouseServiceTest {
         Warehouse warehouse = new Warehouse(1L, WarehouseSpaceType.SHELF, WarehouseLocation.Warsaw, user, new ArrayList<>());
 
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
-        when(warehouseRepository.findByWarehouseLocation(locationRequest.getWarehouseLocation())).thenReturn(Optional.of(warehouse));
+        when(warehouseRepository.findFirstByWarehouseLocation(locationRequest.getWarehouseLocation())).thenReturn(Optional.of(warehouse));
         when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Item result = warehouseService.assignItemsToWarehouseLocation(locationRequest, 1L);
@@ -165,7 +165,7 @@ public class WarehouseServiceTest {
 
     @Test
     void shouldThrowExceptionWhenWarehouseNotFound() {
-        lenient().when(warehouseRepository.findByWarehouseLocation(any())).thenReturn(Optional.empty());
+        lenient().when(warehouseRepository.findFirstByWarehouseLocation(any())).thenReturn(Optional.empty());
         WarehouseLocationRequest locationRequest = new WarehouseLocationRequest(WarehouseLocation.Warsaw);
         assertThrows(IllegalArgumentException.class, () -> warehouseService.assignItemsToWarehouseLocation(locationRequest, 1L));
     }

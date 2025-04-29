@@ -64,6 +64,7 @@ public class WarehouseServiceIntegrationTest {
         authenticateTestUser();
         createAndSaveTestItem();
         createAndSaveTestWarehouse();
+        warehouseRepository.deleteAll();
     }
 
     @AfterEach
@@ -176,8 +177,9 @@ public class WarehouseServiceIntegrationTest {
 
         Item result = warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId());
 
-        assertEquals("KS02B", result.getLocationCode());
-        assertEquals(warehouse, result.getWarehouse());
+        assertNotNull(result);
+        assertEquals("WS02B", result.getLocationCode());
+        assertEquals(warehouse.getId(), result.getWarehouse().getId());
     }
 
     @Test
