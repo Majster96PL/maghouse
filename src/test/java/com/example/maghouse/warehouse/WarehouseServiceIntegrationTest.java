@@ -185,8 +185,14 @@ public class WarehouseServiceIntegrationTest {
     @Test
     void shouldThrowAllWhenUserNotAuthenticated(){
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(WarehouseLocation.Krakow);
+        WarehouseSpaceTypeRequest warehouseSpaceTypeRequest = new WarehouseSpaceTypeRequest(WarehouseSpaceType.DRAVER);
+        WarehouseRequest warehouseRequest = new WarehouseRequest();
 
         SecurityContextHolder.getContext().setAuthentication(null);
+
+        assertThrows(SecurityException.class,
+                () -> warehouseService.createWarehouse(warehouseRequest)
+        );
 
         assertThrows(SecurityException.class,
                 () -> warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, 1L)
@@ -194,6 +200,10 @@ public class WarehouseServiceIntegrationTest {
 
         assertThrows(SecurityException.class,
                 () -> warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, 1L)
+        );
+
+        assertThrows(SecurityException.class,
+                () -> warehouseService.assignLocationCode(warehouseSpaceTypeRequest, 1L)
         );
     }
 }
