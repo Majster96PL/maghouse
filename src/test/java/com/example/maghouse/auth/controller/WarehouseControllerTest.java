@@ -8,6 +8,7 @@ import com.example.maghouse.warehouse.Warehouse;
 import com.example.maghouse.warehouse.WarehouseRequest;
 import com.example.maghouse.warehouse.WarehouseService;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
+import com.example.maghouse.warehouse.location.WarehouseLocationRequest;
 import com.example.maghouse.warehouse.spacetype.WarehouseSpaceType;
 import com.example.maghouse.warehouse.spacetype.WarehouseSpaceTypeRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +21,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -146,7 +148,41 @@ public class WarehouseControllerTest {
         verify(warehouseService).assignLocationCode(warehouseSpaceTypeRequest, id);
     }
 
+    @Test
+    void shouldAssignWarehouseLocationToItem() {
+        WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(
+                WarehouseLocation.Rzeszow
+        );
 
+        Item item = Item.builder()
+                .id(1L)
+                .name("ItemName")
+                .itemCode("itemCode")
+                .locationCode("RS05B")
+                .user(user)
+                .deliveries(null)
+                .build();
 
+        Warehouse warehouse = Warehouse.builder()
+                .id(1L)
+                .warehouseSpaceType(WarehouseSpaceType.SHELF)
+                .warehouseLocation(WarehouseLocation.Rzeszow)
+                .user(user)
+                .items(List.of(item))
+                .build();
+
+        when(warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId()))
+                .thenReturn(item);
+
+        item.setWarehouse(warehouse);
+
+        Item result = warehouseController.assignWarehouseLocation(warehouseLocationRequest, item.getId());
+
+        assertEquals(item.getId(), result.getId());
+        assertEquals("RS05B", result.getLocationCode());
+        assertEquals(warehouse.getId(), result.getWarehouse().getId());
+        verify(warehouseService).assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId());
+
+    }
 }
 
