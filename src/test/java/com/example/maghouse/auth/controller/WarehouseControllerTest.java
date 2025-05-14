@@ -184,5 +184,19 @@ public class WarehouseControllerTest {
         verify(warehouseService).assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId());
 
     }
+
+    @Test
+    void shouldThrowExceptionWhenAssignWarehouseLocationFails(){
+        Long id = 100L;
+
+        WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest();
+
+        when(warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, id))
+                .thenThrow(new IllegalArgumentException("Warehouse not found!!"));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> warehouseController.assignWarehouseLocation(warehouseLocationRequest, id));
+        verify(warehouseService).assignItemsToWarehouseLocation(warehouseLocationRequest, id);
+    }
 }
 
