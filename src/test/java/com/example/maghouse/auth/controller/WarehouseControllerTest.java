@@ -103,6 +103,7 @@ public class WarehouseControllerTest {
 
         assertThrows(RuntimeException.class, () -> warehouseController.create(warehouseRequest));
         verify(warehouseService).createWarehouse(warehouseRequest);
+
     }
 
 
@@ -130,6 +131,21 @@ public class WarehouseControllerTest {
         assertEquals("S05B", result.getLocationCode());
         verify(warehouseService).assignLocationCode(warehouseSpaceTypeRequest, item.getId());
     }
+
+    @Test
+    void shouldThrowExceptionWhenAssignSpaceTypeFails(){
+        Long id = 99L;
+
+        WarehouseSpaceTypeRequest warehouseSpaceTypeRequest = new WarehouseSpaceTypeRequest();
+
+        when(warehouseService.assignLocationCode(warehouseSpaceTypeRequest, id))
+                .thenThrow(new IllegalArgumentException("Item not found!"));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> warehouseController.assignSpaceType(id, warehouseSpaceTypeRequest));
+        verify(warehouseService).assignLocationCode(warehouseSpaceTypeRequest, id);
+    }
+
 
 
 }
