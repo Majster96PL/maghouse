@@ -3,11 +3,13 @@ package com.example.maghouse.auth.controller;
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
+import com.example.maghouse.item.Item;
 import com.example.maghouse.warehouse.Warehouse;
 import com.example.maghouse.warehouse.WarehouseRequest;
 import com.example.maghouse.warehouse.WarehouseService;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
 import com.example.maghouse.warehouse.spacetype.WarehouseSpaceType;
+import com.example.maghouse.warehouse.spacetype.WarehouseSpaceTypeRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -89,6 +91,32 @@ public class WarehouseControllerTest {
         assertEquals(user, result.getUser());
         verify(warehouseService).createWarehouse(request);
 
+    }
+
+
+    @Test
+    void shouldAssignSpaceTypeToItem(){
+        WarehouseSpaceTypeRequest warehouseSpaceTypeRequest = new WarehouseSpaceTypeRequest(
+                WarehouseSpaceType.SHELF
+        );
+
+        Item item = Item.builder()
+                .id(1L)
+                .name("ItemName")
+                .itemCode("itemCode")
+                .locationCode("S05B")
+                .user(user)
+                .deliveries(null)
+                .build();
+
+        when(warehouseService.assignLocationCode(warehouseSpaceTypeRequest, item.getId()))
+                .thenReturn(item);
+
+        Item result = warehouseController.assignSpaceType(item.getId(), warehouseSpaceTypeRequest);
+
+        assertEquals(1L, item.getId());
+        assertEquals("S05B", result.getLocationCode());
+        verify(warehouseService).assignLocationCode(warehouseSpaceTypeRequest, item.getId());
     }
 }
 
