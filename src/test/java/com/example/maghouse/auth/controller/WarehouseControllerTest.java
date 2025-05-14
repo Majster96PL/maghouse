@@ -23,6 +23,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class WarehouseControllerTest {
@@ -93,6 +94,17 @@ public class WarehouseControllerTest {
 
     }
 
+    @Test
+    void shouldThrowExceptionWhenCreateWarehouseFails(){
+        WarehouseRequest warehouseRequest = new WarehouseRequest();
+
+        when(warehouseService.createWarehouse(warehouseRequest))
+                .thenThrow(new RuntimeException("Request not found!"));
+
+        assertThrows(RuntimeException.class, () -> warehouseController.create(warehouseRequest));
+        verify(warehouseService).createWarehouse(warehouseRequest);
+    }
+
 
     @Test
     void shouldAssignSpaceTypeToItem(){
@@ -118,5 +130,7 @@ public class WarehouseControllerTest {
         assertEquals("S05B", result.getLocationCode());
         verify(warehouseService).assignLocationCode(warehouseSpaceTypeRequest, item.getId());
     }
+
+
 }
 
