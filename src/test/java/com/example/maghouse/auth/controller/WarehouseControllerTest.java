@@ -234,5 +234,19 @@ public class WarehouseControllerTest {
         verify(warehouseService).updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId);
 
     }
+
+    @Test
+    void shouldThrowExceptionWhenUpdateWarehouseLocationFails(){
+        Long id = 404L;
+
+        WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest();
+
+        when(warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, id))
+                .thenThrow(new RuntimeException("Update failed!!"));
+
+        assertThrows(RuntimeException.class, () -> warehouseController.updateWarehouseLocation(warehouseLocationRequest, id));
+        verify(warehouseService).updatedItemsToWarehouseLocation(warehouseLocationRequest, id);
+
+    }
 }
 
