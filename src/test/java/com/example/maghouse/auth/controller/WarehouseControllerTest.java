@@ -198,5 +198,41 @@ public class WarehouseControllerTest {
                 () -> warehouseController.assignWarehouseLocation(warehouseLocationRequest, id));
         verify(warehouseService).assignItemsToWarehouseLocation(warehouseLocationRequest, id);
     }
+
+    @Test
+    void shouldUpdateWarehouseLocation(){
+        Long itemId = 1L;
+
+        WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(
+                WarehouseLocation.Warsaw
+        );
+
+        Item updatedItem = Item.builder()
+                .id(1L)
+                .name("ItemName")
+                .itemCode("itemCode")
+                .locationCode("WS05B")
+                .user(user)
+                .deliveries(null)
+                .build();
+
+        Warehouse warehouse = Warehouse.builder()
+                .id(2L)
+                .warehouseSpaceType(WarehouseSpaceType.SHELF)
+                .warehouseLocation(WarehouseLocation.Warsaw)
+                .user(user)
+                .items(List.of(updatedItem))
+                .build();
+
+        when(warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId))
+                .thenReturn(updatedItem);
+
+        Item result = warehouseController.updateWarehouseLocation(warehouseLocationRequest, itemId);
+
+        assertEquals(itemId, result.getId());
+        assertEquals("WS05B", result.getLocationCode());
+        verify(warehouseService).updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId);
+
+    }
 }
 
