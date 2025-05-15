@@ -215,7 +215,7 @@ public class WarehouseControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(warehouseLocationRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.location").exists());
+                .andExpect(jsonPath("$.locationCode").exists());
 
 
     }
