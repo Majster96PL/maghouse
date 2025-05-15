@@ -9,11 +9,14 @@ import com.example.maghouse.security.PasswordEncoder;
 import com.example.maghouse.warehouse.Warehouse;
 import com.example.maghouse.warehouse.WarehouseRepository;
 import com.example.maghouse.warehouse.WarehouseRequest;
+import com.example.maghouse.warehouse.WarehouseService;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
+import com.example.maghouse.warehouse.location.WarehouseLocationRequest;
 import com.example.maghouse.warehouse.spacetype.WarehouseSpaceType;
 import com.example.maghouse.warehouse.spacetype.WarehouseSpaceTypeRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -53,6 +56,9 @@ public class WarehouseControllerIntegrationTest {
     private AuthenticationManager authenticationManager;
 
     @Autowired
+    private WarehouseService warehouseService;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -65,6 +71,7 @@ public class WarehouseControllerIntegrationTest {
     private WarehouseRepository warehouseRepository;
 
     private User user;
+    private Item item;
     private Warehouse warehouse;
 
 
@@ -75,6 +82,11 @@ public class WarehouseControllerIntegrationTest {
         createAndSaveTestItem();
         authenticateTestUser();
         warehouseRepository.deleteAll();
+    }
+
+    @AfterEach
+    void tearDown(){
+        SecurityContextHolder.clearContext();
     }
 
 
@@ -114,9 +126,8 @@ public class WarehouseControllerIntegrationTest {
         return warehouseRepository.save(warehouse);
     }
 
-
     private Item createAndSaveTestItem(){
-        Item item = Item.builder()
+         item = Item.builder()
                 .name("TestName")
                 .itemCode("itemCode")
                 .locationCode(null)
@@ -146,21 +157,38 @@ public class WarehouseControllerIntegrationTest {
 
     @Test
     void shouldAssignWarehouseSpaceTypeToItem() throws Exception {
-        Item result = createAndSaveTestItem();
-        result.setLocationCode("C10C");
-        result.setWarehouse(warehouse);
+        item.setLocationCode("C10C");
+        item.setWarehouse(warehouse);
 
-        itemRepository.save(result);
+        itemRepository.save(item);
 
         WarehouseSpaceTypeRequest warehouseSpaceTypeRequest = new WarehouseSpaceTypeRequest(
                 WarehouseSpaceType.CONTAINER
         );
 
-        mockMvc.perform(post("/auth/warehouse/assign-space-type/" + result.getId())
+        mockMvc.perform(post("/auth/warehouse/assign-space-type/" + item.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(warehouseSpaceTypeRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.locationCode").exists());
 
+    }
+
+    @Test
+    void shouldAssignWarehouseLocationToItem() throws Exception {
+        item.setLocationCode("C10C");
+        item.setWarehouse(warehouse);
+
+        itemRepository.save(item);
+
+        WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(
+                WarehouseLocation.Rzeszow
+        );
+
+        mockMvc.perform(post("/auth/warehouse/assign-location/" + item.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(warehouseLocationRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.locationCode").value("RC10C"));
     }
 }
