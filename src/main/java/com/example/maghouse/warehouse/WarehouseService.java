@@ -46,6 +46,7 @@ public class WarehouseService {
         return warehouseRepository.save(warehouse);
     }
 
+    @Transactional
     public Item assignItemsToWarehouseLocation( WarehouseLocationRequest warehouseLocationRequest, Long itemId){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -56,19 +57,25 @@ public class WarehouseService {
         var user = userRepository.findUserByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("User with email not found!"));
 
-        String locationPrefix = generateLocationPrefix(warehouseLocationRequest.getWarehouseLocation());
+        Warehouse warehouse = warehouseRepository.findFirstByWarehouseLocation(warehouseLocationRequest.getWarehouseLocation())
+                .orElseThrow(() -> new IllegalArgumentException("Warehouse not found!"));
 
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found!"));
 
+        String locationPrefix = generateLocationPrefix(warehouseLocationRequest.getWarehouseLocation());
+
+
         String newLocation = locationPrefix + item.getLocationCode();
         item.setLocationCode(newLocation);
         item.setUser(user);
+        item.setWarehouse(warehouse);
         itemRepository.save(item);
 
         return item;
     }
 
+    @Transactional
     public Item updatedItemsToWarehouseLocation(WarehouseLocationRequest warehouseLocationRequest, Long id){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()){
@@ -82,6 +89,9 @@ public class WarehouseService {
                 .orElseThrow( () -> new IllegalArgumentException("Item not found!"));
 
         String currentLocation = item.getLocationCode();
+        if (currentLocation == null || currentLocation.length() <= 1) {
+            throw new IllegalStateException("Item location code is invalid or too short for update");
+        }
         String restOfString = currentLocation.substring(1);
         String newPrefix = generateLocationPrefix(warehouseLocationRequest.getWarehouseLocation());
         String newLocation = newPrefix + restOfString;

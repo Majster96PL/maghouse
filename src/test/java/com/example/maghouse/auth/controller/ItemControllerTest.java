@@ -43,6 +43,7 @@ public class ItemControllerTest {
                 .name("Test_Item")
                 .itemCode("ITEM_CODE")
                 .locationCode("Location_Code")
+                .quantity(100)
                 .user(user)
                 .warehouse(null)
                 .deliveries(null)
