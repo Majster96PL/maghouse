@@ -11,6 +11,7 @@ import com.example.maghouse.warehouse.WarehouseRepository;
 import com.example.maghouse.warehouse.WarehouseRequest;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
 import com.example.maghouse.warehouse.spacetype.WarehouseSpaceType;
+import com.example.maghouse.warehouse.spacetype.WarehouseSpaceTypeRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -140,6 +141,26 @@ public class WarehouseControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.warehouseSpaceType").value("CONTAINER"));
+
+    }
+
+    @Test
+    void shouldAssignWarehouseSpaceTypeToItem() throws Exception {
+        Item result = createAndSaveTestItem();
+        result.setLocationCode("C10C");
+        result.setWarehouse(warehouse);
+
+        itemRepository.save(result);
+
+        WarehouseSpaceTypeRequest warehouseSpaceTypeRequest = new WarehouseSpaceTypeRequest(
+                WarehouseSpaceType.CONTAINER
+        );
+
+        mockMvc.perform(post("/auth/warehouse/assign-space-type/" + result.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(warehouseSpaceTypeRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.locationCode").exists());
 
     }
 }
