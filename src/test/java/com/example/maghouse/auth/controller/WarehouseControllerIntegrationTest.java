@@ -35,6 +35,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.ArrayList;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -178,8 +179,6 @@ public class WarehouseControllerIntegrationTest {
     void shouldAssignWarehouseLocationToItem() throws Exception {
         item.setLocationCode("S01A");
 
-        itemRepository.save(item);
-
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(
                 WarehouseLocation.Warsaw
         );
@@ -196,5 +195,28 @@ public class WarehouseControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(warehouseLocationRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.locationCode").exists());
+    }
+
+    @Test
+    void shouldUpdateWarehouseLocation() throws Exception {
+        item.setLocationCode("WS01A");
+
+        WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(
+                WarehouseLocation.Rzeszow
+        );
+
+        String newLocation = String.valueOf(warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, item.getId()));
+
+        item.setLocationCode(newLocation);
+
+        itemRepository.save(item);
+
+        mockMvc.perform(put("/auth/warehouse/update-location/" + item.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(warehouseLocationRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.location").exists());
+
+
     }
 }
