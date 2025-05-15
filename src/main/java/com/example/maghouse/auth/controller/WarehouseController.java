@@ -29,14 +29,14 @@ public class WarehouseController {
     }
 
     @PostMapping("/assign-location/{itemId}")
-    public Item assignWarehouseLocation (@RequestBody  WarehouseLocationRequest warehouseLocationRequest,
-                                         @PathVariable Long itemId){
+    public Item assignWarehouseLocation (@PathVariable Long itemId,
+                                         @RequestBody  WarehouseLocationRequest warehouseLocationRequest){
          return warehouseService.assignItemsToWarehouseLocation( warehouseLocationRequest, itemId);
     }
 
     @PutMapping("/update-location/{itemId}")
-    public Item updateWarehouseLocation(@RequestBody  WarehouseLocationRequest warehouseLocationRequest,
-                                        @PathVariable Long itemId){
+    public Item updateWarehouseLocation(@PathVariable Long itemId,
+                                        @RequestBody  WarehouseLocationRequest warehouseLocationRequest){
         return warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId);
     }
 

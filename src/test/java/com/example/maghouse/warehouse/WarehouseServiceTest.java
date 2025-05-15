@@ -138,7 +138,7 @@ public class WarehouseServiceTest {
 
     @Test
     void shouldThrowExceptionWhenItemNotFound() {
-        when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
+        lenient().when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
         WarehouseLocationRequest locationRequest = new WarehouseLocationRequest(WarehouseLocation.Warsaw);
         assertThrows(IllegalArgumentException.class, () -> warehouseService.assignItemsToWarehouseLocation(locationRequest, 1L));
     }

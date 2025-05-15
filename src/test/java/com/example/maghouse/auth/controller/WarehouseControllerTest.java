@@ -176,7 +176,7 @@ public class WarehouseControllerTest {
 
         item.setWarehouse(warehouse);
 
-        Item result = warehouseController.assignWarehouseLocation(warehouseLocationRequest, item.getId());
+        Item result = warehouseController.assignWarehouseLocation(item.getId(), warehouseLocationRequest);
 
         assertEquals(item.getId(), result.getId());
         assertEquals("RS05B", result.getLocationCode());
@@ -195,7 +195,7 @@ public class WarehouseControllerTest {
                 .thenThrow(new IllegalArgumentException("Warehouse not found!!"));
 
         assertThrows(IllegalArgumentException.class,
-                () -> warehouseController.assignWarehouseLocation(warehouseLocationRequest, id));
+                () -> warehouseController.assignWarehouseLocation(id, warehouseLocationRequest));
         verify(warehouseService).assignItemsToWarehouseLocation(warehouseLocationRequest, id);
     }
 
@@ -227,7 +227,7 @@ public class WarehouseControllerTest {
         when(warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId))
                 .thenReturn(updatedItem);
 
-        Item result = warehouseController.updateWarehouseLocation(warehouseLocationRequest, itemId);
+        Item result = warehouseController.updateWarehouseLocation(itemId, warehouseLocationRequest );
 
         assertEquals(itemId, result.getId());
         assertEquals("WS05B", result.getLocationCode());
@@ -244,7 +244,7 @@ public class WarehouseControllerTest {
         when(warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, id))
                 .thenThrow(new RuntimeException("Update failed!!"));
 
-        assertThrows(RuntimeException.class, () -> warehouseController.updateWarehouseLocation(warehouseLocationRequest, id));
+        assertThrows(RuntimeException.class, () -> warehouseController.updateWarehouseLocation(id, warehouseLocationRequest));
         verify(warehouseService).updatedItemsToWarehouseLocation(warehouseLocationRequest, id);
 
     }
