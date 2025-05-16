@@ -9,6 +9,7 @@ import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.mapper.DeliveryResponseToDeliveryMapper;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -20,8 +21,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Optional;
 
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class DeliveryServiceTest {
@@ -51,7 +55,6 @@ public class DeliveryServiceTest {
     private DeliveryService deliveryService;
 
     private User user;
-    private Item item;
     private Delivery delivery;
 
     @BeforeEach
@@ -66,7 +69,7 @@ public class DeliveryServiceTest {
                 .items(new ArrayList<>())
                 .build();
 
-        item = Item.builder()
+        Item item = Item.builder()
                 .name("ItemName")
                 .itemCode("itemCode")
                 .quantity(100)
@@ -79,7 +82,7 @@ public class DeliveryServiceTest {
         delivery = Delivery.builder()
                 .supplier("inpost")
                 .date(Date.valueOf(LocalDate.now()))
-                .numberDelivery(deliveryNumberGenerator.generateDeliveryNumber())
+                .numberDelivery(null)
                 .itemName(item.getName())
                 .itemCode(item.getItemCode())
                 .deliveryStatus(DeliveryStatus.CREATED)
@@ -92,5 +95,44 @@ public class DeliveryServiceTest {
         when(authentication.getPrincipal()).thenReturn(userDetails);
         when(userDetails.getUsername()).thenReturn(user.getEmail());
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        deliveryRepository.deleteAll();
+    }
+
+    @Test
+    void shouldCreateDeliverySuccessfully() {
+        String deliveryNumber = deliveryNumberGenerator.generateDeliveryNumber();
+        LocalDate date = LocalDate.now();
+
+        DeliveryRequest request = new DeliveryRequest(
+                "inpost",
+                "ItemName",
+                "ItemCode",
+                100,
+                WarehouseLocation.Rzeszow
+        );
+
+        DeliveryResponse deliveryResponse =
+                deliveryResponseToDeliveryMapper.mapToDeliveryResponse(
+        request, deliveryNumber, date, user );
+
+        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(deliveryResponseToDeliveryMapper.mapToDeliveryResponse(
+                eq(request),
+                eq(delivery.getNumberDelivery()),
+                eq(date),
+                eq(user))
+        ).thenReturn(deliveryResponse);
+
+        when(deliveryResponseToDeliveryMapper.mapToDelivery(deliveryResponse))
+                .thenReturn(delivery);
+
+        when(deliveryRepository.save(delivery)).thenReturn(delivery);
+
+        Delivery result = deliveryService.createDelivery(request);
+
+        assertNotNull(result);
+        assertEquals(delivery.getNumberDelivery(), result.getNumberDelivery());
+        assertEquals(delivery.getSupplier(), result.getSupplier());
+        assertEquals(delivery.getItemName(), result.getItemName());
     }
 }
