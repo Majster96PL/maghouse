@@ -91,16 +91,17 @@ public class DeliveryServiceTest {
                 .item(item)
                 .build();
 
-        when(authentication.isAuthenticated()).thenReturn(true);
-        when(authentication.getPrincipal()).thenReturn(userDetails);
-        when(userDetails.getUsername()).thenReturn(user.getEmail());
+        lenient().when(authentication.isAuthenticated()).thenReturn(true);
+        lenient().when(authentication.getPrincipal()).thenReturn(userDetails);
+        lenient().when(userDetails.getUsername()).thenReturn(user.getEmail());
         SecurityContextHolder.getContext().setAuthentication(authentication);
         deliveryRepository.deleteAll();
     }
 
     @Test
     void shouldCreateDeliverySuccessfully() {
-        String deliveryNumber = deliveryNumberGenerator.generateDeliveryNumber();
+        String deliveryNumber = "1/05/2025";
+        when(deliveryNumberGenerator.generateDeliveryNumber()).thenReturn("1/05/2025");
         LocalDate date = LocalDate.now();
 
         DeliveryRequest request = new DeliveryRequest(
@@ -118,7 +119,7 @@ public class DeliveryServiceTest {
         when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(deliveryResponseToDeliveryMapper.mapToDeliveryResponse(
                 eq(request),
-                eq(delivery.getNumberDelivery()),
+                eq(deliveryNumber),
                 eq(date),
                 eq(user))
         ).thenReturn(deliveryResponse);
@@ -134,5 +135,53 @@ public class DeliveryServiceTest {
         assertEquals(delivery.getNumberDelivery(), result.getNumberDelivery());
         assertEquals(delivery.getSupplier(), result.getSupplier());
         assertEquals(delivery.getItemName(), result.getItemName());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenNotAuthenticatedUser(){
+        SecurityContextHolder.clearContext();
+
+        DeliveryRequest request = new DeliveryRequest(
+                "inpost",
+                "ItemName",
+                "ItemCode",
+                100,
+                WarehouseLocation.Rzeszow
+        );
+
+        assertThrows(SecurityException.class,
+                () -> deliveryService.createDelivery(request));
+
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserNotFoundByEmail(){
+        DeliveryRequest request = new DeliveryRequest(
+                "inpost",
+                "ItemName",
+                "ItemCode",
+                100,
+                WarehouseLocation.Rzeszow
+        );
+
+        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> deliveryService.createDelivery(request));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDeliveryNumberGeneratorReturnsNull(){
+        DeliveryRequest request = new DeliveryRequest(
+                "inpost",
+                "ItemName",
+                "ItemCode",
+                100,
+                WarehouseLocation.Rzeszow
+        );
+
+        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(deliveryNumberGenerator.generateDeliveryNumber()).thenReturn(null);
+
+        assertThrows(NullPointerException.class, () -> deliveryService.createDelivery(request));
     }
 }
