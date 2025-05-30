@@ -4,6 +4,7 @@ import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.delivery.status.DeliveryStatus;
+import com.example.maghouse.delivery.status.DeliveryStatusRequest;
 import com.example.maghouse.item.Item;
 import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.mapper.DeliveryResponseToDeliveryMapper;
@@ -184,4 +185,20 @@ public class DeliveryServiceTest {
 
         assertThrows(NullPointerException.class, () -> deliveryService.createDelivery(request));
     }
+
+    @Test
+    void shouldUpdateDeliveryStatusSuccessfully(){
+        DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
+
+        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(deliveryRepository.findById(delivery.getId())).thenReturn(Optional.of(delivery));
+        when(deliveryRepository.save(delivery)).thenReturn(delivery);
+
+        Delivery result = deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId());
+
+        assertNotNull(result);
+        assertEquals(DeliveryStatus.IN_PROGRESS, result.getDeliveryStatus());
+    }
+
+
 }
