@@ -222,4 +222,15 @@ public class DeliveryServiceTest {
         assertEquals(initialQuantity + deliveryQuantity, item.getQuantity());
         verify(itemRepository).save(item);
     }
+
+    @Test
+   void shouldThrowExceptionWhenUpdatingStatusForNotAuthenticatedUser(){
+        SecurityContextHolder.clearContext();
+        DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
+
+        assertThrows(SecurityException.class,
+                () -> deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId()));
+   }
+
+
 }
