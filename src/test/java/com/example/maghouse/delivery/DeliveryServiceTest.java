@@ -232,5 +232,35 @@ public class DeliveryServiceTest {
                 () -> deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId()));
    }
 
+   @Test
+   void shouldThrowExceptionWhenUserNotFoundDuringStatusUpdate(){
+        DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
+        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId()));
+   }
+
+   @Test
+   void shouldThrowExceptionWhenDeliveryNotFoundDuringStatusUpdate(){
+        DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
+        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(deliveryRepository.findById(delivery.getId())).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId()));
+   }
+
+   @Test
+   void shouldThrowExceptionWhenItemNotFoundDuringStatusUpdate(){
+        DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.DELIVERED);
+       when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
+       when(deliveryRepository.findById(delivery.getId())).thenReturn(Optional.of(delivery));
+       when(itemRepository.findByItemCode(delivery.getItemCode())).thenReturn(Optional.empty());
+
+       assertThrows(IllegalArgumentException.class,
+               () -> deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId()));
+   }
+
 
 }
