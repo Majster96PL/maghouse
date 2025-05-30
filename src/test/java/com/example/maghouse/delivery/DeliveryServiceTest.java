@@ -55,6 +55,7 @@ public class DeliveryServiceTest {
     @InjectMocks
     private DeliveryService deliveryService;
 
+    private Item item;
     private User user;
     private Delivery delivery;
 
@@ -70,7 +71,7 @@ public class DeliveryServiceTest {
                 .items(new ArrayList<>())
                 .build();
 
-        Item item = Item.builder()
+        item = Item.builder()
                 .name("ItemName")
                 .itemCode("itemCode")
                 .quantity(100)
@@ -200,5 +201,25 @@ public class DeliveryServiceTest {
         assertEquals(DeliveryStatus.IN_PROGRESS, result.getDeliveryStatus());
     }
 
+    @Test
+    void shouldUpdateStatusToDeliveryAndUpdateItemQuantity(){
+        DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.DELIVERED);
 
+        int initialQuantity = item.getQuantity();
+        int deliveryQuantity = delivery.getQuantity();
+
+        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(deliveryRepository.findById(delivery.getId())).thenReturn(Optional.of(delivery));
+        when(itemRepository.findByItemCode(delivery.getItemCode())).thenReturn(Optional.of(item));
+
+        when(itemRepository.save(item)).thenReturn(item);
+        when(deliveryRepository.save(delivery)).thenReturn(delivery);
+
+        Delivery result = deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId());
+
+        assertNotNull(result);
+        assertEquals(DeliveryStatus.DELIVERED, result.getDeliveryStatus());
+        assertEquals(initialQuantity + deliveryQuantity, item.getQuantity());
+        verify(itemRepository).save(item);
+    }
 }
