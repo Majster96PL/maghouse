@@ -36,6 +36,9 @@ public class DeliveryService {
                 .orElseThrow(() -> new IllegalArgumentException("User with email not found!"));
         LocalDate data = LocalDate.now();
         String numberDelivery = deliveryNumberGenerator.generateDeliveryNumber();
+        if (numberDelivery == null) {
+            throw new NullPointerException("Delivery number cannot be null");
+        }
 
         var deliveryResponse = deliveryResponseToDeliveryMapper.mapToDeliveryResponse(
                 deliveryRequest, numberDelivery, data, user);
