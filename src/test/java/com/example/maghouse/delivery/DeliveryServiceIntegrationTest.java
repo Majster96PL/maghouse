@@ -27,8 +27,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestPropertySource("classpath:application-test.yml")
@@ -168,6 +167,29 @@ public class DeliveryServiceIntegrationTest {
         Item updatedItem = itemRepository.findById(item.getId()).orElseThrow();
         assertEquals(DeliveryStatus.DELIVERED, updatedDelivery.getDeliveryStatus());
         assertEquals(initialQuantity + deliveryQuantity, updatedItem.getQuantity());
+    }
+
+    @Test
+    void shouldThrowAllWhenUserNotAuthenticated(){
+        SecurityContextHolder.clearContext();
+        DeliveryRequest deliveryRequest = new DeliveryRequest(
+                "INPOST",
+                item.getName(),
+                item.getItemCode(),
+                100,
+                WarehouseLocation.Rzeszow
+        );
+        DeliveryStatusRequest statusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
+
+        assertThrows(SecurityException.class, () ->
+                        deliveryService.createDelivery(deliveryRequest),
+                "CreateDelivery should throw when not authenticated"
+        );
+
+        assertThrows(SecurityException.class, () ->
+                        deliveryService.updateDeliveryStatus(statusRequest, delivery.getId()),
+                "UpdateDeliveryStatus should throw when not authenticated"
+        );
     }
 
 }
