@@ -4,6 +4,7 @@ import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.delivery.status.DeliveryStatus;
+import com.example.maghouse.delivery.status.DeliveryStatusRequest;
 import com.example.maghouse.item.Item;
 import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.security.PasswordEncoder;
@@ -73,7 +74,6 @@ public class DeliveryServiceIntegrationTest {
 
     private void setUpUser(){
         user = User.builder()
-                .id(1L)
                 .firstname("John")
                 .lastname("Kovalsky")
                 .email("john.kovalsky@maghouse.com")
@@ -96,7 +96,6 @@ public class DeliveryServiceIntegrationTest {
 
     private Item createTestItem(){
         item = Item.builder()
-                .id(1L)
                 .name("Test name")
                 .itemCode("1024-01-235-1967")
                 .quantity(100)
@@ -111,7 +110,6 @@ public class DeliveryServiceIntegrationTest {
 
     private Delivery createDeliveryTest(){
         delivery = Delivery.builder()
-                .id(1L)
                 .supplier("INPOST")
                 .date(Date.valueOf(LocalDate.now()))
                 .numberDelivery("13/05/2025")
@@ -143,5 +141,22 @@ public class DeliveryServiceIntegrationTest {
         assertEquals(DeliveryStatus.CREATED,result.getDeliveryStatus());
         assertEquals(user.getEmail(), result.getUser().getEmail());
     }
+
+    @Test
+    void shouldUpdateStatusToInProgressWithoutChangingItemQuantity(){
+        DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
+        int initialQuantity = item.getQuantity();
+
+        Delivery updatedDelivery = deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId());
+        assertEquals(DeliveryStatus.IN_PROGRESS, updatedDelivery.getDeliveryStatus());
+
+        Item unchangedItem = itemRepository.findById(item.getId()).orElseThrow();
+        assertEquals(initialQuantity, unchangedItem.getQuantity());
+
+        Delivery persistedDelivery = deliveryRepository.findById(delivery.getId()).orElseThrow();
+        assertEquals(DeliveryStatus.IN_PROGRESS, persistedDelivery.getDeliveryStatus());
+    }
+
+
 
 }
