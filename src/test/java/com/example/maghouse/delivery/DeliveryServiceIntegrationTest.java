@@ -157,6 +157,17 @@ public class DeliveryServiceIntegrationTest {
         assertEquals(DeliveryStatus.IN_PROGRESS, persistedDelivery.getDeliveryStatus());
     }
 
+    @Test
+    void shouldUpdateStatusToDeliveredAndIncreaseItemQuantity(){
+        int initialQuantity = item.getQuantity();
+        int deliveryQuantity = delivery.getQuantity();
+        DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.DELIVERED);
 
+        Delivery updatedDelivery = deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId());
+
+        Item updatedItem = itemRepository.findById(item.getId()).orElseThrow();
+        assertEquals(DeliveryStatus.DELIVERED, updatedDelivery.getDeliveryStatus());
+        assertEquals(initialQuantity + deliveryQuantity, updatedItem.getQuantity());
+    }
 
 }
