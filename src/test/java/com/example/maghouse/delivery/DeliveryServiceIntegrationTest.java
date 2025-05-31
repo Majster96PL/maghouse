@@ -7,11 +7,11 @@ import com.example.maghouse.delivery.status.DeliveryStatus;
 import com.example.maghouse.item.Item;
 import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.security.PasswordEncoder;
-import com.example.maghouse.warehouse.Warehouse;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +25,9 @@ import org.springframework.test.context.TestPropertySource;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestPropertySource("classpath:application-test.yml")
@@ -59,6 +62,8 @@ public class DeliveryServiceIntegrationTest {
     void setUp(){
         setUpUser();
         authenticateUser();
+        createTestItem();
+        createDeliveryTest();
     }
 
     @AfterEach
@@ -121,4 +126,22 @@ public class DeliveryServiceIntegrationTest {
 
         return deliveryRepository.save(delivery);
     }
+
+    @Test
+    void shouldCreateDeliveryWithValidRequest(){
+        DeliveryRequest deliveryRequest = new DeliveryRequest(
+                "INPOST",
+                item.getName(),
+                item.getItemCode(),
+                100,
+                WarehouseLocation.Rzeszow
+        );
+
+        Delivery result = deliveryService.createDelivery(deliveryRequest);
+
+        assertNotNull(result.getId());
+        assertEquals(DeliveryStatus.CREATED,result.getDeliveryStatus());
+        assertEquals(user.getEmail(), result.getUser().getEmail());
+    }
+
 }
