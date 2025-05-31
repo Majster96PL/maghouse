@@ -3,8 +3,12 @@ package com.example.maghouse.delivery;
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
+import com.example.maghouse.delivery.status.DeliveryStatus;
+import com.example.maghouse.item.Item;
 import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.security.PasswordEncoder;
+import com.example.maghouse.warehouse.Warehouse;
+import com.example.maghouse.warehouse.location.WarehouseLocation;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +21,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.ArrayList;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestPropertySource("classpath:application-test.yml")
@@ -41,6 +49,8 @@ public class DeliveryServiceIntegrationTest {
     private PasswordEncoder passwordEncoder;
 
     private User user;
+    private Item item;
+    private Delivery delivery;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -79,5 +89,36 @@ public class DeliveryServiceIntegrationTest {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
+    private Item createTestItem(){
+        item = Item.builder()
+                .id(1L)
+                .name("Test name")
+                .itemCode("1024-01-235-1967")
+                .quantity(100)
+                .locationCode("RSO1B")
+                .user(user)
+                .warehouse(null)
+                .deliveries(new ArrayList<>())
+                .build();
 
+        return itemRepository.save(item);
+    }
+
+    private Delivery createDeliveryTest(){
+        delivery = Delivery.builder()
+                .id(1L)
+                .supplier("INPOST")
+                .date(Date.valueOf(LocalDate.now()))
+                .numberDelivery("13/05/2025")
+                .itemName(item.getName())
+                .itemCode(item.getItemCode())
+                .quantity(100)
+                .deliveryStatus(DeliveryStatus.CREATED)
+                .warehouseLocation(WarehouseLocation.Rzeszow)
+                .user(user)
+                .item(item)
+                .build();
+
+        return deliveryRepository.save(delivery);
+    }
 }
