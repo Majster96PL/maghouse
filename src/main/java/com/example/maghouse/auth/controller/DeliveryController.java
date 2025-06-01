@@ -16,6 +16,10 @@ public class DeliveryController {
 
     @PostMapping("/create")
     public Delivery create(@RequestBody  DeliveryRequest deliveryRequest){
+        if (deliveryRequest == null) {
+            throw new IllegalArgumentException("Delivery request cannot be null");
+        }
+
         return deliveryService.createDelivery(deliveryRequest);
     }
 
