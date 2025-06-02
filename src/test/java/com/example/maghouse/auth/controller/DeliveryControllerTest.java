@@ -93,7 +93,7 @@ public class DeliveryControllerTest {
                 .build();
         when(deliveryService.createDelivery(request)).thenReturn(exceptedDelivery);
 
-        Delivery result = deliveryController.create(request);
+        Delivery result = deliveryController.create(request).getBody();
 
         assertNotNull(result);
         assertEquals(exceptedDelivery, result);

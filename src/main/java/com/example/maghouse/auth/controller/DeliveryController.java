@@ -5,22 +5,25 @@ import com.example.maghouse.delivery.DeliveryRequest;
 import com.example.maghouse.delivery.DeliveryService;
 import com.example.maghouse.delivery.status.DeliveryStatusRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping(path = "auth/delivery")
 @RestController
+@RequestMapping(path = "/auth/delivery/")
 @RequiredArgsConstructor
 public class DeliveryController {
 
     private final DeliveryService deliveryService;
 
     @PostMapping("/create")
-    public Delivery create(@RequestBody  DeliveryRequest deliveryRequest){
+    public ResponseEntity<Delivery>  create(@RequestBody  DeliveryRequest deliveryRequest){
+        Delivery delivery = deliveryService.createDelivery(deliveryRequest);
         if (deliveryRequest == null) {
             throw new IllegalArgumentException("Delivery request cannot be null");
         }
 
-        return deliveryService.createDelivery(deliveryRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(delivery);
     }
 
     @PutMapping("/update-delivery-status/{id}")
