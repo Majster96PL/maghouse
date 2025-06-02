@@ -168,5 +168,43 @@ public class DeliveryControllerTest {
         verify(deliveryService, never()).updateDeliveryStatus(any(), any());
     }
 
+    void shouldThrowAllExceptionsWhenUserIsNotAuthenticated(){
+        when(securityContext.getAuthentication()).thenReturn(null);
 
+        DeliveryRequest deliveryRequest = new DeliveryRequest(
+                "inpost",
+                "ItemName",
+                "ItemCode",
+                100,
+                WarehouseLocation.Rzeszow
+        );
+
+        assertDoesNotThrow(() -> deliveryController.create(deliveryRequest));
+
+        Long id = 1L;
+        DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
+
+        assertDoesNotThrow(() -> deliveryController.updateDeliveryStatus(deliveryStatusRequest, id));
+    }
+
+    @Test
+    void shouldThrowAllExceptionsWhenUserNotFound(){
+        when(userDetails.getUsername()).thenReturn(user.getEmail());
+        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.empty());
+
+        DeliveryRequest deliveryRequest = new DeliveryRequest(
+                "inpost",
+                "ItemName",
+                "ItemCode",
+                100,
+                WarehouseLocation.Rzeszow
+        );
+
+        assertDoesNotThrow(() -> deliveryController.create(deliveryRequest));
+
+        Long id = 1L;
+        DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
+
+        assertDoesNotThrow(() -> deliveryController.updateDeliveryStatus(deliveryStatusRequest, id));
+    }
 }
