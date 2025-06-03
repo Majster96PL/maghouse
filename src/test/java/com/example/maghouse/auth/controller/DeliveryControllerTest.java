@@ -125,7 +125,7 @@ public class DeliveryControllerTest {
 
         when(deliveryService.updateDeliveryStatus(deliveryStatusRequest, id)).thenReturn(updatedDelivery);
 
-        Delivery result = deliveryController.updateDeliveryStatus(deliveryStatusRequest, id);
+        Delivery result = deliveryController.updateDeliveryStatus(deliveryStatusRequest, id).getBody();
 
         assertNotNull(result);
         assertEquals(DeliveryStatus.IN_PROGRESS, result.getDeliveryStatus());

@@ -27,11 +27,13 @@ public class DeliveryController {
     }
 
     @PutMapping("/update-delivery-status/{id}")
-    public Delivery updateDeliveryStatus(@RequestBody DeliveryStatusRequest deliveryStatusRequest,
+    public ResponseEntity<Delivery> updateDeliveryStatus(@RequestBody DeliveryStatusRequest deliveryStatusRequest,
                                          @PathVariable Long id){
         if(deliveryStatusRequest == null || id == null) {
             throw new IllegalArgumentException("Delivery status request cannot be null");
         }
-        return deliveryService.updateDeliveryStatus(deliveryStatusRequest, id);
+
+        Delivery updatedDelivery = deliveryService.updateDeliveryStatus(deliveryStatusRequest, id);
+        return ResponseEntity.ok(updatedDelivery);
     }
 }

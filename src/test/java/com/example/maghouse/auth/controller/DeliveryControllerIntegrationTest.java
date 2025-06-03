@@ -7,6 +7,9 @@ import com.example.maghouse.delivery.Delivery;
 import com.example.maghouse.delivery.DeliveryRepository;
 import com.example.maghouse.delivery.DeliveryRequest;
 import com.example.maghouse.delivery.status.DeliveryStatus;
+import com.example.maghouse.delivery.status.DeliveryStatusRequest;
+import com.example.maghouse.item.Item;
+import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.security.PasswordEncoder;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,9 +31,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,7 +46,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @AutoConfigureMockMvc
 @Transactional
-
 public class DeliveryControllerIntegrationTest {
 
     @Autowired
@@ -59,6 +64,9 @@ public class DeliveryControllerIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
+    private ItemRepository itemRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     private User user;
@@ -66,9 +74,9 @@ public class DeliveryControllerIntegrationTest {
 
     @BeforeEach
     void setUp(){
-        setUpUser();
-        authenticateUser();
-        createAndSaveTestDelivery();
+        this.setUpUser();
+        this.authenticateUser();
+        this.createAndSaveTestDelivery();
     }
 
     @AfterEach
@@ -108,7 +116,7 @@ public class DeliveryControllerIntegrationTest {
                 .itemName("Item Name")
                 .itemCode("Item Code")
                 .quantity(100)
-                .deliveryStatus(DeliveryStatus.IN_PROGRESS)
+                .deliveryStatus(DeliveryStatus.CREATED)
                 .warehouseLocation(WarehouseLocation.Rzeszow)
                 .user(user)
                 .item(null)
@@ -136,6 +144,49 @@ public class DeliveryControllerIntegrationTest {
                 .andExpect(jsonPath("$.itemCode").value("ItemCode"))
                 .andExpect(jsonPath("$.quantity").value(100))
                 .andExpect( jsonPath("$.warehouseLocation").value("Rzeszow"));
+    }
+
+    @Test
+    void shouldUpdateDeliveryStatusToInProgress() throws Exception {
+        DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
+
+        mockMvc.perform(put("/auth/delivery/update-delivery-status/" + delivery.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(deliveryStatusRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.deliveryStatus").value("IN_PROGRESS"));
+    }
+
+    @Test
+    void shouldUpdateDeliveryStatusToDeliveredAndUpdatedItemQuantity() throws Exception{
+        Item item = Item.builder()
+                .name(delivery.getItemName())
+                .itemCode(delivery.getItemCode())
+                .locationCode(null)
+                .quantity(100)
+                .user(user)
+                .warehouse(null)
+                .deliveries(new ArrayList<>())
+                .build();
+
+        itemRepository.save(item);
+
+        delivery.setItem(item);
+        delivery.setDeliveryStatus(DeliveryStatus.IN_PROGRESS);
+        deliveryRepository.save(delivery);
+
+        DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.DELIVERED);
+
+        mockMvc.perform(put("/auth/delivery/update-delivery-status/" + delivery.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(deliveryStatusRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.deliveryStatus").value("DELIVERED"));
+
+        Item updatedItem = itemRepository.findByItemCode(item.getItemCode())
+                        .orElseThrow(() -> new RuntimeException("Item noc found!"));
+
+        assertEquals(200, updatedItem.getQuantity());
     }
 
 }
