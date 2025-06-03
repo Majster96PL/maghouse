@@ -82,7 +82,6 @@ public class WarehouseControllerIntegrationTest {
         createAndSaveTestWarehouse();
         createAndSaveTestItem();
         authenticateTestUser();
-       // warehouseRepository.deleteAll();
     }
 
     @AfterEach
