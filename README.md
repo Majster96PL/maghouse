@@ -23,7 +23,7 @@
 
 ### 🚚 Delivery Module
 - Create and manage delivery orders
-- Track order status: `PENDING`, `IN_PROGRESS`, `DELIVERED`
+- Track order status: `CREATED`, `IN_PROGRESS`, `DELIVERED`, `CANCELLED`
 - Basic delivery lifecycle support
 
 ---
@@ -90,18 +90,38 @@ java -jar target/maghouse-1.0-SNAPSHOT.jar
 ```
 
 ## 🌐 API Overview
-### All modules expose endpoints through a RESTful API.
+### All modules expose endpoints through a RESTful API. Working on `localhost`
 
-### Sample Endpoints
-- `POST /api/users/register` – Register new user
+### Endpoints
+- `PUT /auth/admin/update` - Update user
 
-- `POST /api/users/login` – Authenticate and get JWT
+- `PUT /auth/admin/change/{id}` - Change role user
 
-- `GET /api/items` – Retrieve all items
+- `POST /auth/register` – Register new user
 
-- `POST /api/warehouse` – Add a new warehouse
+- `POST /auht/login` – Authenticate and get JWT
 
-- `POST /api/delivery` – Create a delivery order
+- `GET /auth/{id}` - Get User by ID
+
+- `POST /auth/refresh` - Refresh JWT token
+
+- `POST /auth/item/create` – Create new item
+
+- `PUT /auth/item//update/{itemId}` – Update item
+
+- `DELETE /auth/item/delete/{itemId}` - Delete item
+
+- `POST /auth/warehouse/create` – Add a new warehouse
+
+- `POST /auth/warehouse/assign-space-type/{itemId}` - Assign space type to item
+
+- `POST /auth/warehouse/assign-location/{itemId}` - Assign warehouse location to item
+
+- `PUT /auth/warehouse/update-location/{itemId}` - Update location
+
+- `POST /auth/delivery/create` – Create a delivery order
+
+- `POST /auth/delivery/update-delivery-status/{id}` - Update delivery status
 
 ### 📘 Full API documentation will be available via Swagger in a future release.
 
