@@ -10,13 +10,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(path = "/auth/delivery/")
+@RequestMapping(path = "/maghouse/")
 @RequiredArgsConstructor
 public class DeliveryController {
 
     private final DeliveryService deliveryService;
 
-    @PostMapping("/create")
+    @PostMapping("/deliveries")
     public ResponseEntity<Delivery>  create(@RequestBody  DeliveryRequest deliveryRequest){
         Delivery delivery = deliveryService.createDelivery(deliveryRequest);
         if (deliveryRequest == null) {
@@ -26,7 +26,7 @@ public class DeliveryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(delivery);
     }
 
-    @PutMapping("/update-delivery-status/{id}")
+    @PutMapping("/deliveries/{id}")
     public ResponseEntity<Delivery> updateDeliveryStatus(@RequestBody DeliveryStatusRequest deliveryStatusRequest,
                                          @PathVariable Long id){
         if(deliveryStatusRequest == null || id == null) {
