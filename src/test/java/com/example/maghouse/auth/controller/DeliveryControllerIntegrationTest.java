@@ -135,7 +135,7 @@ public class DeliveryControllerIntegrationTest {
                 WarehouseLocation.Rzeszow
         );
 
-        mockMvc.perform(post("/auth/delivery/create")
+        mockMvc.perform(post("/maghouse/deliveries")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(deliveryRequest)))
                 .andExpect(status().isCreated())
@@ -150,7 +150,7 @@ public class DeliveryControllerIntegrationTest {
     void shouldUpdateDeliveryStatusToInProgress() throws Exception {
         DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
 
-        mockMvc.perform(put("/auth/delivery/update-delivery-status/" + delivery.getId())
+        mockMvc.perform(put("/maghouse/deliveries/" + delivery.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(deliveryStatusRequest)))
                 .andExpect(status().isOk())
@@ -177,7 +177,7 @@ public class DeliveryControllerIntegrationTest {
 
         DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.DELIVERED);
 
-        mockMvc.perform(put("/auth/delivery/update-delivery-status/" + delivery.getId())
+        mockMvc.perform(put("/maghouse/deliveries" + delivery.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(deliveryStatusRequest)))
                 .andExpect(status().isOk())
