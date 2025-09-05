@@ -57,7 +57,7 @@ public class DeliveryServiceTest {
 
     private Item item;
     private User user;
-    private Delivery delivery;
+    private DeliveryEntity delivery;
 
     @BeforeEach
     void setUp(){
@@ -81,7 +81,7 @@ public class DeliveryServiceTest {
                 .deliveries(new ArrayList<>())
                 .build();
 
-        delivery = Delivery.builder()
+        delivery = DeliveryEntity.builder()
                 .supplier("inpost")
                 .date(Date.valueOf(LocalDate.now()))
                 .numberDelivery(null)
@@ -131,7 +131,7 @@ public class DeliveryServiceTest {
 
         when(deliveryRepository.save(delivery)).thenReturn(delivery);
 
-        Delivery result = deliveryService.createDelivery(request);
+        DeliveryEntity result = deliveryService.createDelivery(request);
 
         assertNotNull(result);
         assertEquals(delivery.getNumberDelivery(), result.getNumberDelivery());
@@ -195,7 +195,7 @@ public class DeliveryServiceTest {
         when(deliveryRepository.findById(delivery.getId())).thenReturn(Optional.of(delivery));
         when(deliveryRepository.save(delivery)).thenReturn(delivery);
 
-        Delivery result = deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId());
+        DeliveryEntity result = deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId());
 
         assertNotNull(result);
         assertEquals(DeliveryStatus.IN_PROGRESS, result.getDeliveryStatus());
@@ -215,7 +215,7 @@ public class DeliveryServiceTest {
         when(itemRepository.save(item)).thenReturn(item);
         when(deliveryRepository.save(delivery)).thenReturn(delivery);
 
-        Delivery result = deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId());
+        DeliveryEntity result = deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId());
 
         assertNotNull(result);
         assertEquals(DeliveryStatus.DELIVERED, result.getDeliveryStatus());

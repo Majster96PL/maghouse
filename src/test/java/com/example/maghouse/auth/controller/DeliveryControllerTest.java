@@ -3,7 +3,7 @@ package com.example.maghouse.auth.controller;
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
-import com.example.maghouse.delivery.Delivery;
+import com.example.maghouse.delivery.DeliveryEntity;
 import com.example.maghouse.delivery.DeliveryRequest;
 import com.example.maghouse.delivery.DeliveryService;
 import com.example.maghouse.delivery.status.DeliveryStatus;
@@ -80,7 +80,7 @@ public class DeliveryControllerTest {
                 WarehouseLocation.Rzeszow
         );
 
-        Delivery exceptedDelivery = Delivery.builder()
+        DeliveryEntity exceptedDelivery = DeliveryEntity.builder()
                 .supplier("inpost")
                 .date(Date.valueOf(LocalDate.now()))
                 .numberDelivery(null)
@@ -93,7 +93,7 @@ public class DeliveryControllerTest {
                 .build();
         when(deliveryService.createDelivery(request)).thenReturn(exceptedDelivery);
 
-        Delivery result = deliveryController.create(request).getBody();
+        DeliveryEntity result = deliveryController.create(request).getBody();
 
         assertNotNull(result);
         assertEquals(exceptedDelivery, result);
@@ -111,7 +111,7 @@ public class DeliveryControllerTest {
         Long id = 1L;
         DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
 
-        Delivery updatedDelivery = Delivery.builder()
+        DeliveryEntity updatedDelivery = DeliveryEntity.builder()
                 .supplier("inpost")
                 .date(Date.valueOf(LocalDate.now()))
                 .numberDelivery(null)
@@ -125,7 +125,7 @@ public class DeliveryControllerTest {
 
         when(deliveryService.updateDeliveryStatus(deliveryStatusRequest, id)).thenReturn(updatedDelivery);
 
-        Delivery result = deliveryController.updateDeliveryStatus(deliveryStatusRequest, id).getBody();
+        DeliveryEntity result = deliveryController.updateDeliveryStatus(deliveryStatusRequest, id).getBody();
 
         assertNotNull(result);
         assertEquals(DeliveryStatus.IN_PROGRESS, result.getDeliveryStatus());

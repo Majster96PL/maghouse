@@ -1,7 +1,7 @@
 package com.example.maghouse.item;
 
 import com.example.maghouse.auth.registration.user.User;
-import com.example.maghouse.delivery.Delivery;
+import com.example.maghouse.delivery.DeliveryEntity;
 import com.example.maghouse.warehouse.Warehouse;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -45,6 +45,6 @@ public class Item {
     private Warehouse warehouse;
     @OneToMany(mappedBy = "item")
     @JsonManagedReference
-    private List<Delivery> deliveries;
+    private List<DeliveryEntity> deliveries;
 
 }

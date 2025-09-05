@@ -3,7 +3,7 @@ package com.example.maghouse.auth.controller;
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
-import com.example.maghouse.delivery.Delivery;
+import com.example.maghouse.delivery.DeliveryEntity;
 import com.example.maghouse.delivery.DeliveryRepository;
 import com.example.maghouse.delivery.DeliveryRequest;
 import com.example.maghouse.delivery.status.DeliveryStatus;
@@ -70,7 +70,7 @@ public class DeliveryControllerIntegrationTest {
     private ObjectMapper objectMapper;
 
     private User user;
-    private Delivery delivery;
+    private DeliveryEntity delivery;
 
     @BeforeEach
     void setUp(){
@@ -108,8 +108,8 @@ public class DeliveryControllerIntegrationTest {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    private Delivery createAndSaveTestDelivery() {
-        delivery = Delivery.builder()
+    private DeliveryEntity createAndSaveTestDelivery() {
+        delivery = DeliveryEntity.builder()
                 .supplier("inpost")
                 .date(Date.valueOf(LocalDate.now()))
                 .numberDelivery(null)

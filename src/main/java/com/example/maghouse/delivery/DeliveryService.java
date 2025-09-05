@@ -1,6 +1,5 @@
 package com.example.maghouse.delivery;
 
-
 import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.delivery.status.DeliveryStatus;
 import com.example.maghouse.delivery.status.DeliveryStatusRequest;
@@ -26,7 +25,7 @@ public class DeliveryService {
     private final ItemRepository itemRepository;
 
     @Transactional
-    public Delivery createDelivery(DeliveryRequest deliveryRequest) {
+    public DeliveryEntity createDelivery(DeliveryRequest deliveryRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new SecurityException("User is not authenticated");
@@ -47,7 +46,7 @@ public class DeliveryService {
         return deliveryRepository.save(delivery);
     }
 
-    public Delivery updateDeliveryStatus(DeliveryStatusRequest deliveryStatusRequest, Long id) {
+    public DeliveryEntity updateDeliveryStatus(DeliveryStatusRequest deliveryStatusRequest, Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new SecurityException("User is not authenticated");

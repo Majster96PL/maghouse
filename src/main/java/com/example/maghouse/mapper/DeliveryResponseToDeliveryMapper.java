@@ -1,7 +1,7 @@
 package com.example.maghouse.mapper;
 
 import com.example.maghouse.auth.registration.user.User;
-import com.example.maghouse.delivery.Delivery;
+import com.example.maghouse.delivery.DeliveryEntity;
 import com.example.maghouse.delivery.DeliveryRequest;
 import com.example.maghouse.delivery.DeliveryResponse;
 import com.example.maghouse.delivery.status.DeliveryStatus;
@@ -15,7 +15,9 @@ import java.time.LocalDate;
 public class DeliveryResponseToDeliveryMapper implements DeliveryMapper<DeliveryRequest, DeliveryResponse> {
 
     @Override
-    public DeliveryResponse mapToDeliveryResponse(DeliveryRequest deliveryRequest, String numberDelivery, LocalDate date, User user) {
+    public DeliveryResponse mapToDeliveryResponse(DeliveryRequest deliveryRequest,
+                                                  String numberDelivery, LocalDate date,
+                                                  User user) {
         return DeliveryResponse.builder()
                 .supplier(deliveryRequest.getSupplier())
                 .data(date)
@@ -30,8 +32,8 @@ public class DeliveryResponseToDeliveryMapper implements DeliveryMapper<Delivery
     }
 
     @Override
-    public Delivery mapToDelivery(DeliveryResponse deliveryResponse) {
-        return Delivery.builder()
+    public DeliveryEntity mapToDelivery(DeliveryResponse deliveryResponse) {
+        return DeliveryEntity.builder()
                 .supplier(deliveryResponse.getSupplier())
                 .date(Date.valueOf(deliveryResponse.getData()))
                 .numberDelivery(deliveryResponse.getNumberDelivery())

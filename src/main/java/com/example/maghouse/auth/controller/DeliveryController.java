@@ -1,6 +1,6 @@
 package com.example.maghouse.auth.controller;
 
-import com.example.maghouse.delivery.Delivery;
+import com.example.maghouse.delivery.DeliveryEntity;
 import com.example.maghouse.delivery.DeliveryRequest;
 import com.example.maghouse.delivery.DeliveryService;
 import com.example.maghouse.delivery.status.DeliveryStatusRequest;
@@ -17,8 +17,8 @@ public class DeliveryController {
     private final DeliveryService deliveryService;
 
     @PostMapping("/deliveries")
-    public ResponseEntity<Delivery>  create(@RequestBody  DeliveryRequest deliveryRequest){
-        Delivery delivery = deliveryService.createDelivery(deliveryRequest);
+    public ResponseEntity<DeliveryEntity>  create(@RequestBody  DeliveryRequest deliveryRequest){
+        DeliveryEntity delivery = deliveryService.createDelivery(deliveryRequest);
         if (deliveryRequest == null) {
             throw new IllegalArgumentException("Delivery request cannot be null");
         }
@@ -27,13 +27,13 @@ public class DeliveryController {
     }
 
     @PutMapping("/deliveries/{id}")
-    public ResponseEntity<Delivery> updateDeliveryStatus(@RequestBody DeliveryStatusRequest deliveryStatusRequest,
+    public ResponseEntity<DeliveryEntity> updateDeliveryStatus(@RequestBody DeliveryStatusRequest deliveryStatusRequest,
                                          @PathVariable Long id){
         if(deliveryStatusRequest == null || id == null) {
             throw new IllegalArgumentException("Delivery status request cannot be null");
         }
 
-        Delivery updatedDelivery = deliveryService.updateDeliveryStatus(deliveryStatusRequest, id);
+        DeliveryEntity updatedDelivery = deliveryService.updateDeliveryStatus(deliveryStatusRequest, id);
         return ResponseEntity.ok(updatedDelivery);
     }
 }
