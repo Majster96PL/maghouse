@@ -10,14 +10,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(path = "/maghouse/")
+@RequestMapping(path = "/deliveries")
 @RequiredArgsConstructor
 public class DeliveryController {
 
     private final DeliveryService deliveryService;
 
-    @PostMapping("/deliveries")
-    public ResponseEntity<DeliveryEntity>  create(@RequestBody  DeliveryRequest deliveryRequest){
+    @PostMapping()
+    public ResponseEntity<DeliveryEntity> create(@RequestBody  DeliveryRequest deliveryRequest){
         DeliveryEntity delivery = deliveryService.createDelivery(deliveryRequest);
         if (deliveryRequest == null) {
             throw new IllegalArgumentException("Delivery request cannot be null");
@@ -26,7 +26,7 @@ public class DeliveryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(delivery);
     }
 
-    @PutMapping("/deliveries/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<DeliveryEntity> updateDeliveryStatus(@RequestBody DeliveryStatusRequest deliveryStatusRequest,
                                          @PathVariable Long id){
         if(deliveryStatusRequest == null || id == null) {
