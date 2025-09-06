@@ -38,10 +38,10 @@ public class DeliveryService {
         if (numberDelivery == null) {
             throw new NullPointerException("Delivery number cannot be null");
         }
-
         var deliveryResponse = deliveryResponseToDeliveryMapper.mapToDeliveryResponse(
-                deliveryRequest, numberDelivery, data, user);
+                deliveryRequest, numberDelivery, data, user.getId());
         var delivery = deliveryResponseToDeliveryMapper.mapToDelivery(deliveryResponse);
+        delivery.setUser(user);
 
         return deliveryRepository.save(delivery);
     }
@@ -58,10 +58,10 @@ public class DeliveryService {
                 .orElseThrow(() -> new IllegalArgumentException("Delivery not found!"));
         delivery.setDeliveryStatus(deliveryStatusRequest.getDeliveryStatus());
         if (deliveryStatusRequest.getDeliveryStatus() == DeliveryStatus.DELIVERED) {
-            var item = itemRepository.findByItemCode(delivery.getItemCode())
-                    .orElseThrow(() -> new IllegalArgumentException("Item not found with itemCode: " + delivery.getItemCode()));
-            item.setQuantity(item.getQuantity() + delivery.getQuantity());
-            itemRepository.save(item);
+            itemRepository.findByItemCode(delivery.getItemCode()).ifPresent(item -> {
+                item.setQuantity(item.getQuantity() + delivery.getQuantity());
+                itemRepository.save(item);
+            });
         }
         return deliveryRepository.save(delivery);
     }
