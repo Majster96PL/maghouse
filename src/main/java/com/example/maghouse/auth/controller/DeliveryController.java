@@ -19,7 +19,7 @@ public class DeliveryController {
     private final DeliveryService deliveryService;
     private final DeliveryResponseToDeliveryMapper deliveryResponseToDeliveryMapper;
 
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<DeliveryResponse> create(@RequestBody  DeliveryRequest deliveryRequest){
         DeliveryEntity deliveryEntity = deliveryService.createDelivery(deliveryRequest);
         DeliveryResponse deliveryResponse = deliveryResponseToDeliveryMapper.mapToResponse(deliveryEntity);

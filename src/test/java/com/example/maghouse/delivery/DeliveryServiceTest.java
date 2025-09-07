@@ -116,14 +116,14 @@ public class DeliveryServiceTest {
 
         DeliveryResponse deliveryResponse =
                 deliveryResponseToDeliveryMapper.mapToDeliveryResponse(
-        request, deliveryNumber, date, user );
+        request, deliveryNumber, date, user.getId() );
 
         when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(deliveryResponseToDeliveryMapper.mapToDeliveryResponse(
                 eq(request),
                 eq(deliveryNumber),
                 eq(date),
-                eq(user))
+                eq(user.getId()))
         ).thenReturn(deliveryResponse);
 
         when(deliveryResponseToDeliveryMapper.mapToDelivery(deliveryResponse))
