@@ -1,12 +1,9 @@
 package com.example.maghouse.mapper;
 
-import com.example.maghouse.delivery.DeliveryEntity;
-import com.example.maghouse.delivery.DeliveryResponse;
-
 import java.time.LocalDate;
 
-public interface DeliveryMapper<From, To, Entity> {
-    To mapToDeliveryResponse(From deliveryRequest, String numberDelivery, LocalDate date, long userId);
-    DeliveryEntity mapToDelivery(To deliveryResponse);
-    DeliveryResponse mapToResponse(DeliveryEntity deliveryEntity);
+public interface DeliveryMapper<DeliveryRequest, DeliveryResponse, Entity> {
+    DeliveryResponse mapToDeliveryResponse(DeliveryRequest deliveryRequest, String numberDelivery, LocalDate date, long userId);
+    Entity mapToDelivery(DeliveryResponse deliveryResponse);
+    DeliveryResponse mapToResponse(Entity deliveryEntity);
 }
