@@ -27,7 +27,7 @@ public class ItemController {
     @PutMapping("/{itemId}")
     public ResponseEntity<ItemResponse> updateItemQuantity(@PathVariable Long itemId, @RequestBody ItemRequest itemRequest) {
         ItemEntity updatedItem = itemService.updateItemQuantity(itemId, itemRequest);
-        ItemResponse updatedItemResponse = itemResponseToItemMapper.mapToItem(updatedItem);
+        ItemResponse updatedItemResponse = itemResponseToItemMapper.mapToItemResponse(updatedItem);
         return ResponseEntity.ok(updatedItemResponse);
     }
 

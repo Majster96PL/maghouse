@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -40,7 +39,7 @@ public class WarehouseService {
         var user = userRepository.findUserByEmail(userDetails.getUsername())
                 .orElseThrow( () -> new IllegalArgumentException("User with email not found!"));
         String locationPrefix = generateLocationPrefix(warehouseRequest.getWarehouseLocation());
-        List<Item> items = itemRepository.findByItemCodeStartingWith(locationPrefix);
+        List<ItemEntity> items = itemRepository.findByItemCodeStartingWith(locationPrefix);
         if (items.isEmpty()) {
             throw new IllegalArgumentException("No items found for location prefix: " + locationPrefix);
         }
@@ -65,16 +64,16 @@ public class WarehouseService {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new SecurityException("User is not authenticated!");
         }
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         var user = userRepository.findUserByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("User with email not found!"));
-
-        WarehouseEntity warehouseEntity = warehouseRepository.findFirstByWarehouseLocation(warehouseLocationRequest.getWarehouseLocation())
-                .orElseThrow(() -> new IllegalArgumentException("WarehouseEntity not found!"));
-
         ItemEntity item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found!"));
+
         String locationPrefix = generateLocationPrefix(warehouseLocationRequest.getWarehouseLocation());
+
+
         String newLocation = locationPrefix + item.getLocationCode();
         item.setLocationCode(newLocation);
         item.setUser(user);

@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @AutoConfigureMockMvc
 @Transactional
-public class WarehouseEntityServiceIntegrationTest {
+public class WarehouseServiceIntegrationTest {
 
     @Autowired
     private WarehouseService warehouseService;

@@ -19,7 +19,6 @@ public class ItemResponseToItemMapper implements ItemMapper<ItemRequest, ItemRes
                 .build();
     }
 
-
     @Override
     public ItemEntity mapToEntityFromResponse(ItemResponse itemResponse) {
         return ItemEntity.builder()
@@ -34,7 +33,7 @@ public class ItemResponseToItemMapper implements ItemMapper<ItemRequest, ItemRes
 
 
     @Override
-    public ItemResponse mapToItem(ItemEntity itemEntity) {
+    public ItemResponse mapToItemResponse(ItemEntity itemEntity) {
         return ItemResponse.builder()
                 .name(itemEntity.getName())
                 .itemCode(itemEntity.getItemCode())

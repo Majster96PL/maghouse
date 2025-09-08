@@ -45,7 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Transactional
-public class WarehouseEntityControllerIntegrationTest {
+public class WarehouseControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
