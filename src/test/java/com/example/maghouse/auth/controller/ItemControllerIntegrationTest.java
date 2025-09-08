@@ -5,7 +5,7 @@ import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.token.TokenResponse;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
-import com.example.maghouse.item.Item;
+import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.item.ItemRequest;
 import com.example.maghouse.security.PasswordEncoder;
@@ -69,13 +69,15 @@ public class ItemControllerIntegrationTest {
         userToken = getAccessToken();
     }
 
-    private Item createAndSaveTestItem(){
-        Item item = Item.builder()
+    private ItemEntity createAndSaveTestItem(){
+        ItemEntity item = ItemEntity.builder()
                 .id(1L)
                 .name("Test Name")
                 .itemCode("TestCode")
                 .quantity(10)
                 .user(user)
+                .deliveries(null)
+                .warehouse(null)
                 .build();
         return itemRepository.save(item);
     }
@@ -84,7 +86,7 @@ public class ItemControllerIntegrationTest {
     void shouldCreateItem() throws Exception {
         ItemRequest itemRequest = new ItemRequest("Item1", 10);
 
-        mockMvc.perform(post("/auth/item/create")
+        mockMvc.perform(post("/maghouse/items")
                         .content(objectMapper.writeValueAsString(itemRequest))
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + userToken))
@@ -95,12 +97,12 @@ public class ItemControllerIntegrationTest {
 
     @Test
     void shouldUpdateItemQuantity() throws Exception {
-        Item item = createAndSaveTestItem();
+        ItemEntity item = createAndSaveTestItem();
         itemRepository.save(item);
 
         ItemRequest updateRequest = new ItemRequest("Item1", 15);
 
-        mockMvc.perform(put("/auth/item/update/" + item.getId())
+        mockMvc.perform(put("/maghouse/items" + item.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest))
                         .header("Authorization", "Bearer " + userToken))
@@ -110,10 +112,10 @@ public class ItemControllerIntegrationTest {
 
     @Test
     void shouldDeleteItem() throws Exception {
-        Item item = createAndSaveTestItem();
+        ItemEntity item = createAndSaveTestItem();
         itemRepository.save(item);
 
-        mockMvc.perform(delete("/auth/item/delete/" + item.getId())
+        mockMvc.perform(delete("/maghouse/delete/" + item.getId())
                         .header("Authorization", "Bearer " + userToken))
                 .andExpect(status().isNoContent());
     }
@@ -121,7 +123,7 @@ public class ItemControllerIntegrationTest {
     private String getAccessToken() throws Exception {
         LoginRequest loginRequest = new LoginRequest("johndoe@example.com", "password");
 
-        String response = mockMvc.perform(post("/auth/login")
+        String response = mockMvc.perform(post("/maghouse/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())

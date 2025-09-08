@@ -3,7 +3,7 @@ package com.example.maghouse.auth.controller;
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
-import com.example.maghouse.item.Item;
+import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.security.PasswordEncoder;
 import com.example.maghouse.warehouse.WarehouseEntity;
@@ -45,7 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Transactional
-public class WarehouseEntityControllerIntegrationTest {
+public class WarehouseControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -72,7 +72,7 @@ public class WarehouseEntityControllerIntegrationTest {
     private WarehouseRepository warehouseRepository;
 
     private User user;
-    private Item item;
+    private ItemEntity item;
     private WarehouseEntity warehouseEntity;
 
 
@@ -126,8 +126,8 @@ public class WarehouseEntityControllerIntegrationTest {
         return warehouseRepository.save(warehouseEntity);
     }
 
-    private Item createAndSaveTestItem(){
-         item = Item.builder()
+    private ItemEntity createAndSaveTestItem(){
+         item = ItemEntity.builder()
                 .name("TestName")
                 .itemCode("itemCode")
                 .locationCode(null)

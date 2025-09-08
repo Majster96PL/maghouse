@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WarehouseResponse {
+    private long id;
     private WarehouseSpaceType warehouseSpaceType;
     private WarehouseLocation warehouseLocation;
     private Long userId;
