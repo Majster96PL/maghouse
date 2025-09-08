@@ -1,7 +1,7 @@
 package com.example.maghouse.auth.registration.user;
 
 import com.example.maghouse.auth.registration.role.Role;
-import com.example.maghouse.item.Item;
+import com.example.maghouse.item.ItemEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -15,7 +15,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
-
 
 @Entity
 @Data
@@ -44,7 +43,7 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
     @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    private List<Item> items;
+    private List<ItemEntity> items;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

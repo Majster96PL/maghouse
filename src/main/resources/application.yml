@@ -21,4 +21,4 @@ spring:
       classpath: properties.secret
 server:
   servlet:
-    classPath: /maghouse
+    contextPath: /maghouse

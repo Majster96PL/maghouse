@@ -1,30 +1,45 @@
 package com.example.maghouse.mapper;
 
-import com.example.maghouse.item.Item;
+import com.example.maghouse.item.ItemEntity;
+import com.example.maghouse.item.ItemRequest;
 import com.example.maghouse.item.ItemResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
-public class ItemResponseToItemMapper implements ItemMapper<ItemResponse, Item>{
-
+public class ItemResponseToItemMapper implements ItemMapper<ItemRequest, ItemResponse, ItemEntity>{
 
     @Override
-    public Item mapToItem(ItemResponse itemResponse) {
-        return Item.builder()
-                .name(itemResponse.getName())
-                .itemCode(itemResponse.getItemCode())
-                .quantity(itemResponse.getQuantity())
-                .locationCode(null)
-                .user(itemResponse.getUser())
+    public ItemResponse mapToItem(ItemRequest itemRequest, String itemCode, String locationCode, long userId) {
+        return ItemResponse.builder()
+                .name(itemRequest.getName())
+                .itemCode(itemCode)
+                .quantity(itemRequest.getQuantity())
+                .locationCode(locationCode)
+                .userId(userId)
                 .build();
     }
 
     @Override
-    public void mapIteRequestToItemResponse(ItemResponse itemRequest, Item itemResponse) {
-            itemResponse.setName(itemRequest.getName());
-            itemResponse.setQuantity(itemRequest.getQuantity());
+    public ItemEntity mapToResponse(ItemResponse itemResponse) {
+        return ItemEntity.builder()
+                .name(itemResponse.getName())
+                .itemCode(itemResponse.getItemCode())
+                .quantity(itemResponse.getQuantity())
+                .user(null)
+                .warehouse(null)
+                .deliveries(null)
+                .build();
+    }
 
+
+    @Override
+    public ItemResponse mapToItemResponse(ItemEntity itemEntity) {
+        return ItemResponse.builder()
+                .name(itemEntity.getName())
+                .itemCode(itemEntity.getItemCode())
+                .quantity(itemEntity.getQuantity())
+                .locationCode(itemEntity.getLocationCode())
+                .userId(itemEntity.getUser().getId())
+                .build();
     }
 }

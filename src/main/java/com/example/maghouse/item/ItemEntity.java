@@ -22,7 +22,7 @@ import java.util.List;
 @Table(name = "items")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Item {
+public class ItemEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

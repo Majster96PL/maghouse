@@ -2,7 +2,7 @@ package com.example.maghouse.delivery;
 
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.delivery.status.DeliveryStatus;
-import com.example.maghouse.item.Item;
+import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
@@ -45,7 +45,7 @@ public class Delivery {
     @ManyToOne
     @JoinColumn(name = "item_id")
     @JsonBackReference
-    private Item item;
+    private ItemEntity item;
 
 
 }

@@ -71,8 +71,8 @@ public class ItemServiceIntegrationTest {
         userRepository.save(user);
     }
 
-    private Item createAndSaveTestItem(){
-        Item item = Item.builder()
+    private ItemEntity createAndSaveTestItem(){
+        ItemEntity item = com.example.maghouse.item.ItemEntity.builder()
                 .id(1L)
                 .name("Test Name")
                 .itemCode("TestCode")
@@ -85,7 +85,7 @@ public class ItemServiceIntegrationTest {
     @Test
     public void shouldCreateItemByUser(){
         ItemRequest itemRequest = new ItemRequest("Item", 10);
-        Item testItem = itemService.createItem(itemRequest);
+        ItemEntity testItem = itemService.createItem(itemRequest);
 
         assertNotNull(testItem.getId());
         assertEquals("Item", testItem.getName());
@@ -95,17 +95,17 @@ public class ItemServiceIntegrationTest {
 
     @Test
     public void shouldUpdateItemQuantity(){
-        Item item = createAndSaveTestItem();
+        ItemEntity item = createAndSaveTestItem();
         ItemRequest updateRequest = new ItemRequest("Test Name", 100);
 
-        Item updatedItem = itemService.updateItemQuantity(item.getId(), updateRequest);
+        ItemEntity updatedItem = itemService.updateItemQuantity(item.getId(), updateRequest);
 
         assertEquals(100, updatedItem.getQuantity());
     }
 
     @Test
     public void shouldDeleteItem(){
-        Item item = createAndSaveTestItem();
+        ItemEntity item = createAndSaveTestItem();
 
         itemService.deleteItem(item.getId());
 

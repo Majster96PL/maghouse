@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface ItemRepository extends JpaRepository<Item, Long> {
-    Optional<Item> findByItemCode(String itemCode);
+public interface ItemRepository extends JpaRepository<ItemEntity, Long> {
+    Optional<ItemEntity> findByItemCode(String itemCode);
 }

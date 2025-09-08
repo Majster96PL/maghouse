@@ -5,7 +5,7 @@ import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.delivery.status.DeliveryStatus;
 import com.example.maghouse.delivery.status.DeliveryStatusRequest;
-import com.example.maghouse.item.Item;
+import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.mapper.DeliveryResponseToDeliveryMapper;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
@@ -55,7 +55,7 @@ public class DeliveryServiceTest {
     @InjectMocks
     private DeliveryService deliveryService;
 
-    private Item item;
+    private ItemEntity item;
     private User user;
     private Delivery delivery;
 
@@ -71,7 +71,7 @@ public class DeliveryServiceTest {
                 .items(new ArrayList<>())
                 .build();
 
-        item = Item.builder()
+        item = com.example.maghouse.item.ItemEntity.builder()
                 .name("ItemName")
                 .itemCode("itemCode")
                 .quantity(100)
@@ -261,6 +261,4 @@ public class DeliveryServiceTest {
        assertThrows(IllegalArgumentException.class,
                () -> deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId()));
    }
-
-
 }

@@ -3,7 +3,7 @@ package com.example.maghouse.warehouse;
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
-import com.example.maghouse.item.Item;
+import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.security.PasswordEncoder;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
@@ -55,7 +55,7 @@ public class WarehouseServiceIntegrationTest {
     private ItemRepository itemRepository;
 
     private User user;
-    private Item item;
+    private ItemEntity item;
     private Warehouse warehouse;
 
     @BeforeEach
@@ -94,8 +94,8 @@ public class WarehouseServiceIntegrationTest {
         userRepository.save(user);
     }
 
-    private Item createAndSaveTestItem(){
-        item = Item.builder()
+    private ItemEntity createAndSaveTestItem(){
+        item = ItemEntity.builder()
                 .id(1L)
                 .name("Test Name")
                 .itemCode("TEST123")
@@ -138,11 +138,11 @@ public class WarehouseServiceIntegrationTest {
     void shouldAssignCorrectLocation(){
         Warehouse warehouse = createAndSaveTestWarehouse();
 
-        Item item = createAndSaveTestItem();
+        ItemEntity item = createAndSaveTestItem();
 
         WarehouseSpaceTypeRequest request = new WarehouseSpaceTypeRequest(WarehouseSpaceType.DRAVER);
 
-        Item result = warehouseService.assignLocationCode(request, item.getId());
+        ItemEntity result = warehouseService.assignLocationCode(request, item.getId());
 
         assertNotNull(result);
         assertNotNull(result.getLocationCode());
@@ -152,13 +152,13 @@ public class WarehouseServiceIntegrationTest {
 
     @Test
     void shouldUpdateLocationPrefix(){
-        Item item = createAndSaveTestItem();
+        ItemEntity item = createAndSaveTestItem();
         item.setLocationCode("RS01C");
         itemRepository.save(item);
 
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(WarehouseLocation.Krakow);
 
-        Item result = warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, item.getId());
+        ItemEntity result = warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, item.getId());
 
         assertNotNull(result);
         assertTrue(result.getLocationCode().matches("^KS\\d{2}[A-C]$"));
@@ -169,13 +169,13 @@ public class WarehouseServiceIntegrationTest {
     void shouldAssignItemsToWarehouseLocation(){
         Warehouse warehouse = createAndSaveTestWarehouse();
 
-        Item item = createAndSaveTestItem();
+        ItemEntity item = createAndSaveTestItem();
         item.setLocationCode("S02B");
         itemRepository.save(item);
 
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(WarehouseLocation.Warsaw);
 
-        Item result = warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId());
+        ItemEntity result = warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId());
 
         assertNotNull(result);
         assertEquals("WS02B", result.getLocationCode());

@@ -1,18 +1,19 @@
 package com.example.maghouse.item;
 
-import com.example.maghouse.auth.registration.user.User;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ItemResponse {
     private String name;
     private String itemCode;
     private int quantity;
     private String locationCode;
-    private User user;
+    private long userId;
 
 }
