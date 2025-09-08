@@ -19,3 +19,6 @@ spring:
   config:
     import:
       classpath: properties.secret
+server:
+  servlet:
+    classPath: /maghouse

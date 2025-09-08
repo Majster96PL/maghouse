@@ -8,19 +8,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping(path = "/auth/item/")
+@RequestMapping(path = "/items/")
 @RestController
 @RequiredArgsConstructor
 public class ItemController {
 
     private final ItemService itemService;
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<Item> create(@RequestBody ItemRequest itemRequest) {
         Item item = itemService.createItem(itemRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(item);
     }
-    @PutMapping("/update/{itemId}")
+    @PutMapping("/{itemId}")
     public ResponseEntity<Item> updateItemQuantity(@PathVariable Long itemId, @RequestBody ItemRequest itemRequest) {
         Item updatedItem = itemService.updateItemQuantity(itemId, itemRequest);
         return ResponseEntity.ok(updatedItem);
