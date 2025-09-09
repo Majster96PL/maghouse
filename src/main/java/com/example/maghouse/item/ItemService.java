@@ -32,7 +32,7 @@ public class ItemService {
                 .orElseThrow(() -> new IllegalArgumentException("User with email not found"));
         String code = itemCodeGenerator.generateItemCode();
 
-        ItemResponse itemResponse = itemResponseToItemMapper.mapToItem(itemRequest, code, null, user.getId() );
+        ItemResponse itemResponse = itemResponseToItemMapper.mapToItemResponse(itemRequest, code, null, user.getId() );
         ItemEntity item = itemResponseToItemMapper.mapToResponse(itemResponse);
         item.setUser(user);
         return itemRepository.save(item);
