@@ -39,7 +39,7 @@ public class ItemControllerTest {
 
         itemRequest = new ItemRequest("Test_Item", 100);
 
-        item = com.example.maghouse.item.ItemEntity.builder()
+        item = ItemEntity.builder()
                 .id(1L)
                 .name("Test_Item")
                 .itemCode("ITEM_CODE")
