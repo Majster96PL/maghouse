@@ -32,8 +32,8 @@ public class ItemService {
                 .orElseThrow(() -> new IllegalArgumentException("User with email not found"));
         String code = itemCodeGenerator.generateItemCode();
 
-        ItemResponse itemResponse = itemResponseToItemMapper.mapToItemResponse(itemRequest, code, null, user.getId() );
-        ItemEntity item = itemResponseToItemMapper.mapToResponse(itemResponse);
+        ItemResponse itemResponse = itemResponseToItemMapper.mapToItemResponseFromRequest(itemRequest, code, null, user.getId() );
+        ItemEntity item = itemResponseToItemMapper.mapToEntityFromResponse(itemResponse);
         item.setUser(user);
         return itemRepository.save(item);
     }

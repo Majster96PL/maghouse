@@ -21,13 +21,13 @@ public class ItemController {
     @PostMapping
     public ResponseEntity<ItemResponse> create(@RequestBody ItemRequest itemRequest) {
         ItemEntity item = itemService.createItem(itemRequest);
-        ItemResponse itemResponse = itemResponseToItemMapper.mapToItemResponse(item);
+        ItemResponse itemResponse = itemResponseToItemMapper.mapToItem(item);
         return ResponseEntity.status(HttpStatus.CREATED).body(itemResponse);
     }
     @PutMapping("/{itemId}")
     public ResponseEntity<ItemResponse> updateItemQuantity(@PathVariable Long itemId, @RequestBody ItemRequest itemRequest) {
         ItemEntity updatedItem = itemService.updateItemQuantity(itemId, itemRequest);
-        ItemResponse updatedItemResponse = itemResponseToItemMapper.mapToItemResponse(updatedItem);
+        ItemResponse updatedItemResponse = itemResponseToItemMapper.mapToItem(updatedItem);
         return ResponseEntity.ok(updatedItemResponse);
     }
 
