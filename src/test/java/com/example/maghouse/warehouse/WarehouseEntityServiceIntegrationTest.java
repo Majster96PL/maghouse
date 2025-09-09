@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @AutoConfigureMockMvc
 @Transactional
-public class WarehouseServiceIntegrationTest {
+public class WarehouseEntityServiceIntegrationTest {
 
     @Autowired
     private WarehouseService warehouseService;
@@ -56,7 +56,7 @@ public class WarehouseServiceIntegrationTest {
 
     private User user;
     private ItemEntity item;
-    private Warehouse warehouse;
+    private WarehouseEntity warehouseEntity;
 
     @BeforeEach
     void setUp(){
@@ -102,14 +102,14 @@ public class WarehouseServiceIntegrationTest {
                 .locationCode(null)
                 .quantity(10)
                 .user(user)
-                .warehouse(null)
+                .warehouseEntity(null)
                 .build();
 
         return itemRepository.save(item);
     }
 
-    private Warehouse createAndSaveTestWarehouse(){
-         warehouse = Warehouse.builder()
+    private WarehouseEntity createAndSaveTestWarehouse(){
+         warehouseEntity = WarehouseEntity.builder()
                 .id(1L)
                 .warehouseSpaceType(WarehouseSpaceType.SHELF)
                 .warehouseLocation(WarehouseLocation.Warsaw)
@@ -117,7 +117,7 @@ public class WarehouseServiceIntegrationTest {
                 .items(new ArrayList<>())
                 .build();
 
-        return warehouseRepository.save(warehouse);
+        return warehouseRepository.save(warehouseEntity);
     }
 
     @Test
@@ -126,7 +126,7 @@ public class WarehouseServiceIntegrationTest {
         request.setWarehouseSpaceType(WarehouseSpaceType.SHELF);
         request.setWarehouseLocation(WarehouseLocation.Rzeszow);
 
-        Warehouse result = warehouseService.createWarehouse(request);
+        WarehouseEntity result = warehouseService.createWarehouse(request);
 
         assertNotNull(result.getId());
         assertEquals(WarehouseSpaceType.SHELF, result.getWarehouseSpaceType());
@@ -136,7 +136,7 @@ public class WarehouseServiceIntegrationTest {
 
     @Test
     void shouldAssignCorrectLocation(){
-        Warehouse warehouse = createAndSaveTestWarehouse();
+        WarehouseEntity warehouseEntity = createAndSaveTestWarehouse();
 
         ItemEntity item = createAndSaveTestItem();
 
@@ -167,7 +167,7 @@ public class WarehouseServiceIntegrationTest {
 
     @Test
     void shouldAssignItemsToWarehouseLocation(){
-        Warehouse warehouse = createAndSaveTestWarehouse();
+        WarehouseEntity warehouseEntity = createAndSaveTestWarehouse();
 
         ItemEntity item = createAndSaveTestItem();
         item.setLocationCode("S02B");
@@ -179,7 +179,7 @@ public class WarehouseServiceIntegrationTest {
 
         assertNotNull(result);
         assertEquals("WS02B", result.getLocationCode());
-        assertEquals(warehouse.getId(), result.getWarehouse().getId());
+        assertEquals(warehouseEntity.getId(), result.getWarehouseEntity().getId());
     }
 
     @Test

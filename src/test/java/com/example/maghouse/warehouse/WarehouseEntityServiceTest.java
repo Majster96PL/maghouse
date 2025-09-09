@@ -29,7 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class WarehouseServiceTest {
+public class WarehouseEntityServiceTest {
 
     @Mock
     private WarehouseResponseToWarehouseMapper warehouseResponseToWarehouseMapper;
@@ -80,17 +80,17 @@ public class WarehouseServiceTest {
     @Test
     void shouldCreateWarehouse_WhenUserIsAuthenticated() {
         WarehouseRequest warehouseRequest = new WarehouseRequest(WarehouseSpaceType.CONTAINER, WarehouseLocation.Krakow);
-        Warehouse warehouse = new Warehouse(1L, warehouseRequest.getWarehouseSpaceType(), warehouseRequest.getWarehouseLocation(), user, new ArrayList<>());
+        WarehouseEntity warehouseEntity = new WarehouseEntity(1L, warehouseRequest.getWarehouseSpaceType(), warehouseRequest.getWarehouseLocation(), user, new ArrayList<>());
 
-        when(warehouseResponseToWarehouseMapper.mapToEntity(any(WarehouseResponse.class))).thenReturn(warehouse);
-        when(warehouseRepository.save(any(Warehouse.class))).thenReturn(warehouse);
+        when(warehouseResponseToWarehouseMapper.mapToEntityFromResponse(any(WarehouseResponse.class))).thenReturn(warehouseEntity);
+        when(warehouseRepository.save(any(WarehouseEntity.class))).thenReturn(warehouseEntity);
 
-        Warehouse result = warehouseService.createWarehouse(warehouseRequest);
+        WarehouseEntity result = warehouseService.createWarehouse(warehouseRequest);
 
         assertNotNull(result);
         assertEquals(warehouseRequest.getWarehouseSpaceType(), result.getWarehouseSpaceType());
         assertEquals(warehouseRequest.getWarehouseLocation(), result.getWarehouseLocation());
-        verify(warehouseRepository, times(1)).save(any(Warehouse.class));
+        verify(warehouseRepository, times(1)).save(any(WarehouseEntity.class));
     }
 
     @Test
@@ -124,10 +124,10 @@ public class WarehouseServiceTest {
     void shouldAssignItemsToWarehouseLocation() {
         WarehouseLocationRequest locationRequest = new WarehouseLocationRequest(WarehouseLocation.Warsaw);
         ItemEntity item = new ItemEntity(1L, "Test_Item", "itemCode", 450, "S01A", user, null, new ArrayList<>());
-        Warehouse warehouse = new Warehouse(1L, WarehouseSpaceType.SHELF, WarehouseLocation.Warsaw, user, new ArrayList<>());
+        WarehouseEntity warehouseEntity = new WarehouseEntity(1L, WarehouseSpaceType.SHELF, WarehouseLocation.Warsaw, user, new ArrayList<>());
 
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
-        when(warehouseRepository.findFirstByWarehouseLocation(locationRequest.getWarehouseLocation())).thenReturn(Optional.of(warehouse));
+        when(warehouseRepository.findFirstByWarehouseLocation(locationRequest.getWarehouseLocation())).thenReturn(Optional.of(warehouseEntity));
         when(itemRepository.save(any(ItemEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         ItemEntity result = warehouseService.assignItemsToWarehouseLocation(locationRequest, 1L);
