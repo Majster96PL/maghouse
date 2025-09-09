@@ -10,13 +10,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(path = "/auth/warehouse/")
+@RequestMapping(path = "/warehouses/")
 @AllArgsConstructor
 public class WarehouseController {
 
     private final WarehouseService warehouseService;
 
-    @PostMapping("/create")
+    @PostMapping
     public Warehouse create(@RequestBody WarehouseRequest warehouseRequest){
         return warehouseService.createWarehouse(warehouseRequest);
     }
@@ -34,7 +34,7 @@ public class WarehouseController {
          return warehouseService.assignItemsToWarehouseLocation( warehouseLocationRequest, itemId);
     }
 
-    @PutMapping("/update-location/{itemId}")
+    @PutMapping("/{itemId}")
     public ItemEntity updateWarehouseLocation(@PathVariable Long itemId,
                                         @RequestBody  WarehouseLocationRequest warehouseLocationRequest){
         return warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId);
