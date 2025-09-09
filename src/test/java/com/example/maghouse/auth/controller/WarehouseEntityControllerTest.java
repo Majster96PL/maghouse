@@ -4,8 +4,9 @@ import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.item.Item;
-import com.example.maghouse.warehouse.Warehouse;
+import com.example.maghouse.warehouse.WarehouseEntity;
 import com.example.maghouse.warehouse.WarehouseRequest;
+import com.example.maghouse.warehouse.WarehouseResponse;
 import com.example.maghouse.warehouse.WarehouseService;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
 import com.example.maghouse.warehouse.location.WarehouseLocationRequest;
@@ -28,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-public class WarehouseControllerTest {
+public class WarehouseEntityControllerTest {
 
     @Mock
     private WarehouseService warehouseService;
@@ -79,19 +80,18 @@ public class WarehouseControllerTest {
         request.setWarehouseSpaceType(WarehouseSpaceType.SHELF);
         request.setWarehouseLocation(WarehouseLocation.Rzeszow);
 
-        Warehouse warehouse = Warehouse.builder()
+        WarehouseEntity warehouseEntity = WarehouseEntity.builder()
                 .id(1L)
                 .warehouseSpaceType(WarehouseSpaceType.SHELF)
                 .warehouseLocation(WarehouseLocation.Rzeszow)
                 .user(user)
                 .build();
 
-        when(warehouseService.createWarehouse(request)).thenReturn(warehouse);
+        when(warehouseService.createWarehouse(request)).thenReturn(warehouseEntity);
 
-        Warehouse result = warehouseController.create(request);
+        WarehouseResponse result = warehouseController.create(request);
 
-        assertEquals(1L, result.getId());
-        assertEquals(user, result.getUser());
+        assertEquals(user, result.getUserId());
         verify(warehouseService).createWarehouse(request);
 
     }
@@ -163,7 +163,7 @@ public class WarehouseControllerTest {
                 .deliveries(null)
                 .build();
 
-        Warehouse warehouse = Warehouse.builder()
+        WarehouseEntity warehouseEntity = WarehouseEntity.builder()
                 .id(1L)
                 .warehouseSpaceType(WarehouseSpaceType.SHELF)
                 .warehouseLocation(WarehouseLocation.Rzeszow)
@@ -174,13 +174,13 @@ public class WarehouseControllerTest {
         when(warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId()))
                 .thenReturn(item);
 
-        item.setWarehouse(warehouse);
+        item.setWarehouseEntity(warehouseEntity);
 
         Item result = warehouseController.assignWarehouseLocation(item.getId(), warehouseLocationRequest);
 
         assertEquals(item.getId(), result.getId());
         assertEquals("RS05B", result.getLocationCode());
-        assertEquals(warehouse.getId(), result.getWarehouse().getId());
+        assertEquals(warehouseEntity.getId(), result.getWarehouseEntity().getId());
         verify(warehouseService).assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId());
 
     }
@@ -192,7 +192,7 @@ public class WarehouseControllerTest {
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest();
 
         when(warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, id))
-                .thenThrow(new IllegalArgumentException("Warehouse not found!!"));
+                .thenThrow(new IllegalArgumentException("WarehouseEntity not found!!"));
 
         assertThrows(IllegalArgumentException.class,
                 () -> warehouseController.assignWarehouseLocation(id, warehouseLocationRequest));
@@ -216,7 +216,7 @@ public class WarehouseControllerTest {
                 .deliveries(null)
                 .build();
 
-        Warehouse warehouse = Warehouse.builder()
+        WarehouseEntity warehouseEntity = WarehouseEntity.builder()
                 .id(2L)
                 .warehouseSpaceType(WarehouseSpaceType.SHELF)
                 .warehouseLocation(WarehouseLocation.Warsaw)

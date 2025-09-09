@@ -1,8 +1,10 @@
 package com.example.maghouse.auth.controller;
 
 import com.example.maghouse.item.Item;
-import com.example.maghouse.warehouse.Warehouse;
+import com.example.maghouse.mapper.WarehouseResponseToWarehouseMapper;
+import com.example.maghouse.warehouse.WarehouseEntity;
 import com.example.maghouse.warehouse.WarehouseRequest;
+import com.example.maghouse.warehouse.WarehouseResponse;
 import com.example.maghouse.warehouse.WarehouseService;
 import com.example.maghouse.warehouse.location.WarehouseLocationRequest;
 import com.example.maghouse.warehouse.spacetype.WarehouseSpaceTypeRequest;
@@ -15,10 +17,12 @@ import org.springframework.web.bind.annotation.*;
 public class WarehouseController {
 
     private final WarehouseService warehouseService;
+    private final WarehouseResponseToWarehouseMapper warehouseResponseToWarehouseMapper;
 
     @PostMapping
-    public Warehouse create(@RequestBody WarehouseRequest warehouseRequest){
-        return warehouseService.createWarehouse(warehouseRequest);
+    public WarehouseResponse create(@RequestBody WarehouseRequest warehouseRequest){
+        WarehouseEntity warehouse = warehouseService.createWarehouse(warehouseRequest);
+        return warehouseResponseToWarehouseMapper.mapToWarehouse(warehouse);
     }
 
     @PostMapping("/assign-space-type/{itemId}")

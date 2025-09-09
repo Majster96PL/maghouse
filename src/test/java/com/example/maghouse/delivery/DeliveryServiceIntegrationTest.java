@@ -100,7 +100,7 @@ public class DeliveryServiceIntegrationTest {
                 .quantity(100)
                 .locationCode("RSO1B")
                 .user(user)
-                .warehouse(null)
+                .warehouseEntity(null)
                 .deliveries(new ArrayList<>())
                 .build();
 

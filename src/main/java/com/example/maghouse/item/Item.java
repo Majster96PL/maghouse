@@ -2,7 +2,7 @@ package com.example.maghouse.item;
 
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.delivery.DeliveryEntity;
-import com.example.maghouse.warehouse.Warehouse;
+import com.example.maghouse.warehouse.WarehouseEntity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -42,7 +42,7 @@ public class Item {
     private User user;
     @ManyToOne
     @JoinColumn(name = "warehouse_id")
-    private Warehouse warehouse;
+    private WarehouseEntity warehouseEntity;
     @OneToMany(mappedBy = "item")
     @JsonManagedReference
     private List<DeliveryEntity> deliveries;

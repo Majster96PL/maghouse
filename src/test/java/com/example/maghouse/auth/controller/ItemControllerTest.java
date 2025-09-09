@@ -45,7 +45,7 @@ public class ItemControllerTest {
                 .locationCode("Location_Code")
                 .quantity(100)
                 .user(user)
-                .warehouse(null)
+                .warehouseEntity(null)
                 .deliveries(null)
                 .build();
 

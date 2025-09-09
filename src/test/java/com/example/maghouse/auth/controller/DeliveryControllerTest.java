@@ -5,6 +5,7 @@ import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.delivery.DeliveryEntity;
 import com.example.maghouse.delivery.DeliveryRequest;
+import com.example.maghouse.delivery.DeliveryResponse;
 import com.example.maghouse.delivery.DeliveryService;
 import com.example.maghouse.delivery.status.DeliveryStatus;
 import com.example.maghouse.delivery.status.DeliveryStatusRequest;
@@ -93,7 +94,7 @@ public class DeliveryControllerTest {
                 .build();
         when(deliveryService.createDelivery(request)).thenReturn(exceptedDelivery);
 
-        DeliveryEntity result = deliveryController.create(request).getBody();
+        DeliveryResponse result = deliveryController.create(request).getBody();
 
         assertNotNull(result);
         assertEquals(exceptedDelivery, result);
@@ -125,7 +126,7 @@ public class DeliveryControllerTest {
 
         when(deliveryService.updateDeliveryStatus(deliveryStatusRequest, id)).thenReturn(updatedDelivery);
 
-        DeliveryEntity result = deliveryController.updateDeliveryStatus(deliveryStatusRequest, id).getBody();
+        DeliveryResponse result = deliveryController.updateDeliveryStatus(deliveryStatusRequest, id).getBody();
 
         assertNotNull(result);
         assertEquals(DeliveryStatus.IN_PROGRESS, result.getDeliveryStatus());
