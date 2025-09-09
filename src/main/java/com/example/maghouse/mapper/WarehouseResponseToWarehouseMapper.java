@@ -1,6 +1,6 @@
 package com.example.maghouse.mapper;
 
-import com.example.maghouse.item.Item;
+import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.warehouse.WarehouseEntity;
 import com.example.maghouse.warehouse.WarehouseRequest;
 import com.example.maghouse.warehouse.WarehouseResponse;
@@ -40,7 +40,7 @@ public class WarehouseResponseToWarehouseMapper implements WarehouseMapper<Wareh
                 .warehouseLocation(warehouseEntity.getWarehouseLocation())
                 .userId(warehouseEntity.getUser().getId())
                 .itemsId(warehouseEntity.getItems().stream()
-                        .map(Item::getId)
+                        .map(ItemEntity::getId)
                         .collect(Collectors.toList()))
                 .build();
     }
