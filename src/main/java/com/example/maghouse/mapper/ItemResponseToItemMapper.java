@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class ItemResponseToItemMapper implements ItemMapper<ItemRequest, ItemResponse, ItemEntity>{
 
     @Override
-    public ItemResponse mapToItemResponse(ItemRequest itemRequest, String itemCode, String locationCode, long id) {
+    public ItemResponse mapToItemResponseFromRequest(ItemRequest itemRequest, String itemCode, String locationCode, long id) {
         return ItemResponse.builder()
                 .name(itemRequest.getName())
                 .itemCode(itemCode)
@@ -21,7 +21,7 @@ public class ItemResponseToItemMapper implements ItemMapper<ItemRequest, ItemRes
 
 
     @Override
-    public ItemEntity mapToResponse(ItemResponse itemResponse) {
+    public ItemEntity mapToEntityFromResponse(ItemResponse itemResponse) {
         return ItemEntity.builder()
                 .name(itemResponse.getName())
                 .itemCode(itemResponse.getItemCode())
@@ -34,7 +34,7 @@ public class ItemResponseToItemMapper implements ItemMapper<ItemRequest, ItemRes
 
 
     @Override
-    public ItemResponse mapToItemResponse(ItemEntity itemEntity) {
+    public ItemResponse mapToItem(ItemEntity itemEntity) {
         return ItemResponse.builder()
                 .name(itemEntity.getName())
                 .itemCode(itemEntity.getItemCode())
