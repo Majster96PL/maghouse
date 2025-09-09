@@ -31,7 +31,7 @@ public class SecurityConfig {
                         auth.requestMatchers("/auth/**").permitAll()
                                 .requestMatchers("/h2-console/**").permitAll()
                                 .requestMatchers("/auth/item/**").hasAnyRole("USER", "ADMIN", "MANAGER", "WAREHOUSEMAN", "DRIVER")
-                                .requestMatchers("/auth/warehouse/**").hasAnyRole("USER", "ADMIN", "MANAGER", "WAREHOUSEMAN", "DRIVER")
+                                .requestMatchers("/maghouse/warehouses/**").hasAnyRole("USER", "ADMIN", "MANAGER", "WAREHOUSEMAN", "DRIVER")
                                 .requestMatchers("/maghouse/**").hasAnyRole("USER", "ADMIN", "MANAGER", "WAREHOUSEMAN", "DRIVER")
                                 .requestMatchers("/auth/admin/**").hasRole("ADMIN")
                                 .anyRequest().authenticated())
