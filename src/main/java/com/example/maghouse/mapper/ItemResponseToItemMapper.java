@@ -9,15 +9,16 @@ import org.springframework.stereotype.Component;
 public class ItemResponseToItemMapper implements ItemMapper<ItemRequest, ItemResponse, ItemEntity>{
 
     @Override
-    public ItemResponse mapToItem(ItemRequest itemRequest, String itemCode, String locationCode, long userId) {
+    public ItemResponse mapToItemResponse(ItemRequest itemRequest, String itemCode, String locationCode, long id) {
         return ItemResponse.builder()
                 .name(itemRequest.getName())
                 .itemCode(itemCode)
                 .quantity(itemRequest.getQuantity())
                 .locationCode(locationCode)
-                .userId(userId)
+                .userId(id)
                 .build();
     }
+
 
     @Override
     public ItemEntity mapToResponse(ItemResponse itemResponse) {
