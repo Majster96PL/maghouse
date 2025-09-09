@@ -21,7 +21,7 @@ import java.sql.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "delivery" )
-public class Delivery {
+public class DeliveryEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

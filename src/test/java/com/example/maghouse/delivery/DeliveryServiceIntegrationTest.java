@@ -53,7 +53,7 @@ public class DeliveryServiceIntegrationTest {
 
     private User user;
     private ItemEntity item;
-    private Delivery delivery;
+    private DeliveryEntity delivery;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -107,8 +107,8 @@ public class DeliveryServiceIntegrationTest {
         return itemRepository.save(item);
     }
 
-    private Delivery createDeliveryTest(){
-        delivery = Delivery.builder()
+    private DeliveryEntity createDeliveryTest(){
+        delivery = DeliveryEntity.builder()
                 .supplier("INPOST")
                 .date(Date.valueOf(LocalDate.now()))
                 .numberDelivery("13/05/2025")
@@ -134,11 +134,11 @@ public class DeliveryServiceIntegrationTest {
                 WarehouseLocation.Rzeszow
         );
 
-        Delivery result = deliveryService.createDelivery(deliveryRequest);
+        DeliveryEntity result = deliveryService.createDelivery(deliveryRequest);
 
         assertNotNull(result.getId());
         assertEquals(DeliveryStatus.CREATED,result.getDeliveryStatus());
-        assertEquals(user.getEmail(), result.getUser().getEmail());
+        assertEquals(user.getEmail(), result.getUser());
     }
 
     @Test
@@ -146,13 +146,13 @@ public class DeliveryServiceIntegrationTest {
         DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
         int initialQuantity = item.getQuantity();
 
-        Delivery updatedDelivery = deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId());
+        DeliveryEntity updatedDelivery = deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId());
         assertEquals(DeliveryStatus.IN_PROGRESS, updatedDelivery.getDeliveryStatus());
 
         ItemEntity unchangedItem = itemRepository.findById(item.getId()).orElseThrow();
         assertEquals(initialQuantity, unchangedItem.getQuantity());
 
-        Delivery persistedDelivery = deliveryRepository.findById(delivery.getId()).orElseThrow();
+        DeliveryEntity persistedDelivery = deliveryRepository.findById(delivery.getId()).orElseThrow();
         assertEquals(DeliveryStatus.IN_PROGRESS, persistedDelivery.getDeliveryStatus());
     }
 
@@ -162,7 +162,7 @@ public class DeliveryServiceIntegrationTest {
         int deliveryQuantity = delivery.getQuantity();
         DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.DELIVERED);
 
-        Delivery updatedDelivery = deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId());
+        DeliveryEntity updatedDelivery = deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId());
 
         ItemEntity updatedItem = itemRepository.findById(item.getId()).orElseThrow();
         assertEquals(DeliveryStatus.DELIVERED, updatedDelivery.getDeliveryStatus());
