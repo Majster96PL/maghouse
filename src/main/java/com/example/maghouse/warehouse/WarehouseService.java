@@ -30,7 +30,6 @@ public class WarehouseService {
     private final ItemRepository itemRepository;
     private static final WarehouseResponse warehouseResponse = new WarehouseResponse();
 
-
     @Transactional
     public WarehouseEntity createWarehouse(WarehouseRequest warehouseRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -66,7 +65,6 @@ public class WarehouseService {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new SecurityException("User is not authenticated!");
         }
-
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         var user = userRepository.findUserByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("User with email not found!"));
@@ -76,14 +74,10 @@ public class WarehouseService {
 
         ItemEntity item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found!"));
-
         String locationPrefix = generateLocationPrefix(warehouseLocationRequest.getWarehouseLocation());
-
-
         String newLocation = locationPrefix + item.getLocationCode();
         item.setLocationCode(newLocation);
         item.setUser(user);
-        item.setWarehouseEntity(warehouseEntity);
         itemRepository.save(item);
 
         return item;
