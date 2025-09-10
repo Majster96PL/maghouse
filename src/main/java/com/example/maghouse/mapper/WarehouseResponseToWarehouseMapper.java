@@ -38,7 +38,7 @@ public class WarehouseResponseToWarehouseMapper implements WarehouseMapper<Wareh
         return WarehouseResponse.builder()
                 .warehouseSpaceType(warehouseEntity.getWarehouseSpaceType())
                 .warehouseLocation(warehouseEntity.getWarehouseLocation())
-                .userId(warehouseEntity.getId())
+                .userId(warehouseEntity.getUser().getId())
                 .itemsId(warehouseEntity.getItems().stream()
                         .map(Item::getId)
                         .collect(Collectors.toList()))
