@@ -3,7 +3,7 @@ package com.example.maghouse.auth.controller;
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
-import com.example.maghouse.item.Item;
+import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.security.PasswordEncoder;
 import com.example.maghouse.warehouse.Warehouse;
@@ -72,7 +72,7 @@ public class WarehouseControllerIntegrationTest {
     private WarehouseRepository warehouseRepository;
 
     private User user;
-    private Item item;
+    private ItemEntity item;
     private Warehouse warehouse;
 
 
@@ -126,8 +126,8 @@ public class WarehouseControllerIntegrationTest {
         return warehouseRepository.save(warehouse);
     }
 
-    private Item createAndSaveTestItem(){
-         item = Item.builder()
+    private ItemEntity createAndSaveTestItem(){
+         item = ItemEntity.builder()
                 .name("TestName")
                 .itemCode("itemCode")
                 .locationCode(null)

@@ -8,7 +8,7 @@ import com.example.maghouse.delivery.DeliveryRepository;
 import com.example.maghouse.delivery.DeliveryRequest;
 import com.example.maghouse.delivery.status.DeliveryStatus;
 import com.example.maghouse.delivery.status.DeliveryStatusRequest;
-import com.example.maghouse.item.Item;
+import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.security.PasswordEncoder;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
@@ -159,7 +159,7 @@ public class DeliveryControllerIntegrationTest {
 
     @Test
     void shouldUpdateDeliveryStatusToDeliveredAndUpdatedItemQuantity() throws Exception{
-        Item item = Item.builder()
+        ItemEntity item = com.example.maghouse.item.ItemEntity.builder()
                 .name(delivery.getItemName())
                 .itemCode(delivery.getItemCode())
                 .locationCode(null)
@@ -183,7 +183,7 @@ public class DeliveryControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.deliveryStatus").value("DELIVERED"));
 
-        Item updatedItem = itemRepository.findByItemCode(item.getItemCode())
+        ItemEntity updatedItem = itemRepository.findByItemCode(item.getItemCode())
                         .orElseThrow(() -> new RuntimeException("Item noc found!"));
 
         assertEquals(200, updatedItem.getQuantity());

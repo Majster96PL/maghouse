@@ -22,7 +22,7 @@ public class ItemService {
 
 
     @Transactional
-    public Item createItem(ItemRequest itemRequest) {
+    public ItemEntity createItem(ItemRequest itemRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new SecurityException("User is not authenticated");
@@ -30,19 +30,15 @@ public class ItemService {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userRepository.findUserByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("User with email not found"));
-        itemResponse.setName(itemRequest.getName());
-        itemResponse.setQuantity(itemRequest.getQuantity());
-        itemResponse.setUser(user);
-
         String code = itemCodeGenerator.generateItemCode();
 
-        itemResponse.setItemCode(code);
-
-        var item = itemResponseToItemMapper.mapToItem(itemResponse);
+        ItemResponse itemResponse = itemResponseToItemMapper.mapToItemResponseFromRequest(itemRequest, code, null, user.getId() );
+        ItemEntity item = itemResponseToItemMapper.mapToEntityFromResponse(itemResponse);
+        item.setUser(user);
         return itemRepository.save(item);
     }
 
-    public Item updateItemQuantity(Long itemId, ItemRequest itemRequest) {
+    public ItemEntity updateItemQuantity(Long itemId, ItemRequest itemRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new SecurityException("User is not authenticated");
@@ -51,7 +47,7 @@ public class ItemService {
         User user = userRepository.findUserByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("User with email not found"));
 
-        Item item = itemRepository.findById(itemId)
+        ItemEntity item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found"));
 
         item.setQuantity(itemRequest.getQuantity());

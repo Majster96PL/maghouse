@@ -3,7 +3,7 @@ package com.example.maghouse.warehouse;
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
-import com.example.maghouse.item.Item;
+import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.mapper.WarehouseResponseToWarehouseMapper;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
@@ -110,11 +110,11 @@ public class WarehouseServiceTest {
     @Test
     void shouldAssignLocationCode() {
         WarehouseSpaceTypeRequest spaceTypeRequest = new WarehouseSpaceTypeRequest(WarehouseSpaceType.SHELF);
-        Item item = new Item(1L, "Test_Item", "itemCode", 450, null, user, null, new ArrayList<>());
+        ItemEntity item = new ItemEntity(1L, "Test_Item", "itemCode", 450, null, user, null, new ArrayList<>());
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
-        when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(itemRepository.save(any(ItemEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Item result = warehouseService.assignLocationCode(spaceTypeRequest, 1L);
+        ItemEntity result = warehouseService.assignLocationCode(spaceTypeRequest, 1L);
 
         assertNotNull(result.getLocationCode());
         assertTrue(result.getLocationCode().startsWith("S"));
@@ -123,14 +123,14 @@ public class WarehouseServiceTest {
     @Test
     void shouldAssignItemsToWarehouseLocation() {
         WarehouseLocationRequest locationRequest = new WarehouseLocationRequest(WarehouseLocation.Warsaw);
-        Item item = new Item(1L, "Test_Item", "itemCode", 450, "S01A", user, null, new ArrayList<>());
+        ItemEntity item = new ItemEntity(1L, "Test_Item", "itemCode", 450, "S01A", user, null, new ArrayList<>());
         Warehouse warehouse = new Warehouse(1L, WarehouseSpaceType.SHELF, WarehouseLocation.Warsaw, user, new ArrayList<>());
 
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
         when(warehouseRepository.findFirstByWarehouseLocation(locationRequest.getWarehouseLocation())).thenReturn(Optional.of(warehouse));
-        when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(itemRepository.save(any(ItemEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Item result = warehouseService.assignItemsToWarehouseLocation(locationRequest, 1L);
+        ItemEntity result = warehouseService.assignItemsToWarehouseLocation(locationRequest, 1L);
 
         assertNotNull(result.getLocationCode());
         assertTrue(result.getLocationCode().startsWith("W"));
@@ -146,7 +146,7 @@ public class WarehouseServiceTest {
     @Test
     void shouldUpdateItemLocation() {
         WarehouseLocationRequest locationRequest = new WarehouseLocationRequest(WarehouseLocation.Krakow);
-        Item item = new Item(1L,
+        ItemEntity item = new ItemEntity(1L,
                 "Test_Item", "itemCode",
                 450,
                 "WS01A",
@@ -155,9 +155,9 @@ public class WarehouseServiceTest {
                 new ArrayList<>());
 
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
-        when(itemRepository.save(any(Item.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(itemRepository.save(any(ItemEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Item result = warehouseService.updatedItemsToWarehouseLocation(locationRequest, 1L);
+        ItemEntity result = warehouseService.updatedItemsToWarehouseLocation(locationRequest, 1L);
 
         assertNotNull(result.getLocationCode());
         assertTrue(result.getLocationCode().startsWith("K"));

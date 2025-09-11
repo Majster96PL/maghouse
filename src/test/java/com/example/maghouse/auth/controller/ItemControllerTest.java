@@ -2,8 +2,9 @@ package com.example.maghouse.auth.controller;
 
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.User;
-import com.example.maghouse.item.Item;
+import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemRequest;
+import com.example.maghouse.item.ItemResponse;
 import com.example.maghouse.item.ItemService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,7 @@ public class ItemControllerTest {
     @InjectMocks
     private ItemController itemController;
 
-    private Item item;
+    private ItemEntity item;
     private ItemRequest itemRequest;
     private User user;
 
@@ -38,7 +39,7 @@ public class ItemControllerTest {
 
         itemRequest = new ItemRequest("Test_Item", 100);
 
-        item = Item.builder()
+        item = ItemEntity.builder()
                 .id(1L)
                 .name("Test_Item")
                 .itemCode("ITEM_CODE")
@@ -63,7 +64,7 @@ public class ItemControllerTest {
     void shouldCreateItemSuccessfully(){
         when(itemService.createItem(itemRequest)).thenReturn(item);
 
-        ResponseEntity<Item> response = itemController.create(itemRequest);
+        ResponseEntity<ItemResponse> response = itemController.create(itemRequest);
 
         assertEquals(CREATED, response.getStatusCode());
         assertEquals(item, response.getBody());
@@ -82,7 +83,7 @@ public class ItemControllerTest {
 
         when(itemService.updateItemQuantity(item.getId(),updatedItemRequest)).thenReturn(item);
 
-        ResponseEntity<Item> response = itemController.updateItemQuantity(item.getId(), updatedItemRequest);
+        ResponseEntity<ItemResponse> response = itemController.updateItemQuantity(item.getId(), updatedItemRequest);
 
         assertEquals(OK , response.getStatusCode());
         assertEquals(item.getName(), Objects.requireNonNull(response.getBody()).getName());

@@ -82,20 +82,20 @@ public class ItemServiceTest {
         ItemResponse itemResponse = new ItemResponse();
         itemResponse.setName("Test Item");
         itemResponse.setQuantity(10);
-        itemResponse.setUser(user);
+        itemResponse.setUserId(user.getId());
         itemResponse.setItemCode("ITEM123");
 
-        Item item = new Item();
-        when(itemResponseToItemMapper.mapToItem(any(ItemResponse.class))).thenReturn(item);
-        when(itemRepository.save(any(Item.class))).thenReturn(item);
+        ItemEntity item = new ItemEntity();
+        when(itemResponseToItemMapper.mapToItemResponse(any(ItemRequest.class), "ITEM123","locationCode" , user.getId())).thenReturn(new ItemResponse());
+        when(itemRepository.save(any(ItemEntity.class))).thenReturn(item);
 
-        Item createdItem = itemService.createItem(itemRequest);
+        ItemEntity createdItem = itemService.createItem(itemRequest);
 
         assertNotNull(createdItem);
         verify(userRepository).findUserByEmail("test@example.com");
         verify(itemCodeGenerator).generateItemCode();
-        verify(itemResponseToItemMapper).mapToItem(any(ItemResponse.class));
-        verify(itemRepository).save(any(Item.class));
+        verify(itemResponseToItemMapper).mapToItemResponse(any(ItemRequest.class),"ITEM123","locationCode" , user.getId());
+        verify(itemRepository).save(any(ItemEntity.class));
     }
 
     @Test
@@ -114,21 +114,21 @@ public class ItemServiceTest {
 
         user.setEmail("test@example.com");
 
-        Item item = new Item();
+        ItemEntity item = new ItemEntity();
         item.setId(1L);
         item.setQuantity(10);
 
         when(userDetails.getUsername()).thenReturn("test@example.com");
         when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(user));
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
-        when(itemRepository.save(any(Item.class))).thenReturn(item);
+        when(itemRepository.save(any(ItemEntity.class))).thenReturn(item);
 
-        Item updatedItem = itemService.updateItemQuantity(1L, itemRequest);
+        ItemEntity updatedItem = itemService.updateItemQuantity(1L, itemRequest);
 
         assertNotNull(updatedItem);
         assertEquals(20, updatedItem.getQuantity());
         verify(itemRepository).findById(1L);
-        verify(itemRepository).save(any(Item.class));
+        verify(itemRepository).save(any(ItemEntity.class));
     }
 
     @Test

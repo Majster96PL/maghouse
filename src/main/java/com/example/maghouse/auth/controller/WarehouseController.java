@@ -1,6 +1,6 @@
 package com.example.maghouse.auth.controller;
 
-import com.example.maghouse.item.Item;
+import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.warehouse.Warehouse;
 import com.example.maghouse.warehouse.WarehouseRequest;
 import com.example.maghouse.warehouse.WarehouseService;
@@ -22,20 +22,20 @@ public class WarehouseController {
     }
 
     @PostMapping("/assign-space-type/{itemId}")
-    public Item assignSpaceType ( @PathVariable Long itemId,
-                                @RequestBody WarehouseSpaceTypeRequest warehouseSpaceTypeRequest){
+    public ItemEntity assignSpaceType (@PathVariable Long itemId,
+                                       @RequestBody WarehouseSpaceTypeRequest warehouseSpaceTypeRequest){
          return warehouseService.assignLocationCode(warehouseSpaceTypeRequest, itemId);
 
     }
 
     @PostMapping("/assign-location/{itemId}")
-    public Item assignWarehouseLocation (@PathVariable Long itemId,
+    public ItemEntity assignWarehouseLocation (@PathVariable Long itemId,
                                          @RequestBody  WarehouseLocationRequest warehouseLocationRequest){
          return warehouseService.assignItemsToWarehouseLocation( warehouseLocationRequest, itemId);
     }
 
     @PutMapping("/update-location/{itemId}")
-    public Item updateWarehouseLocation(@PathVariable Long itemId,
+    public ItemEntity updateWarehouseLocation(@PathVariable Long itemId,
                                         @RequestBody  WarehouseLocationRequest warehouseLocationRequest){
         return warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId);
     }

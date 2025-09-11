@@ -1,7 +1,7 @@
 package com.example.maghouse.warehouse;
 
 import com.example.maghouse.auth.registration.user.UserRepository;
-import com.example.maghouse.item.Item;
+import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.mapper.WarehouseResponseToWarehouseMapper;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
@@ -47,7 +47,7 @@ public class WarehouseService {
     }
 
     @Transactional
-    public Item assignItemsToWarehouseLocation( WarehouseLocationRequest warehouseLocationRequest, Long itemId){
+    public ItemEntity assignItemsToWarehouseLocation(WarehouseLocationRequest warehouseLocationRequest, Long itemId){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new SecurityException("User is not authenticated!");
@@ -60,7 +60,7 @@ public class WarehouseService {
         Warehouse warehouse = warehouseRepository.findFirstByWarehouseLocation(warehouseLocationRequest.getWarehouseLocation())
                 .orElseThrow(() -> new IllegalArgumentException("Warehouse not found!"));
 
-        Item item = itemRepository.findById(itemId)
+        ItemEntity item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found!"));
 
         String locationPrefix = generateLocationPrefix(warehouseLocationRequest.getWarehouseLocation());
@@ -76,7 +76,7 @@ public class WarehouseService {
     }
 
     @Transactional
-    public Item updatedItemsToWarehouseLocation(WarehouseLocationRequest warehouseLocationRequest, Long id){
+    public ItemEntity updatedItemsToWarehouseLocation(WarehouseLocationRequest warehouseLocationRequest, Long id){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()){
             throw new SecurityException("User is not authenticated!");
@@ -101,7 +101,7 @@ public class WarehouseService {
         return item;
     }
 
-    public Item assignLocationCode(WarehouseSpaceTypeRequest warehouseSpaceTypeRequest, Long id){
+    public ItemEntity assignLocationCode(WarehouseSpaceTypeRequest warehouseSpaceTypeRequest, Long id){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()){
             throw new SecurityException("User is not authenticated!");
@@ -111,7 +111,7 @@ public class WarehouseService {
                 .orElseThrow( () -> new IllegalArgumentException("User with email not found!"));
         String baseLocation = generateBaseCodeSpaceType(warehouseSpaceTypeRequest.getWarehouseSpaceType());
         Map<String, Integer> spaceUsage = new HashMap<>();
-        Item item = itemRepository.findById(id)
+        ItemEntity item = itemRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found!"));
 
         String locationCode = findAvailableSpace("", baseLocation, spaceUsage);

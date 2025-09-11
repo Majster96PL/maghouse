@@ -5,7 +5,7 @@ import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.delivery.status.DeliveryStatus;
 import com.example.maghouse.delivery.status.DeliveryStatusRequest;
-import com.example.maghouse.item.Item;
+import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.security.PasswordEncoder;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
@@ -52,7 +52,7 @@ public class DeliveryServiceIntegrationTest {
     private PasswordEncoder passwordEncoder;
 
     private User user;
-    private Item item;
+    private ItemEntity item;
     private DeliveryEntity delivery;
 
     @Autowired
@@ -93,8 +93,8 @@ public class DeliveryServiceIntegrationTest {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    private Item createTestItem(){
-        item = Item.builder()
+    private ItemEntity createTestItem(){
+        item = com.example.maghouse.item.ItemEntity.builder()
                 .name("Test name")
                 .itemCode("1024-01-235-1967")
                 .quantity(100)
@@ -149,7 +149,7 @@ public class DeliveryServiceIntegrationTest {
         DeliveryEntity updatedDelivery = deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId());
         assertEquals(DeliveryStatus.IN_PROGRESS, updatedDelivery.getDeliveryStatus());
 
-        Item unchangedItem = itemRepository.findById(item.getId()).orElseThrow();
+        ItemEntity unchangedItem = itemRepository.findById(item.getId()).orElseThrow();
         assertEquals(initialQuantity, unchangedItem.getQuantity());
 
         DeliveryEntity persistedDelivery = deliveryRepository.findById(delivery.getId()).orElseThrow();
@@ -164,7 +164,7 @@ public class DeliveryServiceIntegrationTest {
 
         DeliveryEntity updatedDelivery = deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId());
 
-        Item updatedItem = itemRepository.findById(item.getId()).orElseThrow();
+        ItemEntity updatedItem = itemRepository.findById(item.getId()).orElseThrow();
         assertEquals(DeliveryStatus.DELIVERED, updatedDelivery.getDeliveryStatus());
         assertEquals(initialQuantity + deliveryQuantity, updatedItem.getQuantity());
     }
