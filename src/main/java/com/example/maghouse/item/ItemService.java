@@ -30,10 +30,6 @@ public class ItemService {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userRepository.findUserByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("User with email not found"));
-        itemResponse.setName(itemRequest.getName());
-        itemResponse.setQuantity(itemRequest.getQuantity());
-        itemResponse.setUser(user);
-
         String code = itemCodeGenerator.generateItemCode();
 
         ItemResponse itemResponse = itemResponseToItemMapper.mapToItemResponseFromRequest(itemRequest, code, null, user.getId() );
