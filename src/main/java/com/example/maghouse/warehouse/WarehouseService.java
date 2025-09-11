@@ -47,7 +47,7 @@ public class WarehouseService {
         var warehouseResponse = warehouseResponseToWarehouseMapper.mapToWarehouseResponse(warehouseRequest);
         warehouseResponse.setUserId(user.getId());
         warehouseResponse.setItemsId(items.stream()
-                .map(Item::getId)
+                .map(ItemEntity::getId)
                 .collect(Collectors.toList()));
         var warehouse = warehouseResponseToWarehouseMapper.mapToEntityFromResponse(warehouseResponse);
         warehouse.setUser(user);

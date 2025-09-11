@@ -26,14 +26,14 @@ public class ItemResponseToItemMapper implements ItemMapper<ItemRequest, ItemRes
                 .itemCode(itemResponse.getItemCode())
                 .quantity(itemResponse.getQuantity())
                 .user(null)
-                .warehouse(null)
+                .warehouseEntity(null)
                 .deliveries(null)
                 .build();
     }
 
 
     @Override
-    public ItemResponse mapToItemResponse(ItemEntity itemEntity) {
+    public ItemResponse mapToItem(ItemEntity itemEntity) {
         return ItemResponse.builder()
                 .name(itemEntity.getName())
                 .itemCode(itemEntity.getItemCode())
