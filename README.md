@@ -1,6 +1,6 @@
 # 📦 MagHouse – Full-Scale CRM for Warehouse Management
 
-**MagHouse** is a comprehensive backend CRM system built in **Java 17** using **Spring Boot**. It manages users, items, warehouse spaces, and deliveries. The system uses **JWT-based authentication**, **role-based access control**, and includes **unit/integration tests**. Designed to be production-ready, it also supports future modules like Order and Swagger documentation.
+**MagHouse** is a comprehensive backend CRM system built in **Java 17** using **Spring Boot**. It manages users, items, warehouseEntity spaces, and deliveries. The system uses **JWT-based authentication**, **role-based access control**, and includes **unit/integration tests**. Designed to be production-ready, it also supports future modules like Order and Swagger documentation.
 
 ---
 
@@ -17,9 +17,9 @@
 - Item categorization and metadata support
 
 ### 🏢 Warehouse Module
-- Manage warehouse spaces by `spaceType`
+- Manage warehouseEntity spaces by `spaceType`
 - Support for 3 major city locations
-- Scalable for complex warehouse operations
+- Scalable for complex warehouseEntity operations
 
 ### 🚚 Delivery Module
 - Create and manage delivery orders
@@ -111,11 +111,11 @@ java -jar target/maghouse-1.0-SNAPSHOT.jar
 
 - `DELETE /auth/item/delete/{itemId}` - Delete item
 
-- `POST /auth/warehouse/create` – Add a new warehouse
+- `POST /auth/maghouse/create` – Add a new warehouseEntity
 
 - `POST /auth/warehouse/assign-space-type/{itemId}` - Assign space type to item
 
-- `POST /auth/warehouse/assign-location/{itemId}` - Assign warehouse location to item
+- `POST /auth/warehouse/assign-location/{itemId}` - Assign warehouseEntity location to item
 
 - `PUT /auth/warehouse/update-location/{itemId}` - Update location
 

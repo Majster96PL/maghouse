@@ -77,7 +77,7 @@ public class DeliveryServiceTest {
                 .quantity(100)
                 .locationCode(null)
                 .user(user)
-                .warehouse(null)
+                .warehouseEntity(null)
                 .deliveries(new ArrayList<>())
                 .build();
 

@@ -165,7 +165,7 @@ public class DeliveryControllerIntegrationTest {
                 .locationCode(null)
                 .quantity(100)
                 .user(user)
-                .warehouse(null)
+                .warehouseEntity(null)
                 .deliveries(new ArrayList<>())
                 .build();
 

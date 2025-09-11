@@ -86,7 +86,7 @@ public class ItemServiceTest {
         itemResponse.setItemCode("ITEM123");
 
         ItemEntity item = new ItemEntity();
-        when(itemResponseToItemMapper.mapToItemResponse(any(ItemRequest.class), "ITEM123","locationCode" , user.getId())).thenReturn(new ItemResponse());
+        when(itemResponseToItemMapper.mapToItem(item));
         when(itemRepository.save(any(ItemEntity.class))).thenReturn(item);
 
         ItemEntity createdItem = itemService.createItem(itemRequest);
@@ -94,7 +94,7 @@ public class ItemServiceTest {
         assertNotNull(createdItem);
         verify(userRepository).findUserByEmail("test@example.com");
         verify(itemCodeGenerator).generateItemCode();
-        verify(itemResponseToItemMapper).mapToItemResponse(any(ItemRequest.class),"ITEM123","locationCode" , user.getId());
+        verify(itemResponseToItemMapper).mapToItem(createdItem);
         verify(itemRepository).save(any(ItemEntity.class));
     }
 

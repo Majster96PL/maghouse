@@ -8,6 +8,6 @@ import java.util.Optional;
 
 
 @Repository
-public interface WarehouseRepository extends JpaRepository<Warehouse, Long> {
-    Optional<Warehouse> findFirstByWarehouseLocation(WarehouseLocation location);
+public interface WarehouseRepository extends JpaRepository<WarehouseEntity, Long> {
+    Optional<WarehouseEntity> findFirstByWarehouseLocation(WarehouseLocation location);
 }

@@ -16,7 +16,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -28,9 +30,8 @@ public class WarehouseService {
     private final ItemRepository itemRepository;
     private static final WarehouseResponse warehouseResponse = new WarehouseResponse();
 
-
     @Transactional
-    public Warehouse createWarehouse(WarehouseRequest warehouseRequest) {
+    public WarehouseEntity createWarehouse(WarehouseRequest warehouseRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()){
             throw new SecurityException("User is not authenticated!");
@@ -38,11 +39,23 @@ public class WarehouseService {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         var user = userRepository.findUserByEmail(userDetails.getUsername())
                 .orElseThrow( () -> new IllegalArgumentException("User with email not found!"));
-
-        warehouseResponse.setWarehouseSpaceType(warehouseRequest.getWarehouseSpaceType());
-        warehouseResponse.setWarehouseLocation(warehouseRequest.getWarehouseLocation());
-        warehouseResponse.setUser(user);
-        var warehouse = warehouseResponseToWarehouseMapper.mapToEntity(warehouseResponse);
+        String locationPrefix = generateLocationPrefix(warehouseRequest.getWarehouseLocation());
+        List<ItemEntity> items = itemRepository.findByItemCodeStartingWith(locationPrefix);
+        if (items.isEmpty()) {
+            throw new IllegalArgumentException("No items found for location prefix: " + locationPrefix);
+        }
+        var warehouseResponse = warehouseResponseToWarehouseMapper.mapToWarehouseResponse(warehouseRequest);
+        warehouseResponse.setUserId(user.getId());
+        warehouseResponse.setItemsId(items.stream()
+                .map(ItemEntity::getId)
+                .collect(Collectors.toList()));
+        var warehouse = warehouseResponseToWarehouseMapper.mapToEntityFromResponse(warehouseResponse);
+        warehouse.setUser(user);
+        items.forEach(item -> {
+            item.setWarehouseEntity(warehouse);
+            warehouse.getItems().add(item);
+            itemRepository.saveAll(items);
+        });
         return warehouseRepository.save(warehouse);
     }
 
@@ -56,10 +69,6 @@ public class WarehouseService {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         var user = userRepository.findUserByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("User with email not found!"));
-
-        Warehouse warehouse = warehouseRepository.findFirstByWarehouseLocation(warehouseLocationRequest.getWarehouseLocation())
-                .orElseThrow(() -> new IllegalArgumentException("Warehouse not found!"));
-
         ItemEntity item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found!"));
 
@@ -69,7 +78,6 @@ public class WarehouseService {
         String newLocation = locationPrefix + item.getLocationCode();
         item.setLocationCode(newLocation);
         item.setUser(user);
-        item.setWarehouse(warehouse);
         itemRepository.save(item);
 
         return item;
