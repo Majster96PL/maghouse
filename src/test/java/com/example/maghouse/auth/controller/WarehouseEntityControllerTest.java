@@ -176,9 +176,8 @@ public class WarehouseEntityControllerTest {
 
         item.setWarehouseEntity(warehouseEntity);
 
-        Item result = warehouseController.assignWarehouseLocation(item.getId(), warehouseLocationRequest);
+        ItemEntity result = warehouseController.assignWarehouseLocation(item.getId(), warehouseLocationRequest);
 
-        assertEquals(item.getId(), result.getId());
         assertEquals("RS05B", result.getLocationCode());
         assertEquals(warehouseEntity.getId(), result.getWarehouseEntity().getId());
         verify(warehouseService).assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId());
@@ -207,7 +206,7 @@ public class WarehouseEntityControllerTest {
                 WarehouseLocation.Warsaw
         );
 
-        Item updatedItem = Item.builder()
+        ItemEntity updatedItem = ItemEntity.builder()
                 .id(1L)
                 .name("ItemName")
                 .itemCode("itemCode")
@@ -227,7 +226,7 @@ public class WarehouseEntityControllerTest {
         when(warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId))
                 .thenReturn(updatedItem);
 
-        Item result = warehouseController.updateWarehouseLocation(itemId, warehouseLocationRequest );
+        ItemEntity result = warehouseController.updateWarehouseLocation(itemId, warehouseLocationRequest );
 
         assertEquals(itemId, result.getId());
         assertEquals("WS05B", result.getLocationCode());

@@ -19,7 +19,7 @@ import java.util.List;
 @Entity
 @Builder
 @Data
-@Table(name = "items")
+@Table(name = "itemEntity")
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemEntity {

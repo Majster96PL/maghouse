@@ -77,7 +77,7 @@ public class ItemControllerIntegrationTest {
                 .quantity(10)
                 .user(user)
                 .deliveries(null)
-                .warehouse(null)
+                .warehouseEntity(null)
                 .build();
         return itemRepository.save(item);
     }

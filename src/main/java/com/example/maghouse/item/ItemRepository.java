@@ -12,6 +12,6 @@ import java.util.Optional;
 public interface ItemRepository extends JpaRepository<ItemEntity, Long> {
     Optional<ItemEntity> findByItemCode(String itemCode);
 
-    @Query("SELECT i From Item i WHERE i.itemCode LIKE CONCAT(:prefix, '%')")
+    @Query("SELECT i FROM ItemEntity i WHERE i.itemCode LIKE CONCAT(:prefix, '%')")
     List<ItemEntity> findByItemCodeStartingWith(@Param("prefix") String prefix);
 }
