@@ -111,7 +111,6 @@ public class WarehouseServiceIntegrationTest {
     private WarehouseEntity createAndSaveTestWarehouse(){
          warehouseEntity = WarehouseEntity.builder()
                 .id(1L)
-                .warehouseSpaceType(WarehouseSpaceType.SHELF)
                 .warehouseLocation(WarehouseLocation.Warsaw)
                 .user(user)
                 .items(new ArrayList<>())
@@ -123,13 +122,11 @@ public class WarehouseServiceIntegrationTest {
     @Test
     void shouldCreateWarehousePersistInDatabase(){
         WarehouseRequest request = new WarehouseRequest();
-        request.setWarehouseSpaceType(WarehouseSpaceType.SHELF);
         request.setWarehouseLocation(WarehouseLocation.Rzeszow);
 
         WarehouseEntity result = warehouseService.createWarehouse(request);
 
         assertNotNull(result.getId());
-        assertEquals(WarehouseSpaceType.SHELF, result.getWarehouseSpaceType());
         assertEquals(WarehouseLocation.Rzeszow, result.getWarehouseLocation());
         assertEquals(user, result.getUser());
     }
@@ -142,7 +139,7 @@ public class WarehouseServiceIntegrationTest {
 
         WarehouseSpaceTypeRequest request = new WarehouseSpaceTypeRequest(WarehouseSpaceType.DRAVER);
 
-        ItemEntity result = warehouseService.assignLocationCode(request, item.getId());
+        ItemEntity result = warehouseService.assignWarehouseSpaceType(request, item.getId());
 
         assertNotNull(result);
         assertNotNull(result.getLocationCode());
@@ -203,7 +200,7 @@ public class WarehouseServiceIntegrationTest {
         );
 
         assertThrows(SecurityException.class,
-                () -> warehouseService.assignLocationCode(warehouseSpaceTypeRequest, 1L)
+                () -> warehouseService.assignWarehouseSpaceType(warehouseSpaceTypeRequest, 1L)
         );
     }
 }

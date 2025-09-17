@@ -117,7 +117,6 @@ public class WarehouseControllerIntegrationTest {
 
     private WarehouseEntity createAndSaveTestWarehouse() {
         warehouseEntity = WarehouseEntity.builder()
-                .warehouseSpaceType(WarehouseSpaceType.CONTAINER)
                 .warehouseLocation(WarehouseLocation.Warsaw)
                 .user(user)
                 .items(new ArrayList<>())
@@ -143,7 +142,6 @@ public class WarehouseControllerIntegrationTest {
     @Test
     void shouldCreateWarehousePersistDatabase() throws Exception {
         WarehouseRequest request = new WarehouseRequest(
-                WarehouseSpaceType.CONTAINER,
                 WarehouseLocation.Warsaw
         );
 
@@ -151,7 +149,7 @@ public class WarehouseControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.warehouseSpaceType").value("CONTAINER"));
+                .andExpect(jsonPath("$.warehouseLocation").value("Warsaw"));
 
     }
 

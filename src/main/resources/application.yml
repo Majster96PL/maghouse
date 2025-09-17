@@ -22,3 +22,8 @@ spring:
 server:
   servlet:
     contextPath: /maghouse
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG

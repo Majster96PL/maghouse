@@ -1,7 +1,6 @@
 package com.example.maghouse.warehouse;
 
 import com.example.maghouse.warehouse.location.WarehouseLocation;
-import com.example.maghouse.warehouse.spacetype.WarehouseSpaceType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WarehouseResponse {
-    private WarehouseSpaceType warehouseSpaceType;
     private WarehouseLocation warehouseLocation;
     private Long userId;
     private List<Long> itemsId;

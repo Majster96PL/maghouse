@@ -16,9 +16,7 @@ public class WarehouseResponseToWarehouseMapper implements WarehouseMapper<Wareh
     @Override
     public WarehouseResponse mapToWarehouseResponse(WarehouseRequest warehouseRequest) {
         return WarehouseResponse.builder()
-                .warehouseSpaceType(warehouseRequest.getWarehouseSpaceType())
                 .warehouseLocation(warehouseRequest.getWarehouseLocation())
-                .userId(null)
                 .itemsId(new ArrayList<>())
                 .build();
     }
@@ -26,9 +24,7 @@ public class WarehouseResponseToWarehouseMapper implements WarehouseMapper<Wareh
     @Override
     public WarehouseEntity mapToEntityFromResponse(WarehouseResponse warehouseResponse) {
         return WarehouseEntity.builder()
-                .warehouseSpaceType(warehouseResponse.getWarehouseSpaceType())
                 .warehouseLocation(warehouseResponse.getWarehouseLocation())
-                .user(null)
                 .items(new ArrayList<>())
                 .build();
     }
@@ -36,7 +32,6 @@ public class WarehouseResponseToWarehouseMapper implements WarehouseMapper<Wareh
     @Override
     public WarehouseResponse mapToWarehouse(WarehouseEntity warehouseEntity) {
         return WarehouseResponse.builder()
-                .warehouseSpaceType(warehouseEntity.getWarehouseSpaceType())
                 .warehouseLocation(warehouseEntity.getWarehouseLocation())
                 .userId(warehouseEntity.getUser().getId())
                 .itemsId(warehouseEntity.getItems().stream()
