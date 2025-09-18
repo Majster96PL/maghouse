@@ -37,12 +37,15 @@ public class ItemEntity {
     private int quantity;
     @Size(max = 50)
     private String locationCode;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
     @ManyToOne
     @JoinColumn(name = "warehouse_id")
     private WarehouseEntity warehouseEntity;
+
     @OneToMany(mappedBy = "item")
     @JsonManagedReference
     private List<DeliveryEntity> deliveries;
