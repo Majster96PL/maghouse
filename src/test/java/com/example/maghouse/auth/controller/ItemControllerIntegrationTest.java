@@ -86,7 +86,7 @@ public class ItemControllerIntegrationTest {
     void shouldCreateItem() throws Exception {
         ItemRequest itemRequest = new ItemRequest("Item1", 10);
 
-        mockMvc.perform(post("/maghouse/items")
+        mockMvc.perform(post("/items/")
                         .content(objectMapper.writeValueAsString(itemRequest))
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + userToken))
@@ -102,7 +102,7 @@ public class ItemControllerIntegrationTest {
 
         ItemRequest updateRequest = new ItemRequest("Item1", 15);
 
-        mockMvc.perform(put("/maghouse/items" + item.getId())
+        mockMvc.perform(put("/items/" + item.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest))
                         .header("Authorization", "Bearer " + userToken))
@@ -115,7 +115,7 @@ public class ItemControllerIntegrationTest {
         ItemEntity item = createAndSaveTestItem();
         itemRepository.save(item);
 
-        mockMvc.perform(delete("/maghouse/delete/" + item.getId())
+        mockMvc.perform(delete("/delete/" + item.getId())
                         .header("Authorization", "Bearer " + userToken))
                 .andExpect(status().isNoContent());
     }

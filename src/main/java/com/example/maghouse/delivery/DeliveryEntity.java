@@ -39,6 +39,7 @@ public class DeliveryEntity {
     private DeliveryStatus deliveryStatus;
     @Enumerated(EnumType.STRING)
     private WarehouseLocation warehouseLocation;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

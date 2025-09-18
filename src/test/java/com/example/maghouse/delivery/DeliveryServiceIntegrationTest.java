@@ -20,6 +20,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
@@ -138,10 +139,11 @@ public class DeliveryServiceIntegrationTest {
 
         assertNotNull(result.getId());
         assertEquals(DeliveryStatus.CREATED,result.getDeliveryStatus());
-        assertEquals(user.getEmail(), result.getUser());
+        assertEquals(user.getEmail(), result.getUser().getEmail());
     }
 
     @Test
+    @WithMockUser(username = "testUser", roles = "{Role.USER}")
     void shouldUpdateStatusToInProgressWithoutChangingItemQuantity(){
         DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
         int initialQuantity = item.getQuantity();
