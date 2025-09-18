@@ -6,7 +6,7 @@ import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.security.PasswordEncoder;
-import com.example.maghouse.warehouse.Warehouse;
+import com.example.maghouse.warehouse.WarehouseEntity;
 import com.example.maghouse.warehouse.WarehouseRepository;
 import com.example.maghouse.warehouse.WarehouseRequest;
 import com.example.maghouse.warehouse.WarehouseService;
@@ -73,7 +73,7 @@ public class WarehouseControllerIntegrationTest {
 
     private User user;
     private ItemEntity item;
-    private Warehouse warehouse;
+    private WarehouseEntity warehouseEntity;
 
 
     @BeforeEach
@@ -115,15 +115,14 @@ public class WarehouseControllerIntegrationTest {
         userRepository.save(user);
     }
 
-    private Warehouse createAndSaveTestWarehouse() {
-        warehouse = Warehouse.builder()
-                .warehouseSpaceType(WarehouseSpaceType.CONTAINER)
+    private WarehouseEntity createAndSaveTestWarehouse() {
+        warehouseEntity = WarehouseEntity.builder()
                 .warehouseLocation(WarehouseLocation.Warsaw)
                 .user(user)
                 .items(new ArrayList<>())
                 .build();
 
-        return warehouseRepository.save(warehouse);
+        return warehouseRepository.save(warehouseEntity);
     }
 
     private ItemEntity createAndSaveTestItem(){
@@ -133,7 +132,7 @@ public class WarehouseControllerIntegrationTest {
                 .locationCode(null)
                 .quantity(100)
                 .user(user)
-                .warehouse(warehouse)
+                .warehouseEntity(warehouseEntity)
                 .deliveries(null)
                 .build();
 
@@ -143,22 +142,21 @@ public class WarehouseControllerIntegrationTest {
     @Test
     void shouldCreateWarehousePersistDatabase() throws Exception {
         WarehouseRequest request = new WarehouseRequest(
-                WarehouseSpaceType.CONTAINER,
                 WarehouseLocation.Warsaw
         );
 
-        mockMvc.perform(post("/auth/warehouse/create")
+        mockMvc.perform(post("/auth/warehouseEntity/create")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.warehouseSpaceType").value("CONTAINER"));
+                .andExpect(jsonPath("$.warehouseLocation").value("Warsaw"));
 
     }
 
     @Test
     void shouldAssignWarehouseSpaceTypeToItem() throws Exception {
         item.setLocationCode("C10C");
-        item.setWarehouse(warehouse);
+        item.setWarehouseEntity(warehouseEntity);
 
         itemRepository.save(item);
 
@@ -166,7 +164,7 @@ public class WarehouseControllerIntegrationTest {
                 WarehouseSpaceType.CONTAINER
         );
 
-        mockMvc.perform(post("/auth/warehouse/assign-space-type/" + item.getId())
+        mockMvc.perform(post("/auth/warehouseEntity/assign-space-type/" + item.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(warehouseSpaceTypeRequest)))
                 .andExpect(status().isOk())
@@ -185,11 +183,11 @@ public class WarehouseControllerIntegrationTest {
         String location = String.valueOf(warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId()));
 
         item.setLocationCode(location);
-        item.setWarehouse(warehouse);
+        item.setWarehouseEntity(warehouseEntity);
 
         itemRepository.save(item);
 
-        mockMvc.perform(post("/auth/warehouse/assign-location/" + item.getId())
+        mockMvc.perform(post("/auth/warehouseEntity/assign-location/" + item.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(warehouseLocationRequest)))
                 .andExpect(status().isOk())
@@ -210,7 +208,7 @@ public class WarehouseControllerIntegrationTest {
 
         itemRepository.save(item);
 
-        mockMvc.perform(put("/auth/warehouse/update-location/" + item.getId())
+        mockMvc.perform(put("/auth/warehouseEntity/update-location/" + item.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(warehouseLocationRequest)))
                 .andExpect(status().isOk())

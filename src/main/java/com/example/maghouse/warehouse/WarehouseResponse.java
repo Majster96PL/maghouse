@@ -1,9 +1,6 @@
 package com.example.maghouse.warehouse;
 
-import com.example.maghouse.auth.registration.user.User;
-import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
-import com.example.maghouse.warehouse.spacetype.WarehouseSpaceType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,9 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WarehouseResponse {
-    private long id;
-    private WarehouseSpaceType warehouseSpaceType;
     private WarehouseLocation warehouseLocation;
-    private User user;
-    private List<ItemEntity> items;
+    private Long userId;
+    private List<Long> itemsId;
 }

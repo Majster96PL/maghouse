@@ -1,8 +1,12 @@
 package com.example.maghouse.auth.controller;
 
 import com.example.maghouse.item.ItemEntity;
-import com.example.maghouse.warehouse.Warehouse;
+import com.example.maghouse.item.ItemResponse;
+import com.example.maghouse.mapper.ItemResponseToItemMapper;
+import com.example.maghouse.mapper.WarehouseResponseToWarehouseMapper;
+import com.example.maghouse.warehouse.WarehouseEntity;
 import com.example.maghouse.warehouse.WarehouseRequest;
+import com.example.maghouse.warehouse.WarehouseResponse;
 import com.example.maghouse.warehouse.WarehouseService;
 import com.example.maghouse.warehouse.location.WarehouseLocationRequest;
 import com.example.maghouse.warehouse.spacetype.WarehouseSpaceTypeRequest;
@@ -10,34 +14,40 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(path = "/auth/warehouse/")
+@RequestMapping(path = "/warehouses/")
 @AllArgsConstructor
 public class WarehouseController {
 
     private final WarehouseService warehouseService;
+    private final WarehouseResponseToWarehouseMapper warehouseResponseToWarehouseMapper;
+    private final ItemResponseToItemMapper itemResponseToItemMapper;
 
-    @PostMapping("/create")
-    public Warehouse create(@RequestBody WarehouseRequest warehouseRequest){
-        return warehouseService.createWarehouse(warehouseRequest);
+    @PostMapping
+    public WarehouseResponse create(@RequestBody WarehouseRequest warehouseRequest) {
+        WarehouseEntity warehouse = warehouseService.createWarehouse(warehouseRequest);
+        return warehouseResponseToWarehouseMapper.mapToWarehouse(warehouse);
     }
 
     @PostMapping("/assign-space-type/{itemId}")
-    public ItemEntity assignSpaceType (@PathVariable Long itemId,
-                                       @RequestBody WarehouseSpaceTypeRequest warehouseSpaceTypeRequest){
-         return warehouseService.assignLocationCode(warehouseSpaceTypeRequest, itemId);
+    public ItemResponse assignSpaceType(@PathVariable Long itemId,
+                                        @RequestBody WarehouseSpaceTypeRequest warehouseSpaceTypeRequest) {
+        ItemEntity item = warehouseService.assignWarehouseSpaceType(warehouseSpaceTypeRequest, itemId);
+        return itemResponseToItemMapper.mapToItem(item);
 
     }
 
     @PostMapping("/assign-location/{itemId}")
-    public ItemEntity assignWarehouseLocation (@PathVariable Long itemId,
-                                         @RequestBody  WarehouseLocationRequest warehouseLocationRequest){
-         return warehouseService.assignItemsToWarehouseLocation( warehouseLocationRequest, itemId);
+    public ItemResponse assignWarehouseLocation(@PathVariable Long itemId,
+                                                @RequestBody WarehouseLocationRequest warehouseLocationRequest) {
+        ItemEntity item = warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, itemId);
+        return itemResponseToItemMapper.mapToItem(item);
     }
 
-    @PutMapping("/update-location/{itemId}")
-    public ItemEntity updateWarehouseLocation(@PathVariable Long itemId,
-                                        @RequestBody  WarehouseLocationRequest warehouseLocationRequest){
-        return warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId);
+    @PutMapping("/items/{itemId}/location")
+    public ItemResponse updateWarehouseLocation(@PathVariable Long itemId,
+                                                @RequestBody WarehouseLocationRequest warehouseLocationRequest) {
+        ItemEntity item = warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId);
+        return itemResponseToItemMapper.mapToItem(item);
     }
 
 }

@@ -1,7 +1,11 @@
 package com.example.maghouse.mapper;
 
 
-public interface WarehouseMapper<From, To> {
-    To mapToEntity(From warehouseRequest);
-    void updateEntityFromRequest(From warehouseRequest, To warehouseResponse);
+public interface WarehouseMapper<Request, Response, Entity> {
+    Response mapToWarehouseResponse(Request warehouseRequest);
+
+    Entity mapToEntityFromResponse(Response warehouseResponse);
+
+    Response mapToWarehouse(Entity warehouseEntity);
+
 }
