@@ -20,13 +20,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-
 @Service
 @AllArgsConstructor
 public class WarehouseService {
 
-   public static final String STARTING_LOCATION_PREFIX = "";
-   private final WarehouseResponseToWarehouseMapper warehouseResponseToWarehouseMapper;
+    public static final String STARTING_LOCATION_PREFIX = "";
+    private final WarehouseResponseToWarehouseMapper warehouseResponseToWarehouseMapper;
     private final UserRepository userRepository;
     private final WarehouseRepository warehouseRepository;
     private final ItemRepository itemRepository;
@@ -64,11 +63,10 @@ public class WarehouseService {
         ItemEntity item = getItemById(itemId, user);
         String locationPrefix = generateLocationPrefix(warehouseLocationRequest.getWarehouseLocation());
         String newLocation = locationPrefix + item.getLocationCode();
-        LOGGER.debug("Location transformation: {} + {} = {}",
-                locationPrefix, item.getLocationCode(), newLocation);
         item.setLocationCode(newLocation);
         item.setUser(user);
-        itemRepository.save(item);
+        WarehouseEntity warehouse = getOrCreateWarehouseForLocation(warehouseLocationRequest, user);
+        addItemToWarehouse(item, warehouse);
         LOGGER.info("Successfully assigned location: {} to itemId: {}", newLocation, itemId);
         return item;
     }
@@ -87,7 +85,6 @@ public class WarehouseService {
         addItemToWarehouse(item, warehouse);
         LOGGER.info("Successfully updated itemId={} to newLocationCode={} in warehouseId={}",
                 item.getId(), newLocationCode, warehouse.getId());
-        itemRepository.save(item);
         return item;
     }
 
@@ -111,7 +108,6 @@ public class WarehouseService {
             .map(lc -> {
                item.setLocationCode(lc);
                item.setUser(user);
-              // itemRepository.save(item); TODO - check if works without
                LOGGER.info("Successfully assigned locationCode={} to itemId={} for userId={}",
                    locationCode, item.getId(), user.getId());
                return item;
@@ -196,7 +192,6 @@ public class WarehouseService {
         if (currentWarehouse != null) {
             currentWarehouse.getItems().remove(item);
             item.setWarehouseEntity(null);
-            // warehouseRepository.save(currentWarehouse); TODO check if works without
             LOGGER.debug("Removed itemId={} from warehouseId={}", item.getId(),
                     currentWarehouse.getId());
             return true;
@@ -218,10 +213,9 @@ public class WarehouseService {
                             .warehouseLocation(warehouseLocationRequest.getWarehouseLocation())
                             .build();
                     WarehouseEntity newWarehouse = buildWarehouseEntity(warehouseRequest, user, new ArrayList<>());
-                    WarehouseEntity savedWarehouse = warehouseRepository.save(newWarehouse);
-                    LOGGER.info("Creating new warehouseId={} for location={}", savedWarehouse.getId(),
+                    LOGGER.info("Creating new warehouseId={} for location={}", newWarehouse.getId(),
                             warehouseLocationRequest.getWarehouseLocation());
-                    return savedWarehouse;
+                    return newWarehouse;
                 });
     }
 
@@ -238,7 +232,7 @@ public class WarehouseService {
                                       Set<String> spaceUsage) {
         char[] positions = {'A', 'B', 'C'};
 
-        for (int index = 1; index<=50 ; index++) {
+        for (int index = 1; index <= 50 ; index++) {
             for (char position : positions) {
                 String locationCode = String.format("%s%s%02d%c", locationPrefix, baseLocation, index, position);
                 if (!spaceUsage.contains(locationCode)) {
