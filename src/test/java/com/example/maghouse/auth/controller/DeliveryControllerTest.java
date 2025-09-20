@@ -9,12 +9,15 @@ import com.example.maghouse.delivery.DeliveryResponse;
 import com.example.maghouse.delivery.DeliveryService;
 import com.example.maghouse.delivery.status.DeliveryStatus;
 import com.example.maghouse.delivery.status.DeliveryStatusRequest;
+import com.example.maghouse.mapper.DeliveryResponseToDeliveryMapper;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,6 +32,8 @@ import static org.mockito.Mockito.*;
 
 public class DeliveryControllerTest {
 
+    @Mock
+    private DeliveryResponseToDeliveryMapper deliveryResponseToDeliveryMapper;
     @Mock
     private DeliveryService deliveryService;
 
@@ -93,11 +98,13 @@ public class DeliveryControllerTest {
                 .item(null)
                 .build();
         when(deliveryService.createDelivery(request)).thenReturn(exceptedDelivery);
+        when(deliveryResponseToDeliveryMapper.mapToResponse(any(DeliveryEntity.class))).thenReturn(new DeliveryResponse());
 
-        DeliveryResponse result = deliveryController.create(request).getBody();
+        ResponseEntity<DeliveryResponse> result = deliveryController.create(request);
 
         assertNotNull(result);
-        assertEquals(exceptedDelivery, result);
+        assertEquals(HttpStatus.CREATED, result.getStatusCode());
+        assertEquals(new DeliveryResponse(), result.getBody());
         verify(deliveryService).createDelivery(request);
     }
 
@@ -126,10 +133,10 @@ public class DeliveryControllerTest {
 
         when(deliveryService.updateDeliveryStatus(deliveryStatusRequest, id)).thenReturn(updatedDelivery);
 
-        DeliveryResponse result = deliveryController.updateDeliveryStatus(deliveryStatusRequest, id).getBody();
+        ResponseEntity<DeliveryResponse> result = deliveryController.updateDeliveryStatus(deliveryStatusRequest, id);
 
         assertNotNull(result);
-        assertEquals(DeliveryStatus.IN_PROGRESS, result.getDeliveryStatus());
+        assertEquals(HttpStatus.OK, result.getStatusCode());
         verify(deliveryService).updateDeliveryStatus(deliveryStatusRequest, id);
     }
 
@@ -150,7 +157,7 @@ public class DeliveryControllerTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenUpdateDeliveryStatusRequestIsNull(){
+    void shouldThrowExceptionWhenUpdateDeliveryStatusRequestIsNull() throws Exception{
         Long id = 1L;
 
         assertThrows(IllegalArgumentException.class, () ->
