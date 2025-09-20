@@ -158,7 +158,7 @@ public class DeliveryControllerIntegrationTest {
 
     @Test
     void shouldUpdateDeliveryStatusToDeliveredAndUpdatedItemQuantity() throws Exception {
-        ItemEntity item = com.example.maghouse.item.ItemEntity.builder()
+        ItemEntity item = ItemEntity.builder()
                 .name(delivery.getItemName())
                 .itemCode(delivery.getItemCode())
                 .locationCode(null)

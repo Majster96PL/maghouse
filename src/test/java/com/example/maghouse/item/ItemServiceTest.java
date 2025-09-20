@@ -47,6 +47,7 @@ public class ItemServiceTest {
     @InjectMocks
     private ItemService itemService;
 
+    private ItemEntity item;
     private User user;
 
     @BeforeEach
@@ -63,6 +64,10 @@ public class ItemServiceTest {
                 .password("password")
                 .role(Role.USER)
                 .build();
+        item = ItemEntity.builder()
+                .name("ItemName")
+                .quantity(123)
+                .build();
 
         lenient().when(userDetails.getUsername()).thenReturn(user.getEmail());
         lenient().when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
@@ -74,28 +79,35 @@ public class ItemServiceTest {
         itemRequest.setName("Test Item");
         itemRequest.setQuantity(10);
 
-        user.setEmail("test@example.com");
-
-        when(userDetails.getUsername()).thenReturn("test@example.com");
-        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(user));
         when(itemCodeGenerator.generateItemCode()).thenReturn("ITEM123");
+
         ItemResponse itemResponse = new ItemResponse();
-        itemResponse.setName("Test Item");
-        itemResponse.setQuantity(10);
+        itemResponse.setName(itemRequest.getName());
+        itemResponse.setQuantity(itemRequest.getQuantity());
         itemResponse.setUserId(user.getId());
         itemResponse.setItemCode("ITEM123");
 
-        ItemEntity item = new ItemEntity();
-        when(itemResponseToItemMapper.mapToItem(item));
-        when(itemRepository.save(any(ItemEntity.class))).thenReturn(item);
+        when(itemResponseToItemMapper.mapToItemResponseFromRequest(
+                eq(itemRequest), eq("ITEM123"), isNull(), eq(user.getId()))
+        ).thenReturn(itemResponse);
+
+        item.setUser(user);
+
+        when(itemResponseToItemMapper.mapToEntityFromResponse(itemResponse)).thenReturn(item);
+        when(itemRepository.save(item)).thenReturn(item);
 
         ItemEntity createdItem = itemService.createItem(itemRequest);
 
         assertNotNull(createdItem);
-        verify(userRepository).findUserByEmail("test@example.com");
+        assertEquals("ItemName", createdItem.getName());
+        assertEquals(123, createdItem.getQuantity());
+        assertEquals(user, createdItem.getUser());
+
         verify(itemCodeGenerator).generateItemCode();
-        verify(itemResponseToItemMapper).mapToItem(createdItem);
-        verify(itemRepository).save(any(ItemEntity.class));
+        verify(itemResponseToItemMapper).mapToItemResponseFromRequest(
+                eq(itemRequest), eq("ITEM123"), isNull(), eq(user.getId()));
+        verify(itemResponseToItemMapper).mapToEntityFromResponse(itemResponse);
+        verify(itemRepository).save(item);
     }
 
     @Test
@@ -153,8 +165,8 @@ public class ItemServiceTest {
 
     @Test
     void shouldThrowSecurityExceptionWhenUserNotAuthenticatedOnDelete() {
-       when(authentication.isAuthenticated()).thenReturn(false);
+        when(authentication.isAuthenticated()).thenReturn(false);
 
-       assertThrows(SecurityException.class, () -> itemService.deleteItem(1L));
+        assertThrows(SecurityException.class, () -> itemService.deleteItem(1L));
     }
 }

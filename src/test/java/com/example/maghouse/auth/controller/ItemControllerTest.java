@@ -6,6 +6,7 @@ import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemRequest;
 import com.example.maghouse.item.ItemResponse;
 import com.example.maghouse.item.ItemService;
+import com.example.maghouse.mapper.ItemResponseToItemMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -14,14 +15,14 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Objects;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.*;
 
 public class ItemControllerTest {
+
+    @Mock
+    private ItemResponseToItemMapper itemResponseToItemMapper;
 
     @Mock
     private ItemService itemService;
@@ -37,6 +38,14 @@ public class ItemControllerTest {
     void setUp(){
         MockitoAnnotations.openMocks(this);
 
+        user = User.builder()
+                .firstname("John")
+                .lastname("Kovalsky")
+                .email("john.kovalsky@maghouse.com")
+                .password("testPassword")
+                .role(Role.USER)
+                .build();
+
         itemRequest = new ItemRequest("Test_Item", 100);
 
         item = ItemEntity.builder()
@@ -50,24 +59,18 @@ public class ItemControllerTest {
                 .deliveries(null)
                 .build();
 
-        user = User.builder()
-                .firstname("John")
-                .lastname("Kovalsky")
-                .email("john.kovalsky@maghouse.com")
-                .password("testPassword")
-                .role(Role.USER)
-                .build();
-
     }
 
     @Test
     void shouldCreateItemSuccessfully(){
         when(itemService.createItem(itemRequest)).thenReturn(item);
+        when(itemResponseToItemMapper.mapToItem(item)).thenReturn(new ItemResponse());
 
         ResponseEntity<ItemResponse> response = itemController.create(itemRequest);
 
+        assertNotNull(response);
         assertEquals(CREATED, response.getStatusCode());
-        assertEquals(item, response.getBody());
+        assertEquals(new ItemResponse(), response.getBody());
     }
 
     @Test
@@ -82,12 +85,14 @@ public class ItemControllerTest {
         ItemRequest updatedItemRequest = new ItemRequest("Test_Item", 140);
 
         when(itemService.updateItemQuantity(item.getId(),updatedItemRequest)).thenReturn(item);
+        when(itemResponseToItemMapper.mapToItem(item)).thenReturn(new ItemResponse());
 
         ResponseEntity<ItemResponse> response = itemController.updateItemQuantity(item.getId(), updatedItemRequest);
 
+
+        assertNotNull(response);
         assertEquals(OK , response.getStatusCode());
-        assertEquals(item.getName(), Objects.requireNonNull(response.getBody()).getName());
-        assertEquals(item.getQuantity(), response.getBody().getQuantity());
+        assertEquals(new ItemResponse(), response.getBody());
 
     }
 
