@@ -24,7 +24,7 @@ jobs:
         run: mvn -B compile --file pom.xml
 
       - name: Run tests with Maven
-        run: mvn -B test --file pom.xml
+        run: mvn -B clean test --file pom.xml
 
       - name: Verify package
         run: mvn -B verify --file pom.xml
