@@ -1,10 +1,8 @@
 name: Java CI with Maven
 
 on:
-  push:
-    branches: [ "main", "master" ]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: ["**"]
 
 jobs:
   build:
@@ -12,7 +10,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
