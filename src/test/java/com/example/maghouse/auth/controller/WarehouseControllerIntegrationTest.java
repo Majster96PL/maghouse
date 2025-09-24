@@ -28,6 +28,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -75,7 +76,6 @@ public class WarehouseControllerIntegrationTest {
     private ItemEntity item;
     private WarehouseEntity warehouseEntity;
 
-
     @BeforeEach
     void setUp() {
         setUpTestUser();
@@ -89,7 +89,6 @@ public class WarehouseControllerIntegrationTest {
         SecurityContextHolder.clearContext();
     }
 
-
     private void authenticateTestUser() {
         user = userRepository.findUserByEmail(user.getEmail())
                 .orElseThrow( () -> new RuntimeException("User not found!!"));
@@ -102,7 +101,7 @@ public class WarehouseControllerIntegrationTest {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    private void setUpTestUser() {
+    private User setUpTestUser() {
         user = User.builder()
                 .id(1L)
                 .firstname("John")
@@ -112,7 +111,7 @@ public class WarehouseControllerIntegrationTest {
                 .role(Role.USER)
                 .build();
 
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     private WarehouseEntity createAndSaveTestWarehouse() {
@@ -129,7 +128,6 @@ public class WarehouseControllerIntegrationTest {
          item = ItemEntity.builder()
                 .name("TestName")
                 .itemCode("itemCode")
-                .locationCode(null)
                 .quantity(100)
                 .user(user)
                 .warehouseEntity(warehouseEntity)
@@ -140,80 +138,62 @@ public class WarehouseControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "john.kovalsky@maghouse.com", roles = {"USER"})
     void shouldCreateWarehousePersistDatabase() throws Exception {
-        WarehouseRequest request = new WarehouseRequest(
-                WarehouseLocation.Warsaw
-        );
+        WarehouseRequest request = new WarehouseRequest(WarehouseLocation.Warsaw);
 
-        mockMvc.perform(post("/auth/warehouseEntity/create")
+        item.setLocationCode("WS12C");
+
+        mockMvc.perform(post("/warehouses/")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.warehouseLocation").value("Warsaw"));
-
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.warehouseLocation").value("Warsaw"))
+                .andExpect(jsonPath("$.userId").value(user.getId()));
     }
 
     @Test
+    @WithMockUser(username = "john.kovalsky@maghouse.com", roles = {"USER"})
     void shouldAssignWarehouseSpaceTypeToItem() throws Exception {
-        item.setLocationCode("C10C");
-        item.setWarehouseEntity(warehouseEntity);
-
-        itemRepository.save(item);
-
         WarehouseSpaceTypeRequest warehouseSpaceTypeRequest = new WarehouseSpaceTypeRequest(
                 WarehouseSpaceType.CONTAINER
         );
 
-        mockMvc.perform(post("/auth/warehouseEntity/assign-space-type/" + item.getId())
+        mockMvc.perform(post("/warehouses/assign-space-type/" + item.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(warehouseSpaceTypeRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.locationCode").exists());
-
+                .andExpect(jsonPath("$.locationCode").exists())
+                .andExpect(jsonPath("$.itemCode").value("itemCode"));
     }
 
     @Test
+    @WithMockUser(username = "john.kovalsky@maghouse.com", roles = {"USER"})
     void shouldAssignWarehouseLocationToItem() throws Exception {
-        item.setLocationCode("S01A");
-
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(
                 WarehouseLocation.Warsaw
         );
 
-        String location = String.valueOf(warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId()));
-
-        item.setLocationCode(location);
-        item.setWarehouseEntity(warehouseEntity);
-
-        itemRepository.save(item);
-
-        mockMvc.perform(post("/auth/warehouseEntity/assign-location/" + item.getId())
+        mockMvc.perform(post("/warehouses/assign-location/" + item.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(warehouseLocationRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.locationCode").exists());
+                .andExpect(jsonPath("$.locationCode").exists())
+                .andExpect(jsonPath("$.itemCode").value("itemCode"));
     }
 
     @Test
+    @WithMockUser(username = "john.kovalsky@maghouse.com", roles = {"USER"})
     void shouldUpdateWarehouseLocation() throws Exception {
-        item.setLocationCode("WS01A");
-
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(
                 WarehouseLocation.Rzeszow
         );
+        item.setLocationCode("KS05A");
 
-        String newLocation = String.valueOf(warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, item.getId()));
-
-        item.setLocationCode(newLocation);
-
-        itemRepository.save(item);
-
-        mockMvc.perform(put("/auth/warehouseEntity/update-location/" + item.getId())
+        mockMvc.perform(put("/warehouses/items/" + item.getId() + "/location")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(warehouseLocationRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.locationCode").exists());
-
-
     }
 }

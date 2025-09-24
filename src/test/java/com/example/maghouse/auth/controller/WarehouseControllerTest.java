@@ -5,6 +5,8 @@ import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemResponse;
+import com.example.maghouse.mapper.ItemResponseToItemMapper;
+import com.example.maghouse.mapper.WarehouseResponseToWarehouseMapper;
 import com.example.maghouse.warehouse.WarehouseEntity;
 import com.example.maghouse.warehouse.WarehouseRequest;
 import com.example.maghouse.warehouse.WarehouseResponse;
@@ -18,19 +20,27 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class WarehouseEntityControllerTest {
+public class WarehouseControllerTest {
+
+    @Mock
+    private ItemResponseToItemMapper itemResponseToItemMapper;
+
+    @Mock
+    private WarehouseResponseToWarehouseMapper warehouseResponseToWarehouseMapper;
 
     @Mock
     private WarehouseService warehouseService;
@@ -77,8 +87,7 @@ public class WarehouseEntityControllerTest {
 
     @Test
     void shouldCreateWarehouseWhenUserAuthenticated() {
-        WarehouseRequest request = new WarehouseRequest();
-        request.setWarehouseLocation(WarehouseLocation.Rzeszow);
+        WarehouseRequest request = new WarehouseRequest(WarehouseLocation.Warsaw);
 
         WarehouseEntity warehouseEntity = WarehouseEntity.builder()
                 .id(1L)
@@ -86,17 +95,26 @@ public class WarehouseEntityControllerTest {
                 .user(user)
                 .build();
 
+        WarehouseResponse warehouseResponse = WarehouseResponse.builder()
+                .warehouseLocation(request.getWarehouseLocation())
+                .userId(user.getId())
+                .itemsId(new ArrayList<>())
+                .build();
+
         when(warehouseService.createWarehouse(request)).thenReturn(warehouseEntity);
+        when(warehouseResponseToWarehouseMapper.mapToWarehouse(warehouseEntity)).thenReturn(warehouseResponse);
 
-        WarehouseResponse result = warehouseController.create(request);
+        ResponseEntity<WarehouseResponse> result = warehouseController.create(request);
 
-        assertEquals(user, result.getUserId());
+        assertEquals(HttpStatus.CREATED, result.getStatusCode());
+        assertNotNull(result.getBody());
         verify(warehouseService).createWarehouse(request);
+        verify(warehouseResponseToWarehouseMapper).mapToWarehouse(warehouseEntity);
 
     }
 
     @Test
-    void shouldThrowExceptionWhenCreateWarehouseFails(){
+    void shouldThrowExceptionWhenCreateWarehouseFails() {
         WarehouseRequest warehouseRequest = new WarehouseRequest();
 
         when(warehouseService.createWarehouse(warehouseRequest))
@@ -107,9 +125,8 @@ public class WarehouseEntityControllerTest {
 
     }
 
-
     @Test
-    void shouldAssignSpaceTypeToItem(){
+    void shouldAssignSpaceTypeToItem() {
         WarehouseSpaceTypeRequest warehouseSpaceTypeRequest = new WarehouseSpaceTypeRequest(
                 WarehouseSpaceType.SHELF
         );
@@ -118,23 +135,33 @@ public class WarehouseEntityControllerTest {
                 .id(1L)
                 .name("ItemName")
                 .itemCode("itemCode")
-                .locationCode("S05B")
                 .user(user)
-                .deliveries(null)
+                .build();
+        WarehouseEntity warehouseEntity = WarehouseEntity.builder()
+                .id(1L)
+                .warehouseLocation(WarehouseLocation.Rzeszow)
+                .user(user)
+                .build();
+
+        WarehouseResponse warehouseResponse = WarehouseResponse.builder()
+                .userId(user.getId())
+                .itemsId(new ArrayList<>())
                 .build();
 
         when(warehouseService.assignWarehouseSpaceType(warehouseSpaceTypeRequest, item.getId()))
                 .thenReturn(item);
+        when(itemResponseToItemMapper.mapToItem(item)).thenReturn(new ItemResponse());
 
-        ItemResponse result = warehouseController.assignSpaceType(item.getId(), warehouseSpaceTypeRequest);
+        ItemResponse result = warehouseController.assignSpaceType(item.getId(), warehouseSpaceTypeRequest).getBody();
 
         assertEquals(1L, item.getId());
-        assertEquals("S05B", result.getLocationCode());
+        assertNotNull(result);
+        assertEquals(item.getLocationCode(), result.getLocationCode());
         verify(warehouseService).assignWarehouseSpaceType(warehouseSpaceTypeRequest, item.getId());
     }
 
     @Test
-    void shouldThrowExceptionWhenAssignSpaceTypeFails(){
+    void shouldThrowExceptionWhenAssignSpaceTypeFails() {
         Long id = 99L;
 
         WarehouseSpaceTypeRequest warehouseSpaceTypeRequest = new WarehouseSpaceTypeRequest();
@@ -157,7 +184,7 @@ public class WarehouseEntityControllerTest {
                 .id(1L)
                 .name("ItemName")
                 .itemCode("itemCode")
-                .locationCode("RS05B")
+                .locationCode("S05B")
                 .user(user)
                 .deliveries(null)
                 .build();
@@ -174,18 +201,24 @@ public class WarehouseEntityControllerTest {
 
         item.setWarehouseEntity(warehouseEntity);
 
-        ItemResponse result = warehouseController.assignWarehouseLocation(item.getId(), warehouseLocationRequest);
+        ItemResponse itemResponse = ItemResponse.builder()
+                .locationCode("RS05B")
+                .userId(user.getId())
+                .itemCode(item.getItemCode())
+                .build();
+        when(itemResponseToItemMapper.mapToItem(item)).thenReturn(itemResponse);
 
+        ItemResponse result = warehouseController.assignWarehouseLocation(item.getId(), warehouseLocationRequest).getBody();
+
+        assertNotNull(result);
         assertEquals("RS05B", result.getLocationCode());
-        assertEquals(warehouseEntity.getId(), result.getUserId());
+        assertEquals(user.getId(), result.getUserId());
         verify(warehouseService).assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId());
-
     }
 
     @Test
-    void shouldThrowExceptionWhenAssignWarehouseLocationFails(){
+    void shouldThrowExceptionWhenAssignWarehouseLocationFails() {
         Long id = 100L;
-
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest();
 
         when(warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, id))
@@ -197,13 +230,11 @@ public class WarehouseEntityControllerTest {
     }
 
     @Test
-    void shouldUpdateWarehouseLocation(){
+    void shouldUpdateWarehouseLocation() {
         Long itemId = 1L;
-
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(
                 WarehouseLocation.Warsaw
         );
-
         ItemEntity updatedItem = ItemEntity.builder()
                 .id(1L)
                 .name("ItemName")
@@ -212,29 +243,36 @@ public class WarehouseEntityControllerTest {
                 .user(user)
                 .deliveries(null)
                 .build();
-
         WarehouseEntity warehouseEntity = WarehouseEntity.builder()
                 .id(2L)
-                .warehouseLocation(WarehouseLocation.Warsaw)
+                .warehouseLocation(WarehouseLocation.Krakow)
                 .user(user)
                 .items(List.of(updatedItem))
                 .build();
 
         when(warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId))
                 .thenReturn(updatedItem);
+        updatedItem.setWarehouseEntity(warehouseEntity);
 
-        ItemResponse result = warehouseController.updateWarehouseLocation(itemId, warehouseLocationRequest );
+        ItemResponse itemResponse = ItemResponse.builder()
+                .locationCode("KSO5B")
+                .userId(warehouseEntity.getId())
+                .itemCode(updatedItem.getItemCode())
+                .build();
+        when(itemResponseToItemMapper.mapToItem(updatedItem)).thenReturn(itemResponse);
 
-        assertEquals(itemId, result.getUserId());
-        assertEquals("WS05B", result.getLocationCode());
-        verify(warehouseService).updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId);
+        ItemResponse result = warehouseController.updateWarehouseLocation(updatedItem.getId(), warehouseLocationRequest).getBody();
 
+        assertNotNull(result);
+        assertEquals("KSO5B", result.getLocationCode());
+        assertEquals(updatedItem.getItemCode(), result.getItemCode());
+
+        verify(warehouseService).updatedItemsToWarehouseLocation(warehouseLocationRequest, updatedItem.getId());
     }
 
     @Test
-    void shouldThrowExceptionWhenUpdateWarehouseLocationFails(){
+    void shouldThrowExceptionWhenUpdateWarehouseLocationFails() {
         Long id = 404L;
-
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest();
 
         when(warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, id))
@@ -242,7 +280,6 @@ public class WarehouseEntityControllerTest {
 
         assertThrows(RuntimeException.class, () -> warehouseController.updateWarehouseLocation(id, warehouseLocationRequest));
         verify(warehouseService).updatedItemsToWarehouseLocation(warehouseLocationRequest, id);
-
     }
 }
 

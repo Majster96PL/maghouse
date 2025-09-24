@@ -1,8 +1,6 @@
 package com.example.maghouse.auth.controller;
 
-import com.example.maghouse.auth.login.LoginRequest;
 import com.example.maghouse.auth.registration.role.Role;
-import com.example.maghouse.auth.registration.token.TokenResponse;
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.item.ItemEntity;
@@ -18,6 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -39,6 +41,9 @@ public class ItemControllerIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
@@ -51,45 +56,23 @@ public class ItemControllerIntegrationTest {
     private PasswordEncoder passwordEncoder;
 
     private User user;
-    private String userToken;
+    private ItemEntity item;
 
     @BeforeEach
-    void setUp() throws Exception {
-
-         user = User.builder()
-                 .id(1L)
-                .firstname("John")
-                .lastname("Doe")
-                .email("johndoe@example.com")
-                .password(passwordEncoder.bCryptPasswordEncoder().encode("password"))
-                .role(Role.USER)
-                .build();
-        userRepository.save(user);
-
-        userToken = getAccessToken();
-    }
-
-    private ItemEntity createAndSaveTestItem(){
-        ItemEntity item = ItemEntity.builder()
-                .id(1L)
-                .name("Test Name")
-                .itemCode("TestCode")
-                .quantity(10)
-                .user(user)
-                .deliveries(null)
-                .warehouseEntity(null)
-                .build();
-        return itemRepository.save(item);
+    void setUp() {
+        SecurityContextHolder.clearContext();
+        this.setUpUser();
+        this.authenticateUser();
+        this.createAndSaveTestItem();
     }
 
     @Test
     void shouldCreateItem() throws Exception {
         ItemRequest itemRequest = new ItemRequest("Item1", 10);
 
-        mockMvc.perform(post("/maghouse/items")
+        mockMvc.perform(post("/items/")
                         .content(objectMapper.writeValueAsString(itemRequest))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + userToken))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Item1"))
                 .andExpect(jsonPath("$.quantity").value(10));
@@ -98,40 +81,55 @@ public class ItemControllerIntegrationTest {
     @Test
     void shouldUpdateItemQuantity() throws Exception {
         ItemEntity item = createAndSaveTestItem();
-        itemRepository.save(item);
 
-        ItemRequest updateRequest = new ItemRequest("Item1", 15);
+        ItemRequest updateRequest = new ItemRequest("Test_Name", 15);
 
-        mockMvc.perform(put("/maghouse/items" + item.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/items/" + item.getId())
                         .content(objectMapper.writeValueAsString(updateRequest))
-                        .header("Authorization", "Bearer " + userToken))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Test_Name"))
                 .andExpect(jsonPath("$.quantity").value(15));
     }
 
     @Test
     void shouldDeleteItem() throws Exception {
         ItemEntity item = createAndSaveTestItem();
-        itemRepository.save(item);
 
-        mockMvc.perform(delete("/maghouse/delete/" + item.getId())
-                        .header("Authorization", "Bearer " + userToken))
+        mockMvc.perform(delete("/items/" + item.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
 
-    private String getAccessToken() throws Exception {
-        LoginRequest loginRequest = new LoginRequest("johndoe@example.com", "password");
+    private User setUpUser() {
+        user = User.builder()
+                .id(1L)
+                .firstname("John")
+                .lastname("Doe")
+                .email("johndoe@example.com")
+                .password(passwordEncoder.bCryptPasswordEncoder().encode("password"))
+                .role(Role.USER)
+                .build();
+        return userRepository.save(user);
+    }
 
-        String response = mockMvc.perform(post("/maghouse/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+    private void authenticateUser() {
+        user = userRepository.findUserByEmail(user.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                user.getEmail(), "password"
+        );
+        Authentication authentication = authenticationManager.authenticate(authenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
 
-        TokenResponse tokenResponse = objectMapper.readValue(response, TokenResponse.class);
-        return tokenResponse.getAccessToken();
+    private ItemEntity createAndSaveTestItem() {
+        item = ItemEntity.builder()
+                .name("Test_Name")
+                .itemCode("TestCode")
+                .quantity(10)
+                .user(user)
+                .build();
+        return itemRepository.save(item);
     }
 }
