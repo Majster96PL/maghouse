@@ -60,10 +60,10 @@ public class ItemControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        SecurityContextHolder.clearContext();
         this.setUpUser();
         this.authenticateUser();
         this.createAndSaveTestItem();
-
     }
 
     @Test
@@ -82,12 +82,13 @@ public class ItemControllerIntegrationTest {
     void shouldUpdateItemQuantity() throws Exception {
         ItemEntity item = createAndSaveTestItem();
 
-        ItemRequest updateRequest = new ItemRequest("Item1", 15);
+        ItemRequest updateRequest = new ItemRequest("Test_Name", 15);
 
         mockMvc.perform(put("/items/" + item.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateRequest)))
+                        .content(objectMapper.writeValueAsString(updateRequest))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Test_Name"))
                 .andExpect(jsonPath("$.quantity").value(15));
     }
 
@@ -124,8 +125,7 @@ public class ItemControllerIntegrationTest {
 
     private ItemEntity createAndSaveTestItem() {
         item = ItemEntity.builder()
-                .id(1L)
-                .name("Test Name")
+                .name("Test_Name")
                 .itemCode("TestCode")
                 .quantity(10)
                 .user(user)
