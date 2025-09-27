@@ -1,3 +1,3 @@
-From postgres
+FROM postgres
 ENV POSTGRES_DB="maghouse"
-COPY data.sql /docker-entrypoint-initdb.b/
+COPY data.sql /docker-entrypoint-initdb.d/
