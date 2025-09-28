@@ -32,8 +32,8 @@ CREATE TABLE IF NOT EXISTS items
     item_code      VARCHAR(50) NOT NULL,
     quantity      INTEGER     NOT NULL,
     location_code  VARCHAR(50),
-    user_id       BIGINT      NOT NULL,
-    warehouse_id  BIGINT NOT NULL
+    user_id       BIGINT,
+    warehouse_id  BIGINT
     );
 
 CREATE TABLE IF NOT EXISTS delivery
@@ -64,11 +64,6 @@ ALTER TABLE items
 ALTER TABLE delivery
     ADD CONSTRAINT fk_delivery_user FOREIGN KEY (user_id) REFERENCES users (id),
     ADD CONSTRAINT fk_delivery_item FOREIGN KEY (item_id) REFERENCES items (id);
-
-
-INSERT INTO users (firstname, lastname, email, password, role) VALUES
-    ('Admin', 'Admin', 'admin@maghouse.pl', 'admin', 'ADMIN')
-    ON CONFLICT (email) DO NOTHING;
 
 INSERT INTO warehouse (warehouse_location, user_id) VALUES ('Rzeszow', 1)
     ON CONFLICT (id) DO NOTHING;
