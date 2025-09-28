@@ -23,7 +23,7 @@ public class OpenApiConfig {
                         .title("Maghouse API")
                         .version("1.0.0")
                         .description("Documentation Maghouse API")
-                        .termsOfService("http://swagger.io/terms")
-                        .license(new io.swagger.v3.oas.models.info.License().name("Apache 2.0").url("http://springdoc.org")));
+                        .termsOfService("https://swagger.io/terms")
+                        .license(new io.swagger.v3.oas.models.info.License().name("Apache 2.0").url("https://springdoc.org")));
     }
 }
