@@ -5,16 +5,20 @@ import com.example.maghouse.auth.registration.role.ChangeRoleRequest;
 import com.example.maghouse.auth.registration.role.ChangeRoleResponse;
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.token.TokenResponse;
+import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRequest;
+import com.example.maghouse.auth.registration.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -27,6 +31,9 @@ public class AdminControllerTest {
 
     @Mock
     private AdminService adminService;
+
+    @Mock
+    private UserService userService;
 
     private UserRequest userRequest;
     private ChangeRoleRequest changeRoleRequest;
@@ -78,6 +85,21 @@ public class AdminControllerTest {
     }
 
     @Test
+    void shouldReturnUserById() {
+        Long userId = 1L;
+        User expectedUser = new User(1L, "Firstname", "Lastname", "test@example.com", "password123", null, null);
+
+        when(userService.getUserById(userId)).thenReturn(expectedUser);
+
+        ResponseEntity<User> responseEntity = adminController.getUserById(userId);
+
+        assertNotNull(responseEntity);
+        assertEquals(200, responseEntity.getStatusCodeValue());
+        assertEquals(expectedUser, responseEntity.getBody());
+        verify(userService, times(1)).getUserById(userId);
+    }
+
+    @Test
     void shouldDeleteUserSuccessfully() {
         doNothing().when(adminService).deleteUserByAdmin(1L);
 
@@ -118,5 +140,16 @@ public class AdminControllerTest {
 
         assertThatThrownBy(() -> adminController.changeUserRoleByAdmin(changeRoleRequest))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserNotFound() {
+        Long userId = 1L;
+
+        when(userService.getUserById(userId)).thenReturn(null);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> adminController.getUserById(userId));
+        assertEquals("User not found", exception.getMessage());
+        verify(userService, times(1)).getUserById(userId);
     }
 }
