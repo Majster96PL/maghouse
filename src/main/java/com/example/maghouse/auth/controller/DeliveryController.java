@@ -42,11 +42,11 @@ public class DeliveryController {
                     content = @Content)
     })
     public ResponseEntity<DeliveryResponse> create(@RequestBody  DeliveryRequest deliveryRequest){
-        DeliveryEntity deliveryEntity = deliveryService.createDelivery(deliveryRequest);
-        DeliveryResponse deliveryResponse = deliveryResponseToDeliveryMapper.mapToResponse(deliveryEntity);
         if (deliveryRequest == null) {
             throw new IllegalArgumentException("Delivery request cannot be null");
         }
+        DeliveryEntity deliveryEntity = deliveryService.createDelivery(deliveryRequest);
+        DeliveryResponse deliveryResponse = deliveryResponseToDeliveryMapper.mapToResponse(deliveryEntity);
         return ResponseEntity.status(HttpStatus.CREATED).body(deliveryResponse);
     }
 
@@ -65,11 +65,11 @@ public class DeliveryController {
     })
     public ResponseEntity<DeliveryResponse> updateDeliveryStatus(@RequestBody DeliveryStatusRequest deliveryStatusRequest,
                                          @PathVariable Long id){
-        DeliveryEntity updatedDelivery = deliveryService.updateDeliveryStatus(deliveryStatusRequest, id);
-        DeliveryResponse deliveryResponse = deliveryResponseToDeliveryMapper.mapToResponse(updatedDelivery);
         if(deliveryStatusRequest == null || id == null) {
             throw new IllegalArgumentException("Delivery status request cannot be null");
         }
+        DeliveryEntity updatedDelivery = deliveryService.updateDeliveryStatus(deliveryStatusRequest, id);
+        DeliveryResponse deliveryResponse = deliveryResponseToDeliveryMapper.mapToResponse(updatedDelivery);
         return ResponseEntity.ok(deliveryResponse);
     }
 }

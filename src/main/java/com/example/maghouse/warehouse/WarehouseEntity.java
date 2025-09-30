@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -30,5 +31,5 @@ public class WarehouseEntity {
     @JoinColumn(name = "user_id")
     private User user;
     @OneToMany(mappedBy = "warehouseEntity", cascade = CascadeType.ALL)
-    private List<ItemEntity> items;
+    private List<ItemEntity> items = new ArrayList<>();
 }

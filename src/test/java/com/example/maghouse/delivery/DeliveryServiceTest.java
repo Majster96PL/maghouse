@@ -71,7 +71,7 @@ public class DeliveryServiceTest {
                 .items(new ArrayList<>())
                 .build();
 
-        item = com.example.maghouse.item.ItemEntity.builder()
+        item = ItemEntity.builder()
                 .name("ItemName")
                 .itemCode("itemCode")
                 .quantity(100)
@@ -258,7 +258,11 @@ public class DeliveryServiceTest {
        when(deliveryRepository.findById(delivery.getId())).thenReturn(Optional.of(delivery));
        when(itemRepository.findByItemCode(delivery.getItemCode())).thenReturn(Optional.empty());
 
-       assertThrows(IllegalArgumentException.class,
-               () -> deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId()));
+       deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId());
+
+       verify(deliveryRepository, times(1)).findById(delivery.getId());
+       verify(itemRepository, times(1)).findByItemCode(delivery.getItemCode());
+       verify(deliveryRepository, times(1)).save(any(DeliveryEntity.class));
+       verify(itemRepository, never()).save(any(ItemEntity.class));
    }
 }

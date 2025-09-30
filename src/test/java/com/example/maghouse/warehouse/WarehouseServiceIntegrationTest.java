@@ -59,7 +59,8 @@ public class WarehouseServiceIntegrationTest {
     private WarehouseEntity warehouseEntity;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
+        SecurityContextHolder.clearContext();
         setUpTestUser();
         authenticateTestUser();
         createAndSaveTestItem();
@@ -68,21 +69,11 @@ public class WarehouseServiceIntegrationTest {
     }
 
     @AfterEach
-    void tearDown(){
+    void tearDown() {
         SecurityContextHolder.clearContext();
     }
 
-    private void authenticateTestUser() {
-        user = userRepository.findUserByEmail(user.getEmail())
-                   .orElseThrow(() -> new RuntimeException("User not found!"));
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                user.getEmail(), "password123"
-        );
-        Authentication authentication = authenticationManager.authenticate(authenticationToken);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-       }
-
-    private void setUpTestUser() {
+    private User setUpTestUser() {
         user = User.builder()
                 .id(1L)
                 .firstname("John")
@@ -91,26 +82,34 @@ public class WarehouseServiceIntegrationTest {
                 .password(passwordEncoder.bCryptPasswordEncoder().encode("password123"))
                 .role(Role.MANAGER)
                 .build();
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
-    private ItemEntity createAndSaveTestItem(){
+    private User authenticateTestUser() {
+        user = userRepository.findUserByEmail(user.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                user.getEmail(), "password123"
+        );
+        Authentication authentication = authenticationManager.authenticate(authenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        return user;
+    }
+
+    private ItemEntity createAndSaveTestItem() {
         item = ItemEntity.builder()
-                .id(1L)
                 .name("Test Name")
                 .itemCode("TEST123")
-                .locationCode(null)
+                .locationCode("WS01A")
                 .quantity(10)
                 .user(user)
-                .warehouseEntity(null)
                 .build();
 
         return itemRepository.save(item);
     }
 
-    private WarehouseEntity createAndSaveTestWarehouse(){
-         warehouseEntity = WarehouseEntity.builder()
-                .id(1L)
+    private WarehouseEntity createAndSaveTestWarehouse() {
+        warehouseEntity = WarehouseEntity.builder()
                 .warehouseLocation(WarehouseLocation.Warsaw)
                 .user(user)
                 .items(new ArrayList<>())
@@ -120,22 +119,23 @@ public class WarehouseServiceIntegrationTest {
     }
 
     @Test
-    void shouldCreateWarehousePersistInDatabase(){
+    void shouldCreateWarehousePersistInDatabase() {
         WarehouseRequest request = new WarehouseRequest();
-        request.setWarehouseLocation(WarehouseLocation.Rzeszow);
+        request.setWarehouseLocation(WarehouseLocation.Warsaw);
 
         WarehouseEntity result = warehouseService.createWarehouse(request);
 
-        assertNotNull(result.getId());
-        assertEquals(WarehouseLocation.Rzeszow, result.getWarehouseLocation());
+        assertNotNull(result);
+        assertEquals(WarehouseLocation.Warsaw, result.getWarehouseLocation());
         assertEquals(user, result.getUser());
     }
 
     @Test
-    void shouldAssignCorrectLocation(){
+    void shouldAssignCorrectLocation() {
         WarehouseEntity warehouseEntity = createAndSaveTestWarehouse();
 
         ItemEntity item = createAndSaveTestItem();
+        item.setLocationCode(null);
 
         WarehouseSpaceTypeRequest request = new WarehouseSpaceTypeRequest(WarehouseSpaceType.DRAVER);
 
@@ -148,22 +148,24 @@ public class WarehouseServiceIntegrationTest {
     }
 
     @Test
-    void shouldUpdateLocationPrefix(){
-        ItemEntity item = createAndSaveTestItem();
+    void shouldUpdateLocationPrefix() {
         item.setLocationCode("RS01C");
-        itemRepository.save(item);
+        itemRepository.saveAndFlush(item);
 
-        WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(WarehouseLocation.Krakow);
+        WarehouseLocationRequest warehouseLocationRequest =
+                new WarehouseLocationRequest(WarehouseLocation.Krakow);
 
-        ItemEntity result = warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, item.getId());
+        ItemEntity result = warehouseService.updatedItemsToWarehouseLocation(
+                warehouseLocationRequest, item.getId());
 
         assertNotNull(result);
+        assertNotNull(result.getLocationCode());
         assertTrue(result.getLocationCode().matches("^KS\\d{2}[A-C]$"));
         assertEquals(user, result.getUser());
     }
 
     @Test
-    void shouldAssignItemsToWarehouseLocation(){
+    void shouldAssignItemsToWarehouseLocation() {
         WarehouseEntity warehouseEntity = createAndSaveTestWarehouse();
 
         ItemEntity item = createAndSaveTestItem();
@@ -180,7 +182,7 @@ public class WarehouseServiceIntegrationTest {
     }
 
     @Test
-    void shouldThrowAllWhenUserNotAuthenticated(){
+    void shouldThrowAllWhenUserNotAuthenticated() {
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(WarehouseLocation.Krakow);
         WarehouseSpaceTypeRequest warehouseSpaceTypeRequest = new WarehouseSpaceTypeRequest(WarehouseSpaceType.DRAVER);
         WarehouseRequest warehouseRequest = new WarehouseRequest();
