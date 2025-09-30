@@ -27,8 +27,12 @@ public class AdminService {
     private final JwtService jwtService;
     private final AuthService authService;
 
-    public List<User> findAllUsers() {
-        return userRepository.findAll();
+    public List<User> getAllUsersByAdmin() {
+        return userService.findAllUsers();
+    }
+
+    public Optional<User> getUsersByRoleByAdmin(String role) {
+        return userService.getUsersByRole(role);
     }
 
     public ChangeRoleResponse changeUserRoleByAdmin(ChangeRoleRequest changeRoleRequest) {
