@@ -65,6 +65,9 @@ ALTER TABLE delivery
     ADD CONSTRAINT fk_delivery_user FOREIGN KEY (user_id) REFERENCES users (id),
     ADD CONSTRAINT fk_delivery_item FOREIGN KEY (item_id) REFERENCES items (id);
 
+INSERT INTO users (firstname, lastname, email, password, role) VALUES (
+'Admin', 'Admin', 'admin@maghouse.pl', '', 'ADMIN')
+
 INSERT INTO warehouse (warehouse_location, user_id) VALUES ('Rzeszow', 1)
     ON CONFLICT (id) DO NOTHING;
 
