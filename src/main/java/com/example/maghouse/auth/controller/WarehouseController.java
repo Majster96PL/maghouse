@@ -11,6 +11,8 @@ import com.example.maghouse.warehouse.WarehouseService;
 import com.example.maghouse.warehouse.location.WarehouseLocationRequest;
 import com.example.maghouse.warehouse.spacetype.WarehouseSpaceTypeRequest;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,31 +25,37 @@ public class WarehouseController {
     private final ItemResponseToItemMapper itemResponseToItemMapper;
 
     @PostMapping
-    public WarehouseResponse create(@RequestBody WarehouseRequest warehouseRequest) {
+    public ResponseEntity<WarehouseResponse> create(@RequestBody WarehouseRequest warehouseRequest) {
         WarehouseEntity warehouse = warehouseService.createWarehouse(warehouseRequest);
-        return warehouseResponseToWarehouseMapper.mapToWarehouse(warehouse);
+        WarehouseResponse warehouseResponse = warehouseResponseToWarehouseMapper.mapToWarehouse(warehouse);
+        if (warehouseResponse == null) {
+            throw new IllegalArgumentException("Mapper returned null for WarehouseResponse");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(warehouseResponse);
     }
 
     @PostMapping("/assign-space-type/{itemId}")
-    public ItemResponse assignSpaceType(@PathVariable Long itemId,
+    public ResponseEntity<ItemResponse> assignSpaceType(@PathVariable Long itemId,
                                         @RequestBody WarehouseSpaceTypeRequest warehouseSpaceTypeRequest) {
         ItemEntity item = warehouseService.assignWarehouseSpaceType(warehouseSpaceTypeRequest, itemId);
-        return itemResponseToItemMapper.mapToItem(item);
+        ItemResponse response = itemResponseToItemMapper.mapToItem(item);
+        return ResponseEntity.ok(response);
 
     }
 
     @PostMapping("/assign-location/{itemId}")
-    public ItemResponse assignWarehouseLocation(@PathVariable Long itemId,
+    public ResponseEntity<ItemResponse>  assignWarehouseLocation(@PathVariable Long itemId,
                                                 @RequestBody WarehouseLocationRequest warehouseLocationRequest) {
         ItemEntity item = warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, itemId);
-        return itemResponseToItemMapper.mapToItem(item);
+        ItemResponse response = itemResponseToItemMapper.mapToItem(item);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/items/{itemId}/location")
-    public ItemResponse updateWarehouseLocation(@PathVariable Long itemId,
+    public ResponseEntity<ItemResponse>  updateWarehouseLocation(@PathVariable Long itemId,
                                                 @RequestBody WarehouseLocationRequest warehouseLocationRequest) {
         ItemEntity item = warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId);
-        return itemResponseToItemMapper.mapToItem(item);
+        ItemResponse response = itemResponseToItemMapper.mapToItem(item);
+        return ResponseEntity.ok(response);
     }
-
 }
