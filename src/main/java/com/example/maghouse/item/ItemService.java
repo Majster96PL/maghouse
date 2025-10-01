@@ -10,6 +10,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.NoSuchElementException;
+
 @Service
 @AllArgsConstructor
 public class ItemService {
@@ -20,6 +23,14 @@ public class ItemService {
     private final ItemCodeGenerator itemCodeGenerator;
     private static final ItemResponse itemResponse = new ItemResponse();
 
+    public List<ItemEntity> getAllItems() {
+        return itemRepository.findAll();
+    }
+
+    public ItemEntity getItemByItemCode(String itemCode ) {
+        return itemRepository.findByItemCode(itemCode).
+                orElseThrow(() -> new NoSuchElementException("Item not found!"));
+    }
 
     @Transactional
     public ItemEntity createItem(ItemRequest itemRequest) {

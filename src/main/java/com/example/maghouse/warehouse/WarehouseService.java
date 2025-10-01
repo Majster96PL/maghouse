@@ -31,6 +31,10 @@ public class WarehouseService {
     private final ItemRepository itemRepository;
     private static final Logger LOGGER = LoggerFactory.getLogger(WarehouseService.class);
 
+    public List<WarehouseEntity> getAllWarehouses() {
+        return null;
+    }
+
     @Transactional
     public WarehouseEntity createWarehouse(WarehouseRequest warehouseRequest) {
         User user = getAthenticatedUser();

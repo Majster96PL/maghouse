@@ -86,7 +86,7 @@ public class AdminServiceTest {
         List<User> users = List.of(user);
         when(userRepository.findAll()).thenReturn(users);
 
-        List<User> result = adminService.findAllUsers();
+        List<User> result = adminService.getAllUsersByAdmin();
 
         assertNotNull(result);
         assertEquals(1, result.size());

@@ -9,6 +9,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 public class UserService {
@@ -43,6 +46,17 @@ public class UserService {
     public User getUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow( () -> new UsernameNotFoundException("User not found!"));
+    }
+
+    public Optional<User> getUsersByRole(String role) {
+        if (role == null || role.trim().isEmpty()) {
+            throw new IllegalArgumentException("Role cannot be null or empty");
+        }
+        return userRepository.findByRoleName(role);
+    }
+
+    public List<User> findAllUsers() {
+        return userRepository.findAll();
     }
 
     public void deleteUser(Long id) {
