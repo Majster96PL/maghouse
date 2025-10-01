@@ -37,7 +37,7 @@ public class DeliveryController {
             @ApiResponse(responseCode = "201", description = "Delivery successfully created",
                     content = @Content(schema = @Schema(implementation = DeliveryResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request data or validation error",
-                    content = @Content(schema = @Schema(implementation = Map.class))), // Map.class dla standardowego błędu
+                    content = @Content(schema = @Schema(implementation = Map.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized access (missing or invalid token)",
                     content = @Content)
     })
@@ -52,7 +52,7 @@ public class DeliveryController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update delivery status",
-            description = "Updates the status (e.g., 'SHIPPED', 'DELIVERED') of a specific delivery by ID.")
+            description = "Updates the status of a specific delivery by ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Delivery status successfully updated",
                     content = @Content(schema = @Schema(implementation = DeliveryResponse.class))),
