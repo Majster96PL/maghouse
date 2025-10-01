@@ -17,7 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequestMapping(path = "/items/")
 @RestController
@@ -29,6 +31,41 @@ public class ItemController {
     private final ItemService itemService;
     private final ItemResponseToItemMapper itemResponseToItemMapper;
 
+    @GetMapping
+    @Operation(summary = "Retrieve a list of all items",
+            description = "Returns a list of all item types currently in the warehouse inventory.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved items",
+                    content = @Content(schema = @Schema(implementation = ItemResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Access denied",
+                    content = @Content)
+    })
+    public ResponseEntity<List<ItemResponse>> getAllItems() {
+        List<ItemEntity> items = itemService.getAllItems();
+        List<ItemResponse> itemResponses = items.stream()
+                .map(itemResponseToItemMapper::mapToItem)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(itemResponses);
+    }
+
+    @GetMapping("/{itemCode}")
+    @Operation(summary = "Retrieve item details by ID",
+            description = "Returns detailed data for a specific item based on its unique ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved item details",
+                    content = @Content(schema = @Schema(implementation = ItemResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Access denied",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = "Item with the given ID was not found",
+                    content = @Content(schema = @Schema(implementation = Map.class)))
+    })
+    public ResponseEntity<ItemResponse> getItemByItemCode(@PathVariable("itemCode") String itemCode){
+        var item = itemService.getItemByItemCode(itemCode);
+        var response = itemResponseToItemMapper.mapToItem(item);
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping
     @Operation(summary = "Create a new item",
             description = "Adds a new unique item type to the warehouse inventory.")
@@ -37,7 +74,7 @@ public class ItemController {
                     content = @Content(schema = @Schema(implementation = ItemResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request or item already exists",
                     content = @Content(schema = @Schema(implementation = Map.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden (manager:create required)",
+            @ApiResponse(responseCode = "403", description = "Access denied",
                     content = @Content)
     })
     public ResponseEntity<ItemResponse> create(@RequestBody ItemRequest itemRequest) {
@@ -45,6 +82,7 @@ public class ItemController {
         ItemResponse itemResponse = itemResponseToItemMapper.mapToItem(item);
         return ResponseEntity.status(HttpStatus.CREATED).body(itemResponse);
     }
+
     @PutMapping("/{itemId}")
     @Operation(summary = "Update item quantity",
             description = "Modifies the stock quantity for a specific item.")
@@ -53,7 +91,7 @@ public class ItemController {
                     content = @Content(schema = @Schema(implementation = ItemResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid quantity value or request",
                     content = @Content(schema = @Schema(implementation = Map.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden (manager:update required)",
+            @ApiResponse(responseCode = "403", description = "Access denied",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Item with the given ID was not found",
                     content = @Content(schema = @Schema(implementation = Map.class)))
@@ -70,7 +108,7 @@ public class ItemController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Item successfully deleted (No Content)",
                     content = @Content),
-            @ApiResponse(responseCode = "403", description = "Forbidden (manager:delete required)",
+            @ApiResponse(responseCode = "403", description = "Access denied",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Item with the given ID was not found",
                     content = @Content(schema = @Schema(implementation = Map.class)))
