@@ -22,7 +22,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/warehouses/")
@@ -34,6 +36,24 @@ public class WarehouseController {
     private final WarehouseService warehouseService;
     private final WarehouseResponseToWarehouseMapper warehouseResponseToWarehouseMapper;
     private final ItemResponseToItemMapper itemResponseToItemMapper;
+
+    @GetMapping
+    @Operation(summary = "Retrieve all warehouses",
+            description = "Retrieved a list of a defined warehouse structures.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved list of warehouses",
+                    content = @Content(schema = @Schema(implementation = WarehouseResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden (Access denied)",
+                    content = @Content)
+    })
+    public ResponseEntity<List<WarehouseResponse>> getAllWarehouses() {
+        List<WarehouseEntity> warehouses = warehouseService.getAllWarehouses();
+        List<WarehouseResponse> responses = warehouses.stream()
+                .map(warehouseResponseToWarehouseMapper::mapToWarehouse)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(responses);
+    }
 
     @PostMapping
     @Operation(summary = "Create a new warehouse",
@@ -67,7 +87,7 @@ public class WarehouseController {
                     content = @Content)
     })
     public ResponseEntity<ItemResponse> assignSpaceType(@PathVariable Long itemId,
-                                        @RequestBody WarehouseSpaceTypeRequest warehouseSpaceTypeRequest) {
+                                                        @RequestBody WarehouseSpaceTypeRequest warehouseSpaceTypeRequest) {
         ItemEntity item = warehouseService.assignWarehouseSpaceType(warehouseSpaceTypeRequest, itemId);
         ItemResponse response = itemResponseToItemMapper.mapToItem(item);
         return ResponseEntity.ok(response);
@@ -85,8 +105,8 @@ public class WarehouseController {
             @ApiResponse(responseCode = "403", description = "Forbidden (warehouseman:update required)",
                     content = @Content)
     })
-    public ResponseEntity<ItemResponse>  assignWarehouseLocation(@PathVariable Long itemId,
-                                                @RequestBody WarehouseLocationRequest warehouseLocationRequest) {
+    public ResponseEntity<ItemResponse> assignWarehouseLocation(@PathVariable Long itemId,
+                                                                @RequestBody WarehouseLocationRequest warehouseLocationRequest) {
         ItemEntity item = warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, itemId);
         ItemResponse response = itemResponseToItemMapper.mapToItem(item);
         return ResponseEntity.ok(response);
@@ -103,8 +123,8 @@ public class WarehouseController {
             @ApiResponse(responseCode = "403", description = "Forbidden (warehouseman:update required)",
                     content = @Content)
     })
-    public ResponseEntity<ItemResponse>  updateWarehouseLocation(@PathVariable Long itemId,
-                                                @RequestBody WarehouseLocationRequest warehouseLocationRequest) {
+    public ResponseEntity<ItemResponse> updateWarehouseLocation(@PathVariable Long itemId,
+                                                                @RequestBody WarehouseLocationRequest warehouseLocationRequest) {
         ItemEntity item = warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId);
         ItemResponse response = itemResponseToItemMapper.mapToItem(item);
         return ResponseEntity.ok(response);

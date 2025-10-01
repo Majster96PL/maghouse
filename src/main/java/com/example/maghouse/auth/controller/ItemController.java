@@ -50,8 +50,8 @@ public class ItemController {
     }
 
     @GetMapping("/{itemCode}")
-    @Operation(summary = "Retrieve item details by ID",
-            description = "Returns detailed data for a specific item based on its unique ID.")
+    @Operation(summary = "Retrieve item details by item code",
+            description = "Returns detailed data for a specific item based on its unique item code.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved item details",
                     content = @Content(schema = @Schema(implementation = ItemResponse.class))),
