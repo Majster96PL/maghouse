@@ -70,7 +70,7 @@ public class AdminServiceIntegrationTest {
 
     @Test
     void shouldReturnAllUsers() {
-        List<User> users = adminService.findAllUsers();
+        List<User> users = adminService.getAllUsersByAdmin();
 
         assertThat(users).isNotEmpty();
         assertThat(users.stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))).isTrue();
