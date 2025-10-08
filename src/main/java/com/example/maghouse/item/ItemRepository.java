@@ -13,7 +13,7 @@ public interface ItemRepository extends JpaRepository<ItemEntity, Long> {
     Optional<ItemEntity> findByItemCode(String itemCode);
 
     @Query("SELECT i FROM ItemEntity i WHERE i.locationCode LIKE CONCAT(:prefix, '%')")
-    List<ItemEntity> findByItemCodeStartingWith(@Param("prefix") String prefix);
+    List<ItemEntity> findByItemLocationStartingWith(@Param("prefix") String prefix);
 
     @Query("SELECT i.locationCode FROM ItemEntity i " +
             "WHERE i.locationCode LIKE CONCAT(:prefix, '%') AND i.locationCode IS NOT NULL")
