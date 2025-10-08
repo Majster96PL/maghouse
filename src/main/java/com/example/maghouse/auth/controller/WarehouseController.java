@@ -55,6 +55,32 @@ public class WarehouseController {
         return ResponseEntity.ok(responses);
     }
 
+    @GetMapping("/items/by-location/{locationPrefix}")
+    @Operation(summary = "Retrieve all items by warehouse location",
+            description = "Retrieves a list of items assigned to a warehouse location starting with the specified prefix (e.g., 'W', 'K', 'R').")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved list of items",
+                    content = @Content(schema = @Schema(implementation = ItemResponse.class))),
+            @ApiResponse(responseCode = "404", description = "No items found for the given location prefix",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden (Access denied)",
+                    content = @Content)
+    })
+    public ResponseEntity<List<ItemResponse>> getItemsByLocationPrefix(@PathVariable String locationPrefix) {
+
+        List<ItemEntity> items = warehouseService.getAllItemsByLocationCodePrefix(String.valueOf(locationPrefix));
+
+        if (items.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<ItemResponse> responses = items.stream()
+                .map(itemResponseToItemMapper::mapToItem)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(responses);
+    }
+
     @PostMapping
     @Operation(summary = "Create a new warehouse",
             description = "Initializes a new warehouse structure in the system.")

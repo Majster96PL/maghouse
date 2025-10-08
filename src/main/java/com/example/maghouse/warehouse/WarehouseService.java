@@ -32,7 +32,12 @@ public class WarehouseService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WarehouseService.class);
 
     public List<WarehouseEntity> getAllWarehouses() {
-        return null;
+        return warehouseRepository.findAll();
+    }
+
+    public List<ItemEntity> getAllItemsByLocationCodePrefix(String prefix){
+        return itemRepository.findByItemLocationStartingWith(prefix);
+
     }
 
     @Transactional
@@ -149,7 +154,7 @@ public class WarehouseService {
 
     private List<ItemEntity> getItemsByPrefix(WarehouseRequest warehouseRequest,
                                               String locationPrefix, User user) {
-        List<ItemEntity> items = itemRepository.findByItemCodeStartingWith(locationPrefix);
+        List<ItemEntity> items = itemRepository.findByItemLocationStartingWith(locationPrefix);
         if (items.isEmpty()) {
             LOGGER.warn("No items found for location Prefix while creating warehouse." +
                         "Location: {}, Prefix: {}, User: {}",
