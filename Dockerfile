@@ -6,6 +6,6 @@ RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:22-jre-alpine
 WORKDIR /maghouse
-COPY --from=builder /maghouse/target/*.jar maghouse.jar
+COPY --from=builder /maghouse/target/*.jar maghouse2.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "maghouse.jar"]
+ENTRYPOINT ["java", "-Dspring.datasource.username=${DB_USER}", "-Dspring.datasource.password=${DB_PASSWORD}"  , "-jar", "maghouse2.jar"]
