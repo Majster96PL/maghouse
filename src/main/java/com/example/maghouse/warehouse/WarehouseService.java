@@ -35,7 +35,8 @@ public class WarehouseService {
         return warehouseRepository.findAll();
     }
 
-    public List<ItemEntity> getAllItemsByLocationCodePrefix(String prefix){
+    public List<ItemEntity> getAllItemsByLocationCodePrefix(WarehouseLocation warehouseLocation){
+        String prefix = generateLocationPrefix(warehouseLocation);
         return itemRepository.findByItemLocationStartingWith(prefix);
 
     }
