@@ -4,8 +4,10 @@ import com.example.maghouse.delivery.DeliveryEntity;
 import com.example.maghouse.delivery.DeliveryRequest;
 import com.example.maghouse.delivery.DeliveryResponse;
 import com.example.maghouse.delivery.DeliveryService;
+import com.example.maghouse.delivery.status.DeliveryStatus;
 import com.example.maghouse.delivery.status.DeliveryStatusRequest;
 import com.example.maghouse.mapper.DeliveryResponseToDeliveryMapper;
+import com.example.maghouse.warehouse.location.WarehouseLocation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,7 +20,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/deliveries/")
@@ -29,6 +34,124 @@ public class DeliveryController {
 
     private final DeliveryService deliveryService;
     private final DeliveryResponseToDeliveryMapper deliveryResponseToDeliveryMapper;
+
+    @GetMapping
+    @Operation(summary = "Get all deliveries", description = "Retrieves a list of all deliveries.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved list of deliveries"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access")
+    })
+    public ResponseEntity<List<DeliveryResponse>> getAllDeliveries() {
+        List<DeliveryEntity> deliveries = deliveryService.getAllDeliveries();
+        List<DeliveryResponse> responses = deliveries.stream()
+                .map(deliveryResponseToDeliveryMapper::mapToResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/status/{status}")
+    @Operation(summary = "Get deliveries by status", description = "Retrieves deliveries filtered by delivery status.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved deliveries by status"),
+            @ApiResponse(responseCode = "404", description = "No deliveries found for the given status"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access")
+    })
+    public ResponseEntity<List<DeliveryResponse>> getDeliveriesByStatus(@PathVariable DeliveryStatus status) {
+        List<DeliveryEntity> deliveries = deliveryService.getDeliveriesByStatus(status);
+        if (deliveries.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        List<DeliveryResponse> responses = deliveries.stream()
+                .map(deliveryResponseToDeliveryMapper::mapToResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/number/{deliveryNumber}")
+    @Operation(summary = "Get delivery by delivery number", description = "Retrieves a specific delivery by its unique delivery number.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved delivery"),
+            @ApiResponse(responseCode = "404", description = "Delivery with the given number not found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access")
+    })
+    public ResponseEntity<DeliveryResponse> getDeliveryByNumber(@PathVariable String deliveryNumber) {
+        Optional<DeliveryEntity> delivery = deliveryService.getDeliveryByNumber(deliveryNumber);
+        if (delivery.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        DeliveryResponse response = deliveryResponseToDeliveryMapper.mapToResponse(delivery.get());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/supplier/{supplierName}")
+    @Operation(summary = "Get deliveries by supplier", description = "Retrieves deliveries filtered by supplier name.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved deliveries by supplier"),
+            @ApiResponse(responseCode = "404", description = "No deliveries found for the given supplier"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access")
+    })
+    public ResponseEntity<List<DeliveryResponse>> getDeliveriesBySupplier(@PathVariable String supplierName) {
+        List<DeliveryEntity> deliveries = deliveryService.getDeliveriesBySupplier(supplierName);
+        if (deliveries.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        List<DeliveryResponse> responses = deliveries.stream()
+                .map(deliveryResponseToDeliveryMapper::mapToResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/location/{warehouseLocation}")
+    @Operation(summary = "Get deliveries by warehouse location", description = "Retrieves deliveries filtered by warehouse location.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved deliveries by location"),
+            @ApiResponse(responseCode = "404", description = "No deliveries found for the given location"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access")
+    })
+    public ResponseEntity<List<DeliveryResponse>> getDeliveriesByLocation(@PathVariable WarehouseLocation warehouseLocation) {
+        List<DeliveryEntity> deliveries = deliveryService.getDeliveriesByLocation(warehouseLocation);
+        if (deliveries.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        List<DeliveryResponse> responses = deliveries.stream()
+                .map(deliveryResponseToDeliveryMapper::mapToResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/item/{itemCode}")
+    @Operation(summary = "Get deliveries by item code", description = "Retrieves deliveries filtered by item code.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved deliveries by item code"),
+            @ApiResponse(responseCode = "404", description = "No deliveries found for the given item code"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access")
+    })
+    public ResponseEntity<List<DeliveryResponse>> getDeliveriesByItemCode(@PathVariable String itemCode) {
+        List<DeliveryEntity> deliveries = deliveryService.getDeliveriesByItemCode(itemCode);
+        if (deliveries.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        List<DeliveryResponse> responses = deliveries.stream()
+                .map(deliveryResponseToDeliveryMapper::mapToResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get delivery by ID", description = "Retrieves a specific delivery by its ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved delivery"),
+            @ApiResponse(responseCode = "404", description = "Delivery with the given ID not found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access")
+    })
+    public ResponseEntity<DeliveryResponse> getDeliveryById(@PathVariable Long id) {
+        Optional<DeliveryEntity> delivery = deliveryService.getDeliveryById(id);
+        if (delivery.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        DeliveryResponse response = deliveryResponseToDeliveryMapper.mapToResponse(delivery.get());
+        return ResponseEntity.ok(response);
+    }
 
     @PostMapping
     @Operation(summary = "Create a new delivery",
