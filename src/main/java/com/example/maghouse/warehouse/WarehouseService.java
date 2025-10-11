@@ -128,6 +128,16 @@ public class WarehouseService {
             });
     }
 
+    public WarehouseLocation getWarehouseLocationByPrefix(String prefix) {
+        for(WarehouseLocation location : WarehouseLocation.values()) {
+            String locationPrefix = generateLocationPrefix(location);
+            if (locationPrefix.equals(prefix.toUpperCase())) {
+                return location;
+            }
+        }
+        throw new IllegalArgumentException("Unknow location prefix: " + prefix);
+    }
+
     private User getAthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {

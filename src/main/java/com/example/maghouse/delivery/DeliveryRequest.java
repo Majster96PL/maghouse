@@ -13,5 +13,4 @@ public class DeliveryRequest {
     private String itemName;
     private String itemCode;
     private int quantity;
-    private WarehouseLocation warehouseLocation;
 }

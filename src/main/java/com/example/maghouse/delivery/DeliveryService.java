@@ -23,6 +23,7 @@ public class DeliveryService {
     private final DeliveryResponseToDeliveryMapper deliveryResponseToDeliveryMapper;
     private final DeliveryRepository deliveryRepository;
     private final ItemRepository itemRepository;
+    private final WarehouseService warehouseService;
 
     @Transactional
     public DeliveryEntity createDelivery(DeliveryRequest deliveryRequest) {
@@ -42,6 +43,8 @@ public class DeliveryService {
                 deliveryRequest, numberDelivery, data, user.getId());
         var delivery = deliveryResponseToDeliveryMapper.mapToDelivery(deliveryResponse);
         delivery.setUser(user);
+        WarehouseLocation warehouseLocation = determineWarehouseLocationFromItemLocation(deliveryRequest.getItemCode());
+        delivery.setWarehouseLocation(warehouseLocation);
 
         return deliveryRepository.save(delivery);
     }
@@ -64,5 +67,17 @@ public class DeliveryService {
             });
         }
         return deliveryRepository.save(delivery);
+    }
+
+    private WarehouseLocation determineWarehouseLocationFromItemLocation(String itemCode) {
+        ItemEntity item = itemRepository.findByItemCode(itemCode)
+                .orElseThrow(() -> new IllegalArgumentException("Item with code " + itemCode + " not found!"));
+
+        String locationCode = item.getLocationCode();
+        if (locationCode == null || locationCode.isEmpty()) {
+            throw new IllegalArgumentException("Item location code not found!");
+        }
+        String locationPrefix = locationCode.substring(0, 1).toUpperCase();
+        return warehouseService.getWarehouseLocationByPrefix(locationPrefix);
     }
 }
