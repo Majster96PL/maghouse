@@ -3,8 +3,11 @@ package com.example.maghouse.delivery;
 import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.delivery.status.DeliveryStatus;
 import com.example.maghouse.delivery.status.DeliveryStatusRequest;
+import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.mapper.DeliveryResponseToDeliveryMapper;
+import com.example.maghouse.warehouse.WarehouseService;
+import com.example.maghouse.warehouse.location.WarehouseLocation;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -13,6 +16,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -24,6 +29,34 @@ public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final ItemRepository itemRepository;
     private final WarehouseService warehouseService;
+
+    public List<DeliveryEntity> getAllDeliveries() {
+        return deliveryRepository.findAll();
+    }
+
+    public List<DeliveryEntity> getDeliveriesByStatus(DeliveryStatus status) {
+        return deliveryRepository.findByDeliveryStatus(status);
+    }
+
+    public Optional<DeliveryEntity> getDeliveryByNumber(String deliveryNumber) {
+        return deliveryRepository.findByNumberDelivery(deliveryNumber);
+    }
+
+    public List<DeliveryEntity> getDeliveriesBySupplier(String supplierName) {
+        return deliveryRepository.findBySupplierContainingIgnoreCase(supplierName);
+    }
+
+    public List<DeliveryEntity> getDeliveriesByLocation(WarehouseLocation warehouseLocation) {
+        return deliveryRepository.findByWarehouseLocation(warehouseLocation);
+    }
+
+    public List<DeliveryEntity> getDeliveriesByItemCode(String itemCode) {
+        return deliveryRepository.findByItemCode(itemCode);
+    }
+
+    public Optional<DeliveryEntity> getDeliveryById(Long id) {
+        return deliveryRepository.findById(id);
+    }
 
     @Transactional
     public DeliveryEntity createDelivery(DeliveryRequest deliveryRequest) {

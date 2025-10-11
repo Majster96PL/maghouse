@@ -24,7 +24,6 @@ public class DeliveryResponseToDeliveryMapper implements DeliveryMapper<Delivery
                 .itemCode(deliveryRequest.getItemCode())
                 .quantity(deliveryRequest.getQuantity())
                 .deliveryStatus(DeliveryStatus.CREATED)
-                .warehouseLocation(deliveryRequest.getWarehouseLocation())
                 .userId(userId)
                 .build();
     }
