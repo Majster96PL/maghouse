@@ -1,6 +1,5 @@
 package com.example.maghouse.delivery;
 
-import com.example.maghouse.warehouse.location.WarehouseLocation;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

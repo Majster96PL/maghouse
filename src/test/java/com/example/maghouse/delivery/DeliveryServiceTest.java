@@ -8,6 +8,7 @@ import com.example.maghouse.delivery.status.DeliveryStatusRequest;
 import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemRepository;
 import com.example.maghouse.mapper.DeliveryResponseToDeliveryMapper;
+import com.example.maghouse.warehouse.WarehouseService;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,9 @@ public class DeliveryServiceTest {
     @Mock
     private UserDetails userDetails;
 
+    @Mock
+    private WarehouseService warehouseService;
+
     @InjectMocks
     private DeliveryService deliveryService;
 
@@ -73,7 +77,7 @@ public class DeliveryServiceTest {
 
         item = ItemEntity.builder()
                 .name("ItemName")
-                .itemCode("itemCode")
+                .itemCode("ItemCode")
                 .quantity(100)
                 .locationCode(null)
                 .user(user)
@@ -105,13 +109,13 @@ public class DeliveryServiceTest {
         String deliveryNumber = "1/05/2025";
         when(deliveryNumberGenerator.generateDeliveryNumber()).thenReturn("1/05/2025");
         LocalDate date = LocalDate.now();
+        item.setLocationCode("RS10B");
 
         DeliveryRequest request = new DeliveryRequest(
                 "inpost",
                 "ItemName",
                 "ItemCode",
-                100,
-                WarehouseLocation.Rzeszow
+                100
         );
 
         DeliveryResponse deliveryResponse =
@@ -119,6 +123,8 @@ public class DeliveryServiceTest {
         request, deliveryNumber, date, user.getId() );
 
         when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(itemRepository.findByItemCode("ItemCode")).thenReturn(Optional.of(item));
+        when(warehouseService.getWarehouseLocationByPrefix("R")).thenReturn(WarehouseLocation.Rzeszow);
         when(deliveryResponseToDeliveryMapper.mapToDeliveryResponse(
                 eq(request),
                 eq(deliveryNumber),
@@ -134,6 +140,7 @@ public class DeliveryServiceTest {
         DeliveryEntity result = deliveryService.createDelivery(request);
 
         assertNotNull(result);
+        assertEquals(WarehouseLocation.Rzeszow, result.getWarehouseLocation());
         assertEquals(delivery.getNumberDelivery(), result.getNumberDelivery());
         assertEquals(delivery.getSupplier(), result.getSupplier());
         assertEquals(delivery.getItemName(), result.getItemName());
@@ -147,8 +154,7 @@ public class DeliveryServiceTest {
                 "inpost",
                 "ItemName",
                 "ItemCode",
-                100,
-                WarehouseLocation.Rzeszow
+                100
         );
 
         assertThrows(SecurityException.class,
@@ -162,8 +168,7 @@ public class DeliveryServiceTest {
                 "inpost",
                 "ItemName",
                 "ItemCode",
-                100,
-                WarehouseLocation.Rzeszow
+                100
         );
 
         when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.empty());
@@ -177,8 +182,7 @@ public class DeliveryServiceTest {
                 "inpost",
                 "ItemName",
                 "ItemCode",
-                100,
-                WarehouseLocation.Rzeszow
+                100
         );
 
         when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));

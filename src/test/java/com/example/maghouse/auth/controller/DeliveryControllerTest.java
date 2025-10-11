@@ -82,8 +82,7 @@ public class DeliveryControllerTest {
                 "inpost",
                 "ItemName",
                 "ItemCode",
-                100,
-                WarehouseLocation.Rzeszow
+                100
         );
 
         DeliveryEntity exceptedDelivery = DeliveryEntity.builder()
@@ -183,8 +182,7 @@ public class DeliveryControllerTest {
                 "inpost",
                 "ItemName",
                 "ItemCode",
-                100,
-                WarehouseLocation.Rzeszow
+                100
         );
 
         assertDoesNotThrow(() -> deliveryController.create(deliveryRequest));
@@ -204,8 +202,7 @@ public class DeliveryControllerTest {
                 "inpost",
                 "ItemName",
                 "ItemCode",
-                100,
-                WarehouseLocation.Rzeszow
+                100
         );
 
         assertDoesNotThrow(() -> deliveryController.create(deliveryRequest));
