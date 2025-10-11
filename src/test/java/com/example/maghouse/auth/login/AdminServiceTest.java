@@ -83,14 +83,15 @@ public class AdminServiceTest {
 
     @Test
     void shouldReturnAllUsers() {
-        List<User> users = List.of(user);
-        when(userRepository.findAll()).thenReturn(users);
+        List<User> expectedUsers = List.of(user);
 
-        List<User> result = adminService.findAllUsers();
+        when(userService.findAllUsers()).thenReturn(expectedUsers);
+
+        List<User> result = adminService.getAllUsersByAdmin();
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        verify(userRepository, times(1)).findAll();
+        verify(userService, times(1)).findAllUsers();
     }
 
     @Test

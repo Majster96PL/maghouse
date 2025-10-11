@@ -126,12 +126,22 @@ public class DeliveryControllerIntegrationTest {
 
     @Test
     void shouldCreateDeliverySuccessfully() throws Exception {
+        ItemEntity item = ItemEntity.builder()
+                .name("ItemName")
+                .itemCode("ItemCode")
+                .locationCode("RS06C")
+                .quantity(50)
+                .user(user)
+                .warehouseEntity(null)
+                .deliveries(new ArrayList<>())
+                .build();
+        itemRepository.save(item);
+
         DeliveryRequest deliveryRequest = new DeliveryRequest(
                 "inpost",
                 "ItemName",
                 "ItemCode",
-                100,
-                WarehouseLocation.Rzeszow
+                100
         );
 
         mockMvc.perform(post("/deliveries/")

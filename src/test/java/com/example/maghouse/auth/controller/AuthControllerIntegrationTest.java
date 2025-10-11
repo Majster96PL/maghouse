@@ -7,7 +7,6 @@ import com.example.maghouse.auth.login.jwt.JwtService;
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.token.TokenRepository;
 import com.example.maghouse.auth.registration.token.TokenResponse;
-import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRequest;
 import com.example.maghouse.auth.registration.user.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +24,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -169,41 +167,5 @@ public class AuthControllerIntegrationTest {
                 .andExpect(jsonPath("$.error").value("Invalid token"));
 
         verify(authService, times(1)).refreshToken(any(HttpServletRequest.class), any(HttpServletResponse.class));
-    }
-
-    @Test
-    void shouldGetUserByIdSuccessfully() throws Exception {
-        User user = User.builder()
-                .id(1L)
-                .firstname("John")
-                .lastname("Doe")
-                .email("john.doe@example.com")
-                .role(Role.USER)
-                .build();
-
-        when(userService.getUserById(1L)).thenReturn(user);
-
-        mockMvc.perform(get("/auth/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.firstname").value("John"))
-                .andExpect(jsonPath("$.lastname").value("Doe"))
-                .andExpect(jsonPath("$.email").value("john.doe@example.com"))
-                .andExpect(jsonPath("$.role").value("USER"));
-
-        verify(userService, times(1)).getUserById(1L);
-    }
-
-    @Test
-    void shouldReturnNotFoundWhenUserDoesNotExist() throws Exception {
-        when(userService.getUserById(99L)).thenThrow(new RuntimeException("User not found"));
-
-        mockMvc.perform(get("/auth/99")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("User not found"));
-
-        verify(userService, times(1)).getUserById(99L);
     }
 }

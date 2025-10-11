@@ -131,8 +131,7 @@ public class DeliveryServiceIntegrationTest {
                 "INPOST",
                 item.getName(),
                 item.getItemCode(),
-                100,
-                WarehouseLocation.Rzeszow
+                100
         );
 
         DeliveryEntity result = deliveryService.createDelivery(deliveryRequest);
@@ -178,8 +177,7 @@ public class DeliveryServiceIntegrationTest {
                 "INPOST",
                 item.getName(),
                 item.getItemCode(),
-                100,
-                WarehouseLocation.Rzeszow
+                100
         );
         DeliveryStatusRequest statusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
 

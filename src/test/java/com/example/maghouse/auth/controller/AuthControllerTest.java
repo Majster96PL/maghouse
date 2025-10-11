@@ -133,30 +133,4 @@ public class AuthControllerTest {
         assertEquals("Token refresh error", exception.getMessage());
         verify(authService, times(1)).refreshToken(request, response);
     }
-
-    @Test
-    void shouldReturnUserById() {
-        Long userId = 1L;
-        User expectedUser = new User(1L, "Firstname", "Lastname", "test@example.com", "password123", null, null);
-
-        when(userService.getUserById(userId)).thenReturn(expectedUser);
-
-        ResponseEntity<User> responseEntity = authController.getUserById(userId);
-
-        assertNotNull(responseEntity);
-        assertEquals(200, responseEntity.getStatusCodeValue());
-        assertEquals(expectedUser, responseEntity.getBody());
-        verify(userService, times(1)).getUserById(userId);
-    }
-
-    @Test
-    void shouldThrowExceptionWhenUserNotFound() {
-        Long userId = 1L;
-
-        when(userService.getUserById(userId)).thenReturn(null);
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> authController.getUserById(userId));
-        assertEquals("User not found", exception.getMessage());
-        verify(userService, times(1)).getUserById(userId);
-    }
 }
