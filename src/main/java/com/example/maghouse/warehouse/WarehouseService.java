@@ -31,6 +31,16 @@ public class WarehouseService {
     private final ItemRepository itemRepository;
     private static final Logger LOGGER = LoggerFactory.getLogger(WarehouseService.class);
 
+    public List<WarehouseEntity> getAllWarehouses() {
+        return warehouseRepository.findAll();
+    }
+
+    public List<ItemEntity> getAllItemsByLocationCodePrefix(WarehouseLocation warehouseLocation){
+        String prefix = generateLocationPrefix(warehouseLocation);
+        return itemRepository.findByItemLocationStartingWith(prefix);
+
+    }
+
     @Transactional
     public WarehouseEntity createWarehouse(WarehouseRequest warehouseRequest) {
         User user = getAthenticatedUser();
@@ -118,6 +128,16 @@ public class WarehouseService {
             });
     }
 
+    public WarehouseLocation getWarehouseLocationByPrefix(String prefix) {
+        for(WarehouseLocation location : WarehouseLocation.values()) {
+            String locationPrefix = generateLocationPrefix(location);
+            if (locationPrefix.equals(prefix.toUpperCase())) {
+                return location;
+            }
+        }
+        throw new IllegalArgumentException("Unknow location prefix: " + prefix);
+    }
+
     private User getAthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -145,7 +165,7 @@ public class WarehouseService {
 
     private List<ItemEntity> getItemsByPrefix(WarehouseRequest warehouseRequest,
                                               String locationPrefix, User user) {
-        List<ItemEntity> items = itemRepository.findByItemCodeStartingWith(locationPrefix);
+        List<ItemEntity> items = itemRepository.findByItemLocationStartingWith(locationPrefix);
         if (items.isEmpty()) {
             LOGGER.warn("No items found for location Prefix while creating warehouse." +
                         "Location: {}, Prefix: {}, User: {}",

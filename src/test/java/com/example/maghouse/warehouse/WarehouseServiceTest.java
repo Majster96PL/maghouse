@@ -108,7 +108,7 @@ public class WarehouseServiceTest {
                 .thenReturn(mockedWarehouseResponse);
         when(warehouseResponseToWarehouseMapper.mapToEntityFromResponse(any(WarehouseResponse.class)))
                 .thenReturn(new WarehouseEntity());
-        when(itemRepository.findByItemCodeStartingWith("K"))
+        when(itemRepository.findByItemLocationStartingWith("K"))
                 .thenReturn(Collections.singletonList(item));
         when(warehouseRepository.save(any(WarehouseEntity.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
