@@ -115,7 +115,7 @@ public class WarehouseServiceTest {
         when(itemRepository.saveAll(anyList()))
                 .thenReturn(Collections.singletonList(item));
 
-        WarehouseEntity result = warehouseService.createWarehouse(request);
+        WarehouseEntity result = warehouseService.createWarehouse(request, user);
 
         assertNotNull(result);
         assertFalse(result.getItems().isEmpty());
@@ -127,14 +127,14 @@ public class WarehouseServiceTest {
     void shouldThrowSecurityExceptionWhenUserIsNotAuthenticated() {
         when(authentication.isAuthenticated()).thenReturn(false);
         WarehouseRequest warehouseRequest = new WarehouseRequest();
-        assertThrows(SecurityException.class, () -> warehouseService.createWarehouse(warehouseRequest));
+        assertThrows(SecurityException.class, () -> warehouseService.createWarehouse(warehouseRequest, user));
     }
 
     @Test
     void shouldThrowIllegalArgumentExceptionWhenUserNotFound() {
         when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.empty());
         WarehouseRequest warehouseRequest = new WarehouseRequest( WarehouseLocation.Warsaw);
-        assertThrows(IllegalArgumentException.class, () -> warehouseService.createWarehouse(warehouseRequest));
+        assertThrows(IllegalArgumentException.class, () -> warehouseService.createWarehouse(warehouseRequest, user));
     }
 
     @Test
@@ -146,7 +146,7 @@ public class WarehouseServiceTest {
         when(itemRepository.findUnassignedItem(item.getId())).thenReturn(Optional.of(item));
         when(itemRepository.findUsedLocationCodes(anyString())).thenReturn(usedSpaceCode);
 
-        ItemEntity result = warehouseService.assignWarehouseSpaceType(spaceTypeRequest, item.getId());
+        ItemEntity result = warehouseService.assignWarehouseSpaceType(spaceTypeRequest, item.getId(), user);
 
         assertNotNull(result);
         assertTrue(result.getLocationCode().startsWith("S"));
@@ -167,7 +167,7 @@ public class WarehouseServiceTest {
         lenient().when(warehouseResponseToWarehouseMapper.mapToEntityFromResponse(any(WarehouseResponse.class)))
                 .thenReturn(warehouseEntity);
 
-        ItemEntity result = warehouseService.assignItemsToWarehouseLocation(locationRequest, 1L);
+        ItemEntity result = warehouseService.assignItemsToWarehouseLocation(locationRequest, 1L, user);
 
         assertNotNull(result);
         assertTrue(result.getLocationCode().startsWith("W"));
@@ -177,7 +177,7 @@ public class WarehouseServiceTest {
     void shouldThrowExceptionWhenItemNotFound() {
         lenient().when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
         WarehouseLocationRequest locationRequest = new WarehouseLocationRequest(WarehouseLocation.Warsaw);
-        assertThrows(IllegalArgumentException.class, () -> warehouseService.assignItemsToWarehouseLocation(locationRequest, 1L));
+        assertThrows(IllegalArgumentException.class, () -> warehouseService.assignItemsToWarehouseLocation(locationRequest, 1L, user));
     }
 
     @Test
@@ -193,7 +193,7 @@ public class WarehouseServiceTest {
         lenient().when(warehouseResponseToWarehouseMapper.mapToEntityFromResponse(any(WarehouseResponse.class)))
                 .thenReturn(warehouseEntity);
 
-        ItemEntity result = warehouseService.updatedItemsToWarehouseLocation(locationRequest, 1L);
+        ItemEntity result = warehouseService.updatedItemsToWarehouseLocation(locationRequest, 1L, user);
 
         assertNotNull(result);
         assertTrue(result.getLocationCode().startsWith("K"));
@@ -203,6 +203,6 @@ public class WarehouseServiceTest {
     void shouldThrowExceptionWhenWarehouseNotFound() {
         lenient().when(warehouseRepository.findFirstByWarehouseLocation(any())).thenReturn(Optional.empty());
         WarehouseLocationRequest locationRequest = new WarehouseLocationRequest(WarehouseLocation.Warsaw);
-        assertThrows(IllegalArgumentException.class, () -> warehouseService.assignItemsToWarehouseLocation(locationRequest, 1L));
+        assertThrows(IllegalArgumentException.class, () -> warehouseService.assignItemsToWarehouseLocation(locationRequest, 1L, user));
     }
 }

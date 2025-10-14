@@ -101,14 +101,14 @@ public class WarehouseControllerTest {
                 .itemsId(new ArrayList<>())
                 .build();
 
-        when(warehouseService.createWarehouse(request)).thenReturn(warehouseEntity);
+        when(warehouseService.createWarehouse(request, user)).thenReturn(warehouseEntity);
         when(warehouseResponseToWarehouseMapper.mapToWarehouse(warehouseEntity)).thenReturn(warehouseResponse);
 
         ResponseEntity<WarehouseResponse> result = warehouseController.create(request);
 
         assertEquals(HttpStatus.CREATED, result.getStatusCode());
         assertNotNull(result.getBody());
-        verify(warehouseService).createWarehouse(request);
+        verify(warehouseService).createWarehouse(request, user);
         verify(warehouseResponseToWarehouseMapper).mapToWarehouse(warehouseEntity);
 
     }
@@ -117,11 +117,11 @@ public class WarehouseControllerTest {
     void shouldThrowExceptionWhenCreateWarehouseFails() {
         WarehouseRequest warehouseRequest = new WarehouseRequest();
 
-        when(warehouseService.createWarehouse(warehouseRequest))
+        when(warehouseService.createWarehouse(warehouseRequest, user))
                 .thenThrow(new RuntimeException("Request not found!"));
 
         assertThrows(RuntimeException.class, () -> warehouseController.create(warehouseRequest));
-        verify(warehouseService).createWarehouse(warehouseRequest);
+        verify(warehouseService).createWarehouse(warehouseRequest, user);
 
     }
 
@@ -148,7 +148,7 @@ public class WarehouseControllerTest {
                 .itemsId(new ArrayList<>())
                 .build();
 
-        when(warehouseService.assignWarehouseSpaceType(warehouseSpaceTypeRequest, item.getId()))
+        when(warehouseService.assignWarehouseSpaceType(warehouseSpaceTypeRequest, item.getId(), user))
                 .thenReturn(item);
         when(itemResponseToItemMapper.mapToItem(item)).thenReturn(new ItemResponse());
 
@@ -157,7 +157,7 @@ public class WarehouseControllerTest {
         assertEquals(1L, item.getId());
         assertNotNull(result);
         assertEquals(item.getLocationCode(), result.getLocationCode());
-        verify(warehouseService).assignWarehouseSpaceType(warehouseSpaceTypeRequest, item.getId());
+        verify(warehouseService).assignWarehouseSpaceType(warehouseSpaceTypeRequest, item.getId(), user);
     }
 
     @Test
@@ -166,12 +166,12 @@ public class WarehouseControllerTest {
 
         WarehouseSpaceTypeRequest warehouseSpaceTypeRequest = new WarehouseSpaceTypeRequest();
 
-        when(warehouseService.assignWarehouseSpaceType(warehouseSpaceTypeRequest, id))
+        when(warehouseService.assignWarehouseSpaceType(warehouseSpaceTypeRequest, id, user))
                 .thenThrow(new IllegalArgumentException("Item not found!"));
 
         assertThrows(IllegalArgumentException.class,
                 () -> warehouseController.assignSpaceType(id, warehouseSpaceTypeRequest));
-        verify(warehouseService).assignWarehouseSpaceType(warehouseSpaceTypeRequest, id);
+        verify(warehouseService).assignWarehouseSpaceType(warehouseSpaceTypeRequest, id, user);
     }
 
     @Test
@@ -196,7 +196,7 @@ public class WarehouseControllerTest {
                 .items(List.of(item))
                 .build();
 
-        when(warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId()))
+        when(warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId(), user))
                 .thenReturn(item);
 
         item.setWarehouseEntity(warehouseEntity);
@@ -213,7 +213,7 @@ public class WarehouseControllerTest {
         assertNotNull(result);
         assertEquals("RS05B", result.getLocationCode());
         assertEquals(user.getId(), result.getUserId());
-        verify(warehouseService).assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId());
+        verify(warehouseService).assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId(), user);
     }
 
     @Test
@@ -221,12 +221,12 @@ public class WarehouseControllerTest {
         Long id = 100L;
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest();
 
-        when(warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, id))
+        when(warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, id, user))
                 .thenThrow(new IllegalArgumentException("WarehouseEntity not found!!"));
 
         assertThrows(IllegalArgumentException.class,
                 () -> warehouseController.assignWarehouseLocation(id, warehouseLocationRequest));
-        verify(warehouseService).assignItemsToWarehouseLocation(warehouseLocationRequest, id);
+        verify(warehouseService).assignItemsToWarehouseLocation(warehouseLocationRequest, id, user);
     }
 
     @Test
@@ -250,7 +250,7 @@ public class WarehouseControllerTest {
                 .items(List.of(updatedItem))
                 .build();
 
-        when(warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId))
+        when(warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId, user))
                 .thenReturn(updatedItem);
         updatedItem.setWarehouseEntity(warehouseEntity);
 
@@ -267,7 +267,7 @@ public class WarehouseControllerTest {
         assertEquals("KSO5B", result.getLocationCode());
         assertEquals(updatedItem.getItemCode(), result.getItemCode());
 
-        verify(warehouseService).updatedItemsToWarehouseLocation(warehouseLocationRequest, updatedItem.getId());
+        verify(warehouseService).updatedItemsToWarehouseLocation(warehouseLocationRequest, updatedItem.getId(), user);
     }
 
     @Test
@@ -275,11 +275,11 @@ public class WarehouseControllerTest {
         Long id = 404L;
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest();
 
-        when(warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, id))
+        when(warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, id, user))
                 .thenThrow(new RuntimeException("Update failed!!"));
 
         assertThrows(RuntimeException.class, () -> warehouseController.updateWarehouseLocation(id, warehouseLocationRequest));
-        verify(warehouseService).updatedItemsToWarehouseLocation(warehouseLocationRequest, id);
+        verify(warehouseService).updatedItemsToWarehouseLocation(warehouseLocationRequest, id, user);
     }
 }
 

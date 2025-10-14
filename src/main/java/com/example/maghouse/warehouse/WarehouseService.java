@@ -13,9 +13,6 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -42,8 +39,7 @@ public class WarehouseService {
     }
 
     @Transactional
-    public WarehouseEntity createWarehouse(WarehouseRequest warehouseRequest) {
-        User user = getAthenticatedUser();
+    public WarehouseEntity createWarehouse(WarehouseRequest warehouseRequest, User user) {
         LOGGER.info("Request to create warehouse: userId={}, location={}",
                 user.getId(), warehouseRequest.getWarehouseLocation());
         String locationPrefix = generateLocationPrefix(warehouseRequest.getWarehouseLocation());
@@ -66,8 +62,7 @@ public class WarehouseService {
     }
 
     @Transactional
-    public ItemEntity assignItemsToWarehouseLocation(WarehouseLocationRequest warehouseLocationRequest, Long itemId) {
-        User user = getAthenticatedUser();
+    public ItemEntity assignItemsToWarehouseLocation(WarehouseLocationRequest warehouseLocationRequest, Long itemId, User user) {
         LOGGER.info("Request to add space type to Item: itemId = {}, location = {}",
                 itemId, warehouseLocationRequest.getWarehouseLocation());
         ItemEntity item = getItemById(itemId, user);
@@ -82,8 +77,7 @@ public class WarehouseService {
     }
 
     @Transactional
-    public ItemEntity updatedItemsToWarehouseLocation(WarehouseLocationRequest warehouseLocationRequest, Long id) {
-        User user = getAthenticatedUser();
+    public ItemEntity updatedItemsToWarehouseLocation(WarehouseLocationRequest warehouseLocationRequest, Long id, User user) {
         LOGGER.info("Request to update location to Item: itemId = {}, location = {}",
                 id, warehouseLocationRequest.getWarehouseLocation());
         ItemEntity item = getItemById(id, user);
@@ -99,8 +93,7 @@ public class WarehouseService {
     }
 
     @Transactional
-    public ItemEntity assignWarehouseSpaceType(WarehouseSpaceTypeRequest warehouseSpaceTypeRequest, Long id) {
-        User user = getAthenticatedUser();
+    public ItemEntity assignWarehouseSpaceType(WarehouseSpaceTypeRequest warehouseSpaceTypeRequest, Long id, User user) {
         LOGGER.info("Request to add space type to Item: itemId = {}, spaceType = {}",
                 id, warehouseSpaceTypeRequest.getWarehouseSpaceType());
 
@@ -128,6 +121,15 @@ public class WarehouseService {
             });
     }
 
+    public User getUserByEmail(String email) {
+        LOGGER.debug("Looking up user by email: {}", email);
+        return userRepository.findUserByEmail(email)
+                .orElseThrow(() -> {
+                    LOGGER.warn("User not found in database! Email: {}", email);
+                    return new IllegalArgumentException("User with email not found: " + email);
+                });
+    }
+
     public WarehouseLocation getWarehouseLocationByPrefix(String prefix) {
         for(WarehouseLocation location : WarehouseLocation.values()) {
             String locationPrefix = generateLocationPrefix(location);
@@ -138,7 +140,8 @@ public class WarehouseService {
         throw new IllegalArgumentException("Unknow location prefix: " + prefix);
     }
 
-    private User getAthenticatedUser() {
+    //will delete after transfer
+   /* private User getAthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             LOGGER.warn("Authentication failed - user not authenticated!");
@@ -152,7 +155,7 @@ public class WarehouseService {
                     return new IllegalArgumentException("User with email not found: " + userDetails.getUsername());
 
                 });
-    }
+    }*/
 
     private ItemEntity getItemById(Long id, User user) {
         return itemRepository.findById(id)
