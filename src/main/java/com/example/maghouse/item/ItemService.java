@@ -33,6 +33,9 @@ public class ItemService {
 
     @Transactional
     public ItemEntity createItem(ItemRequest itemRequest, User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
         String code = itemCodeGenerator.generateItemCode();
 
         ItemResponse itemResponse = itemResponseToItemMapper.mapToItemResponseFromRequest(itemRequest, code, null, user.getId() );

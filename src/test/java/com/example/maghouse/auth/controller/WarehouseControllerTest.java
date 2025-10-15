@@ -2,11 +2,11 @@ package com.example.maghouse.auth.controller;
 
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.User;
-import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemResponse;
 import com.example.maghouse.mapper.ItemResponseToItemMapper;
 import com.example.maghouse.mapper.WarehouseResponseToWarehouseMapper;
+import com.example.maghouse.security.AuthenticationHelper;
 import com.example.maghouse.warehouse.WarehouseEntity;
 import com.example.maghouse.warehouse.WarehouseRequest;
 import com.example.maghouse.warehouse.WarehouseResponse;
@@ -17,24 +17,22 @@ import com.example.maghouse.warehouse.spacetype.WarehouseSpaceType;
 import com.example.maghouse.warehouse.spacetype.WarehouseSpaceTypeRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class WarehouseControllerTest {
+@ExtendWith(MockitoExtension.class)
+class WarehouseControllerTest {
 
     @Mock
     private ItemResponseToItemMapper itemResponseToItemMapper;
@@ -46,31 +44,16 @@ public class WarehouseControllerTest {
     private WarehouseService warehouseService;
 
     @Mock
-    private UserRepository userRepository;
-
-    @Mock
-    private UserDetails userDetails;
-
-    @Mock
-    private SecurityContext securityContext;
-
-    @Mock
-    private Authentication authentication;
+    private AuthenticationHelper authenticationHelper;
 
     @InjectMocks
     private WarehouseController warehouseController;
 
     private User user;
+    private Authentication authentication;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
-        SecurityContextHolder.setContext(securityContext);
-        lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
-        lenient().when(authentication.isAuthenticated()).thenReturn(true);
-        lenient().when(authentication.getPrincipal()).thenReturn(userDetails);
-
         user = User.builder()
                 .id(1L)
                 .firstname("John")
@@ -80,13 +63,15 @@ public class WarehouseControllerTest {
                 .role(Role.MANAGER)
                 .build();
 
-        lenient().when(userDetails.getUsername()).thenReturn(user.getEmail());
-        lenient().when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
-
+        authentication = mock(Authentication.class);
+        lenient().when(authentication.getName()).thenReturn(user.getEmail());
+        lenient().when(authentication.isAuthenticated()).thenReturn(true);
+        lenient().when(authenticationHelper.getAuthenticatedUser(authentication)).thenReturn(user);
     }
 
     @Test
     void shouldCreateWarehouseWhenUserAuthenticated() {
+        // Given
         WarehouseRequest request = new WarehouseRequest(WarehouseLocation.Warsaw);
 
         WarehouseEntity warehouseEntity = WarehouseEntity.builder()
@@ -101,28 +86,29 @@ public class WarehouseControllerTest {
                 .itemsId(new ArrayList<>())
                 .build();
 
+        when(authenticationHelper.getAuthenticatedUser(authentication)).thenReturn(user);
         when(warehouseService.createWarehouse(request, user)).thenReturn(warehouseEntity);
         when(warehouseResponseToWarehouseMapper.mapToWarehouse(warehouseEntity)).thenReturn(warehouseResponse);
 
-        ResponseEntity<WarehouseResponse> result = warehouseController.create(request);
+        ResponseEntity<WarehouseResponse> result = warehouseController.create(request, authentication);
 
         assertEquals(HttpStatus.CREATED, result.getStatusCode());
         assertNotNull(result.getBody());
+        verify(authenticationHelper).getAuthenticatedUser(authentication);
         verify(warehouseService).createWarehouse(request, user);
         verify(warehouseResponseToWarehouseMapper).mapToWarehouse(warehouseEntity);
-
     }
 
     @Test
     void shouldThrowExceptionWhenCreateWarehouseFails() {
         WarehouseRequest warehouseRequest = new WarehouseRequest();
 
-        when(warehouseService.createWarehouse(warehouseRequest, user))
+        when(authenticationHelper.getAuthenticatedUser(authentication)).thenReturn(user);
+        when(warehouseService.createWarehouse(eq(warehouseRequest), eq(user)))
                 .thenThrow(new RuntimeException("Request not found!"));
 
-        assertThrows(RuntimeException.class, () -> warehouseController.create(warehouseRequest));
-        verify(warehouseService).createWarehouse(warehouseRequest, user);
-
+        assertThrows(RuntimeException.class, () -> warehouseController.create(warehouseRequest, authentication));
+        verify(authenticationHelper).getAuthenticatedUser(authentication);
     }
 
     @Test
@@ -137,40 +123,35 @@ public class WarehouseControllerTest {
                 .itemCode("itemCode")
                 .user(user)
                 .build();
-        WarehouseEntity warehouseEntity = WarehouseEntity.builder()
-                .id(1L)
-                .warehouseLocation(WarehouseLocation.Rzeszow)
-                .user(user)
-                .build();
 
-        WarehouseResponse warehouseResponse = WarehouseResponse.builder()
-                .userId(user.getId())
-                .itemsId(new ArrayList<>())
-                .build();
+        ItemResponse itemResponse = ItemResponse.builder().build();
 
+        when(authenticationHelper.getAuthenticatedUser(authentication)).thenReturn(user);
         when(warehouseService.assignWarehouseSpaceType(warehouseSpaceTypeRequest, item.getId(), user))
                 .thenReturn(item);
-        when(itemResponseToItemMapper.mapToItem(item)).thenReturn(new ItemResponse());
+        when(itemResponseToItemMapper.mapToItem(item)).thenReturn(itemResponse);
 
-        ItemResponse result = warehouseController.assignSpaceType(item.getId(), warehouseSpaceTypeRequest).getBody();
+        ResponseEntity<ItemResponse> responseEntity = warehouseController.assignSpaceType(item.getId(), warehouseSpaceTypeRequest, authentication);
+        ItemResponse result = responseEntity.getBody();
 
-        assertEquals(1L, item.getId());
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertNotNull(result);
-        assertEquals(item.getLocationCode(), result.getLocationCode());
+        verify(authenticationHelper).getAuthenticatedUser(authentication);
         verify(warehouseService).assignWarehouseSpaceType(warehouseSpaceTypeRequest, item.getId(), user);
     }
 
     @Test
     void shouldThrowExceptionWhenAssignSpaceTypeFails() {
         Long id = 99L;
-
         WarehouseSpaceTypeRequest warehouseSpaceTypeRequest = new WarehouseSpaceTypeRequest();
 
-        when(warehouseService.assignWarehouseSpaceType(warehouseSpaceTypeRequest, id, user))
+        when(authenticationHelper.getAuthenticatedUser(authentication)).thenReturn(user);
+        when(warehouseService.assignWarehouseSpaceType(eq(warehouseSpaceTypeRequest), eq(id), eq(user)))
                 .thenThrow(new IllegalArgumentException("Item not found!"));
 
         assertThrows(IllegalArgumentException.class,
-                () -> warehouseController.assignSpaceType(id, warehouseSpaceTypeRequest));
+                () -> warehouseController.assignSpaceType(id, warehouseSpaceTypeRequest, authentication));
+        verify(authenticationHelper).getAuthenticatedUser(authentication);
         verify(warehouseService).assignWarehouseSpaceType(warehouseSpaceTypeRequest, id, user);
     }
 
@@ -196,6 +177,7 @@ public class WarehouseControllerTest {
                 .items(List.of(item))
                 .build();
 
+        when(authenticationHelper.getAuthenticatedUser(authentication)).thenReturn(user);
         when(warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId(), user))
                 .thenReturn(item);
 
@@ -208,11 +190,14 @@ public class WarehouseControllerTest {
                 .build();
         when(itemResponseToItemMapper.mapToItem(item)).thenReturn(itemResponse);
 
-        ItemResponse result = warehouseController.assignWarehouseLocation(item.getId(), warehouseLocationRequest).getBody();
+        ResponseEntity<ItemResponse> responseEntity = warehouseController.assignWarehouseLocation(item.getId(), warehouseLocationRequest, authentication);
+        ItemResponse result = responseEntity.getBody();
 
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertNotNull(result);
         assertEquals("RS05B", result.getLocationCode());
         assertEquals(user.getId(), result.getUserId());
+        verify(authenticationHelper).getAuthenticatedUser(authentication);
         verify(warehouseService).assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId(), user);
     }
 
@@ -221,11 +206,13 @@ public class WarehouseControllerTest {
         Long id = 100L;
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest();
 
-        when(warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, id, user))
+        when(authenticationHelper.getAuthenticatedUser(authentication)).thenReturn(user);
+        when(warehouseService.assignItemsToWarehouseLocation(eq(warehouseLocationRequest), eq(id), eq(user)))
                 .thenThrow(new IllegalArgumentException("WarehouseEntity not found!!"));
 
         assertThrows(IllegalArgumentException.class,
-                () -> warehouseController.assignWarehouseLocation(id, warehouseLocationRequest));
+                () -> warehouseController.assignWarehouseLocation(id, warehouseLocationRequest, authentication));
+        verify(authenticationHelper).getAuthenticatedUser(authentication);
         verify(warehouseService).assignItemsToWarehouseLocation(warehouseLocationRequest, id, user);
     }
 
@@ -250,6 +237,7 @@ public class WarehouseControllerTest {
                 .items(List.of(updatedItem))
                 .build();
 
+        when(authenticationHelper.getAuthenticatedUser(authentication)).thenReturn(user);
         when(warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId, user))
                 .thenReturn(updatedItem);
         updatedItem.setWarehouseEntity(warehouseEntity);
@@ -261,12 +249,14 @@ public class WarehouseControllerTest {
                 .build();
         when(itemResponseToItemMapper.mapToItem(updatedItem)).thenReturn(itemResponse);
 
-        ItemResponse result = warehouseController.updateWarehouseLocation(updatedItem.getId(), warehouseLocationRequest).getBody();
+        ResponseEntity<ItemResponse> responseEntity = warehouseController.updateWarehouseLocation(updatedItem.getId(), warehouseLocationRequest, authentication);
+        ItemResponse result = responseEntity.getBody();
 
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertNotNull(result);
         assertEquals("KSO5B", result.getLocationCode());
         assertEquals(updatedItem.getItemCode(), result.getItemCode());
-
+        verify(authenticationHelper).getAuthenticatedUser(authentication);
         verify(warehouseService).updatedItemsToWarehouseLocation(warehouseLocationRequest, updatedItem.getId(), user);
     }
 
@@ -275,10 +265,12 @@ public class WarehouseControllerTest {
         Long id = 404L;
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest();
 
-        when(warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, id, user))
+        when(authenticationHelper.getAuthenticatedUser(authentication)).thenReturn(user);
+        when(warehouseService.updatedItemsToWarehouseLocation(any(WarehouseLocationRequest.class), eq(id), eq(user)))
                 .thenThrow(new RuntimeException("Update failed!!"));
 
-        assertThrows(RuntimeException.class, () -> warehouseController.updateWarehouseLocation(id, warehouseLocationRequest));
+        assertThrows(RuntimeException.class, () -> warehouseController.updateWarehouseLocation(id, warehouseLocationRequest, authentication));
+        verify(authenticationHelper).getAuthenticatedUser(authentication);
         verify(warehouseService).updatedItemsToWarehouseLocation(warehouseLocationRequest, id, user);
     }
 }

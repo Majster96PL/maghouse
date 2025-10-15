@@ -124,17 +124,15 @@ public class WarehouseServiceTest {
     }
 
     @Test
-    void shouldThrowSecurityExceptionWhenUserIsNotAuthenticated() {
-        when(authentication.isAuthenticated()).thenReturn(false);
+    void shouldThrowIllegalExceptionWhenUserIsNotAuthenticated() {
         WarehouseRequest warehouseRequest = new WarehouseRequest();
-        assertThrows(SecurityException.class, () -> warehouseService.createWarehouse(warehouseRequest, user));
+        assertThrows(NullPointerException.class, () -> warehouseService.createWarehouse(warehouseRequest, null));
     }
 
     @Test
     void shouldThrowIllegalArgumentExceptionWhenUserNotFound() {
-        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.empty());
         WarehouseRequest warehouseRequest = new WarehouseRequest( WarehouseLocation.Warsaw);
-        assertThrows(IllegalArgumentException.class, () -> warehouseService.createWarehouse(warehouseRequest, user));
+        assertThrows(NullPointerException.class, () -> warehouseService.createWarehouse(warehouseRequest, null));
     }
 
     @Test

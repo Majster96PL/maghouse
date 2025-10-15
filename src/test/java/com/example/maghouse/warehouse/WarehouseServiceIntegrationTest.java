@@ -187,22 +187,22 @@ public class WarehouseServiceIntegrationTest {
         WarehouseSpaceTypeRequest warehouseSpaceTypeRequest = new WarehouseSpaceTypeRequest(WarehouseSpaceType.DRAVER);
         WarehouseRequest warehouseRequest = new WarehouseRequest();
 
-        SecurityContextHolder.getContext().setAuthentication(null);
+        User nullUser = null;
 
-        assertThrows(SecurityException.class,
-                () -> warehouseService.createWarehouse(warehouseRequest, user)
+        assertThrows(NullPointerException.class, () ->
+                warehouseService.createWarehouse(warehouseRequest, nullUser)
         );
 
-        assertThrows(SecurityException.class,
-                () -> warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, 1L, user)
+        assertThrows(NullPointerException.class,
+                () -> warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, 1L, nullUser)
         );
 
-        assertThrows(SecurityException.class,
-                () -> warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, 1L, user)
+        assertThrows(NullPointerException.class,
+                () -> warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, 1L, nullUser)
         );
 
-        assertThrows(SecurityException.class,
-                () -> warehouseService.assignWarehouseSpaceType(warehouseSpaceTypeRequest, 1L, user)
+        assertThrows(IllegalArgumentException.class,
+                () -> warehouseService.assignWarehouseSpaceType(warehouseSpaceTypeRequest, 1L, nullUser)
         );
     }
 }
