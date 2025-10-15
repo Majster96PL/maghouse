@@ -40,6 +40,9 @@ public class WarehouseService {
 
     @Transactional
     public WarehouseEntity createWarehouse(WarehouseRequest warehouseRequest, User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
         LOGGER.info("Request to create warehouse: userId={}, location={}",
                 user.getId(), warehouseRequest.getWarehouseLocation());
         String locationPrefix = generateLocationPrefix(warehouseRequest.getWarehouseLocation());
@@ -63,6 +66,9 @@ public class WarehouseService {
 
     @Transactional
     public ItemEntity assignItemsToWarehouseLocation(WarehouseLocationRequest warehouseLocationRequest, Long itemId, User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
         LOGGER.info("Request to add space type to Item: itemId = {}, location = {}",
                 itemId, warehouseLocationRequest.getWarehouseLocation());
         ItemEntity item = getItemById(itemId, user);
@@ -78,6 +84,9 @@ public class WarehouseService {
 
     @Transactional
     public ItemEntity updatedItemsToWarehouseLocation(WarehouseLocationRequest warehouseLocationRequest, Long id, User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
         LOGGER.info("Request to update location to Item: itemId = {}, location = {}",
                 id, warehouseLocationRequest.getWarehouseLocation());
         ItemEntity item = getItemById(id, user);

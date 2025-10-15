@@ -126,13 +126,13 @@ public class WarehouseServiceTest {
     @Test
     void shouldThrowIllegalExceptionWhenUserIsNotAuthenticated() {
         WarehouseRequest warehouseRequest = new WarehouseRequest();
-        assertThrows(NullPointerException.class, () -> warehouseService.createWarehouse(warehouseRequest, null));
+        assertThrows(IllegalArgumentException.class, () -> warehouseService.createWarehouse(warehouseRequest, null));
     }
 
     @Test
     void shouldThrowIllegalArgumentExceptionWhenUserNotFound() {
         WarehouseRequest warehouseRequest = new WarehouseRequest( WarehouseLocation.Warsaw);
-        assertThrows(NullPointerException.class, () -> warehouseService.createWarehouse(warehouseRequest, null));
+        assertThrows(IllegalArgumentException.class, () -> warehouseService.createWarehouse(warehouseRequest, null));
     }
 
     @Test

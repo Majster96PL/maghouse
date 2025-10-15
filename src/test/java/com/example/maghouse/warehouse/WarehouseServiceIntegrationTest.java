@@ -189,15 +189,15 @@ public class WarehouseServiceIntegrationTest {
 
         User nullUser = null;
 
-        assertThrows(NullPointerException.class, () ->
+        assertThrows(IllegalArgumentException.class, () ->
                 warehouseService.createWarehouse(warehouseRequest, nullUser)
         );
 
-        assertThrows(NullPointerException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, 1L, nullUser)
         );
 
-        assertThrows(NullPointerException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, 1L, nullUser)
         );
 
