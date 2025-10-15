@@ -96,7 +96,7 @@ public class DeliveryControllerTest {
                 .user(user)
                 .item(null)
                 .build();
-        when(deliveryService.createDelivery(request)).thenReturn(exceptedDelivery);
+        when(deliveryService.createDelivery(request, user)).thenReturn(exceptedDelivery);
         when(deliveryResponseToDeliveryMapper.mapToResponse(any(DeliveryEntity.class))).thenReturn(new DeliveryResponse());
 
         ResponseEntity<DeliveryResponse> result = deliveryController.create(request);
@@ -104,13 +104,13 @@ public class DeliveryControllerTest {
         assertNotNull(result);
         assertEquals(HttpStatus.CREATED, result.getStatusCode());
         assertEquals(new DeliveryResponse(), result.getBody());
-        verify(deliveryService).createDelivery(request);
+        verify(deliveryService).createDelivery(request, user);
     }
 
     @Test
     void shouldThrowExceptionWhenCreatingDeliveryWithNullRequest(){
         assertThrows(IllegalArgumentException.class, () -> deliveryController.create(null));
-        verify(deliveryService, never()).createDelivery(any());
+        verify(deliveryService, never()).createDelivery(any(), user);
     }
 
     @Test

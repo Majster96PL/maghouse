@@ -137,7 +137,7 @@ public class DeliveryServiceTest {
 
         when(deliveryRepository.save(delivery)).thenReturn(delivery);
 
-        DeliveryEntity result = deliveryService.createDelivery(request);
+        DeliveryEntity result = deliveryService.createDelivery(request, user);
 
         assertNotNull(result);
         assertEquals(WarehouseLocation.Rzeszow, result.getWarehouseLocation());
@@ -158,7 +158,7 @@ public class DeliveryServiceTest {
         );
 
         assertThrows(SecurityException.class,
-                () -> deliveryService.createDelivery(request));
+                () -> deliveryService.createDelivery(request, user));
 
     }
 
@@ -173,7 +173,7 @@ public class DeliveryServiceTest {
 
         when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> deliveryService.createDelivery(request));
+        assertThrows(IllegalArgumentException.class, () -> deliveryService.createDelivery(request, user));
     }
 
     @Test
@@ -188,7 +188,7 @@ public class DeliveryServiceTest {
         when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(deliveryNumberGenerator.generateDeliveryNumber()).thenReturn(null);
 
-        assertThrows(NullPointerException.class, () -> deliveryService.createDelivery(request));
+        assertThrows(NullPointerException.class, () -> deliveryService.createDelivery(request, user));
     }
 
     @Test

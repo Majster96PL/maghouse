@@ -1,5 +1,6 @@
 package com.example.maghouse.delivery;
 
+import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.delivery.status.DeliveryStatus;
 import com.example.maghouse.delivery.status.DeliveryStatusRequest;
@@ -10,9 +11,6 @@ import com.example.maghouse.warehouse.WarehouseService;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -59,14 +57,7 @@ public class DeliveryService {
     }
 
     @Transactional
-    public DeliveryEntity createDelivery(DeliveryRequest deliveryRequest) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new SecurityException("User is not authenticated");
-        }
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        var user = userRepository.findUserByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User with email not found!"));
+    public DeliveryEntity createDelivery(DeliveryRequest deliveryRequest, User user) {
         LocalDate data = LocalDate.now();
         String numberDelivery = deliveryNumberGenerator.generateDeliveryNumber();
         if (numberDelivery == null) {
@@ -83,13 +74,6 @@ public class DeliveryService {
     }
 
     public DeliveryEntity updateDeliveryStatus(DeliveryStatusRequest deliveryStatusRequest, Long id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new SecurityException("User is not authenticated");
-        }
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        var user = userRepository.findUserByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User with email not found!"));
         var delivery = deliveryRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Delivery not found!"));
         delivery.setDeliveryStatus(deliveryStatusRequest.getDeliveryStatus());

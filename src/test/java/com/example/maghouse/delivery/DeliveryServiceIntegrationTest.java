@@ -134,7 +134,7 @@ public class DeliveryServiceIntegrationTest {
                 100
         );
 
-        DeliveryEntity result = deliveryService.createDelivery(deliveryRequest);
+        DeliveryEntity result = deliveryService.createDelivery(deliveryRequest, user);
 
         assertNotNull(result.getId());
         assertEquals(DeliveryStatus.CREATED,result.getDeliveryStatus());
@@ -182,7 +182,7 @@ public class DeliveryServiceIntegrationTest {
         DeliveryStatusRequest statusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
 
         assertThrows(SecurityException.class, () ->
-                        deliveryService.createDelivery(deliveryRequest),
+                        deliveryService.createDelivery(deliveryRequest, user),
                 "CreateDelivery should throw when not authenticated"
         );
 
