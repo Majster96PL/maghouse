@@ -1,22 +1,20 @@
-package com.example.maghouse.auth.controller;
+package com.example.maghouse.security;
 
 import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
+@Component
+@RequiredArgsConstructor
 @Slf4j
-public abstract class BaseController {
+public class AuthenticationHelper {
 
-    protected final UserService userService;
+    private final UserService userService;
 
-    protected BaseController(UserService userService) {
-        this.userService = userService;
-    }
-
-    protected User getAuthenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public User getAuthenticatedUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             log.warn("Authentication failed - user not authenticated!");
             throw new SecurityException("Authentication failed - user not authenticated!");
