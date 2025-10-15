@@ -63,7 +63,7 @@ public class ItemControllerTest {
 
     @Test
     void shouldCreateItemSuccessfully(){
-        when(itemService.createItem(itemRequest)).thenReturn(item);
+        when(itemService.createItem(itemRequest, user)).thenReturn(item);
         when(itemResponseToItemMapper.mapToItem(item)).thenReturn(new ItemResponse());
 
         ResponseEntity<ItemResponse> response = itemController.create(itemRequest);
@@ -75,7 +75,7 @@ public class ItemControllerTest {
 
     @Test
     void shouldThrowExceptionWhenCreatingItemWithNullRequest(){
-        when(itemService.createItem(null)).thenThrow(new IllegalArgumentException("ItemRequest can't be empty!"));
+        when(itemService.createItem(null, user)).thenThrow(new IllegalArgumentException("ItemRequest can't be empty!"));
 
         assertThrows(IllegalArgumentException.class, () -> itemController.create(null));
     }
@@ -84,7 +84,7 @@ public class ItemControllerTest {
     void shouldUpdatedItemQuantity(){
         ItemRequest updatedItemRequest = new ItemRequest("Test_Item", 140);
 
-        when(itemService.updateItemQuantity(item.getId(),updatedItemRequest)).thenReturn(item);
+        when(itemService.updateItemQuantity(item.getId(),updatedItemRequest, user)).thenReturn(item);
         when(itemResponseToItemMapper.mapToItem(item)).thenReturn(new ItemResponse());
 
         ResponseEntity<ItemResponse> response = itemController.updateItemQuantity(item.getId(), updatedItemRequest);
@@ -100,7 +100,7 @@ public class ItemControllerTest {
     void shouldThrowExceptionWhenUpdatingNonExistentItem(){
         ItemRequest wrongItemRequest = new ItemRequest("Item1", 35);
 
-        when(itemService.updateItemQuantity(1L, wrongItemRequest)).thenThrow(new ResponseStatusException(NOT_FOUND, "Item not found!"));
+        when(itemService.updateItemQuantity(1L, wrongItemRequest, user)).thenThrow(new ResponseStatusException(NOT_FOUND, "Item not found!"));
 
         assertThrows(ResponseStatusException.class, () -> itemController.updateItemQuantity(1L, wrongItemRequest));
 
@@ -108,7 +108,7 @@ public class ItemControllerTest {
 
     @Test
     void shouldDeleteItemSuccessfully(){
-        doNothing().when(itemService).deleteItem(1L);
+        doNothing().when(itemService).deleteItem(1L, user);
 
         ResponseEntity<Void> response = itemController.deleteItem(1L);
 
@@ -117,7 +117,7 @@ public class ItemControllerTest {
 
     @Test
     void shouldThrowExceptionWhenDeletingNonExistentItem(){
-        doThrow(new ResponseStatusException(NOT_FOUND, "Item not found")).when(itemService).deleteItem(1L);
+        doThrow(new ResponseStatusException(NOT_FOUND, "Item not found")).when(itemService).deleteItem(1L, user);
 
         assertThrows(ResponseStatusException.class, () -> itemController.deleteItem(1L));
     }

@@ -85,7 +85,7 @@ public class ItemServiceIntegrationTest {
     @Test
     public void shouldCreateItemByUser(){
         ItemRequest itemRequest = new ItemRequest("Item", 10);
-        ItemEntity testItem = itemService.createItem(itemRequest);
+        ItemEntity testItem = itemService.createItem(itemRequest, user);
 
         assertNotNull(testItem.getId());
         assertEquals("Item", testItem.getName());
@@ -98,7 +98,7 @@ public class ItemServiceIntegrationTest {
         ItemEntity item = createAndSaveTestItem();
         ItemRequest updateRequest = new ItemRequest("Test Name", 100);
 
-        ItemEntity updatedItem = itemService.updateItemQuantity(item.getId(), updateRequest);
+        ItemEntity updatedItem = itemService.updateItemQuantity(item.getId(), updateRequest, user);
 
         assertEquals(100, updatedItem.getQuantity());
     }
@@ -107,7 +107,7 @@ public class ItemServiceIntegrationTest {
     public void shouldDeleteItem(){
         ItemEntity item = createAndSaveTestItem();
 
-        itemService.deleteItem(item.getId());
+        itemService.deleteItem(item.getId(), user);
 
         assertFalse(itemRepository.findById(item.getId()).isPresent());
     }

@@ -1,5 +1,7 @@
 package com.example.maghouse.auth.controller;
 
+import com.example.maghouse.auth.registration.user.User;
+import com.example.maghouse.auth.registration.user.UserService;
 import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemRequest;
 import com.example.maghouse.item.ItemResponse;
@@ -12,7 +14,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,13 +24,20 @@ import java.util.stream.Collectors;
 
 @RequestMapping(path = "/items/")
 @RestController
-@RequiredArgsConstructor
 @Tag(name = "Item Management", description = "Endpoints for managing items and stock quantities in the warehouse.")
 @SecurityRequirement(name = "bearerAuth")
-public class ItemController {
+public class ItemController extends BaseController {
 
     private final ItemService itemService;
     private final ItemResponseToItemMapper itemResponseToItemMapper;
+
+    public ItemController(UserService userService,
+                          ItemService itemService,
+                          ItemResponseToItemMapper itemResponseToItemMapper) {
+        super(userService);
+        this.itemService = itemService;
+        this.itemResponseToItemMapper = itemResponseToItemMapper;
+    }
 
     @GetMapping
     @Operation(summary = "Retrieve a list of all items",
@@ -41,6 +49,7 @@ public class ItemController {
                     content = @Content)
     })
     public ResponseEntity<List<ItemResponse>> getAllItems() {
+        User user = getAuthenticatedUser();
         List<ItemEntity> items = itemService.getAllItems();
         List<ItemResponse> itemResponses = items.stream()
                 .map(itemResponseToItemMapper::mapToItem)
@@ -61,6 +70,7 @@ public class ItemController {
                     content = @Content(schema = @Schema(implementation = Map.class)))
     })
     public ResponseEntity<ItemResponse> getItemByItemCode(@PathVariable("itemCode") String itemCode){
+        User user = getAuthenticatedUser();
         var item = itemService.getItemByItemCode(itemCode);
         var response = itemResponseToItemMapper.mapToItem(item);
         return ResponseEntity.ok(response);
@@ -78,7 +88,8 @@ public class ItemController {
                     content = @Content)
     })
     public ResponseEntity<ItemResponse> create(@RequestBody ItemRequest itemRequest) {
-        ItemEntity item = itemService.createItem(itemRequest);
+        User user = getAuthenticatedUser();
+        ItemEntity item = itemService.createItem(itemRequest, user );
         ItemResponse itemResponse = itemResponseToItemMapper.mapToItem(item);
         return ResponseEntity.status(HttpStatus.CREATED).body(itemResponse);
     }
@@ -97,7 +108,8 @@ public class ItemController {
                     content = @Content(schema = @Schema(implementation = Map.class)))
     })
     public ResponseEntity<ItemResponse> updateItemQuantity(@PathVariable Long itemId, @RequestBody ItemRequest itemRequest) {
-        ItemEntity updatedItem = itemService.updateItemQuantity(itemId, itemRequest);
+        User user = getAuthenticatedUser();
+        ItemEntity updatedItem = itemService.updateItemQuantity(itemId, itemRequest, user);
         ItemResponse updatedItemResponse = itemResponseToItemMapper.mapToItem(updatedItem);
         return ResponseEntity.ok(updatedItemResponse);
     }
@@ -114,7 +126,8 @@ public class ItemController {
                     content = @Content(schema = @Schema(implementation = Map.class)))
     })
     public ResponseEntity<Void> deleteItem(@PathVariable Long itemId) {
-        itemService.deleteItem(itemId);
+        User user = getAuthenticatedUser();
+        itemService.deleteItem(itemId, user);
         return ResponseEntity.noContent().build();
     }
 }

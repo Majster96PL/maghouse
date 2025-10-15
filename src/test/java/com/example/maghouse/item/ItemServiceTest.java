@@ -96,7 +96,7 @@ public class ItemServiceTest {
         when(itemResponseToItemMapper.mapToEntityFromResponse(itemResponse)).thenReturn(item);
         when(itemRepository.save(item)).thenReturn(item);
 
-        ItemEntity createdItem = itemService.createItem(itemRequest);
+        ItemEntity createdItem = itemService.createItem(itemRequest, user);
 
         assertNotNull(createdItem);
         assertEquals("ItemName", createdItem.getName());
@@ -116,7 +116,7 @@ public class ItemServiceTest {
 
         ItemRequest itemRequest = new ItemRequest();
 
-        assertThrows(SecurityException.class, () -> itemService.createItem(itemRequest));
+        assertThrows(SecurityException.class, () -> itemService.createItem(itemRequest, user ));
     }
 
     @Test
@@ -135,7 +135,7 @@ public class ItemServiceTest {
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
         when(itemRepository.save(any(ItemEntity.class))).thenReturn(item);
 
-        ItemEntity updatedItem = itemService.updateItemQuantity(1L, itemRequest);
+        ItemEntity updatedItem = itemService.updateItemQuantity(1L, itemRequest,user);
 
         assertNotNull(updatedItem);
         assertEquals(20, updatedItem.getQuantity());
@@ -148,7 +148,7 @@ public class ItemServiceTest {
         ItemRequest itemRequest = new ItemRequest();
         when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> itemService.updateItemQuantity(1L, itemRequest));
+        assertThrows(IllegalArgumentException.class, () -> itemService.updateItemQuantity(1L, itemRequest, user));
     }
 
     @Test
@@ -158,7 +158,7 @@ public class ItemServiceTest {
         when(userDetails.getUsername()).thenReturn("test@example.com");
         when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(user));
 
-        itemService.deleteItem(1L);
+        itemService.deleteItem(1L, user);
 
         verify(itemRepository).deleteById(1L);
     }
@@ -167,6 +167,6 @@ public class ItemServiceTest {
     void shouldThrowSecurityExceptionWhenUserNotAuthenticatedOnDelete() {
         when(authentication.isAuthenticated()).thenReturn(false);
 
-        assertThrows(SecurityException.class, () -> itemService.deleteItem(1L));
+        assertThrows(SecurityException.class, () -> itemService.deleteItem(1L, user));
     }
 }
