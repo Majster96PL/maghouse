@@ -15,7 +15,7 @@ public abstract class BaseController {
         this.userService = userService;
     }
 
-    protected User getAuthenticateUser() {
+    protected User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             log.warn("Authentication failed - user not authenticated!");

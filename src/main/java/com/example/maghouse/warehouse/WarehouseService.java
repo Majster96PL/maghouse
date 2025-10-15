@@ -32,7 +32,7 @@ public class WarehouseService {
         return warehouseRepository.findAll();
     }
 
-    public List<ItemEntity> getAllItemsByLocationCodePrefix(WarehouseLocation warehouseLocation){
+    public List<ItemEntity> getAllItemsByLocationCodePrefix(WarehouseLocation warehouseLocation) {
         String prefix = generateLocationPrefix(warehouseLocation);
         return itemRepository.findByItemLocationStartingWith(prefix);
 
@@ -99,8 +99,8 @@ public class WarehouseService {
 
         ItemEntity item = itemRepository.findUnassignedItem(id)
                 .orElseThrow(() -> {
-                  LOGGER.warn("Attempted to access item {} that already has location code", id);
-                  return new IllegalArgumentException("Item already has a locationCode!");
+                    LOGGER.warn("Attempted to access item {} that already has location code", id);
+                    return new IllegalArgumentException("Item already has a locationCode!");
                 });
 
         String baseLocation = generateBaseCodeSpaceType(warehouseSpaceTypeRequest.getWarehouseSpaceType());
@@ -108,30 +108,21 @@ public class WarehouseService {
         Optional<String> locationCode = findAvailableSpace(STARTING_LOCATION_PREFIX, baseLocation, usedSpaces);
 
         return locationCode
-            .map(lc -> {
-               item.setLocationCode(lc);
-               item.setUser(user);
-               LOGGER.info("Successfully assigned locationCode={} to itemId={} for userId={}",
-                   locationCode, item.getId(), user.getId());
-               return item;
-            })
-           .orElseThrow(() -> {
-              LOGGER.info("Not implemented yet. TODO | FIXME");
-              return new IllegalArgumentException("Unable to assign location code!");
-            });
-    }
-
-    public User getUserByEmail(String email) {
-        LOGGER.debug("Looking up user by email: {}", email);
-        return userRepository.findUserByEmail(email)
+                .map(lc -> {
+                    item.setLocationCode(lc);
+                    item.setUser(user);
+                    LOGGER.info("Successfully assigned locationCode={} to itemId={} for userId={}",
+                            locationCode, item.getId(), user.getId());
+                    return item;
+                })
                 .orElseThrow(() -> {
-                    LOGGER.warn("User not found in database! Email: {}", email);
-                    return new IllegalArgumentException("User with email not found: " + email);
+                    LOGGER.info("Not implemented yet. TODO | FIXME");
+                    return new IllegalArgumentException("Unable to assign location code!");
                 });
     }
 
     public WarehouseLocation getWarehouseLocationByPrefix(String prefix) {
-        for(WarehouseLocation location : WarehouseLocation.values()) {
+        for (WarehouseLocation location : WarehouseLocation.values()) {
             String locationPrefix = generateLocationPrefix(location);
             if (locationPrefix.equals(prefix.toUpperCase())) {
                 return location;
@@ -139,23 +130,6 @@ public class WarehouseService {
         }
         throw new IllegalArgumentException("Unknow location prefix: " + prefix);
     }
-
-    //will delete after transfer
-   /* private User getAthenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            LOGGER.warn("Authentication failed - user not authenticated!");
-            throw new SecurityException("User is not authenticated!");
-        }
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        LOGGER.debug("User authenticated : {}", userDetails.getUsername());
-        return userRepository.findUserByEmail(userDetails.getUsername())
-                .orElseThrow(() -> {
-                    LOGGER.warn("User not found in database! Email: {}", userDetails.getUsername());
-                    return new IllegalArgumentException("User with email not found: " + userDetails.getUsername());
-
-                });
-    }*/
 
     private ItemEntity getItemById(Long id, User user) {
         return itemRepository.findById(id)
@@ -171,7 +145,7 @@ public class WarehouseService {
         List<ItemEntity> items = itemRepository.findByItemLocationStartingWith(locationPrefix);
         if (items.isEmpty()) {
             LOGGER.warn("No items found for location Prefix while creating warehouse." +
-                        "Location: {}, Prefix: {}, User: {}",
+                            "Location: {}, Prefix: {}, User: {}",
                     warehouseRequest.getWarehouseLocation(), locationPrefix, user.getId());
             throw new IllegalArgumentException("No items found for location prefix: " + locationPrefix);
         }
@@ -251,11 +225,11 @@ public class WarehouseService {
     }
 
     private Optional<String> findAvailableSpace(String locationPrefix,
-                                      String baseLocation,
-                                      Set<String> spaceUsage) {
+                                                String baseLocation,
+                                                Set<String> spaceUsage) {
         char[] positions = {'A', 'B', 'C'};
 
-        for (int index = 1; index <= 50 ; index++) {
+        for (int index = 1; index <= 50; index++) {
             for (char position : positions) {
                 String locationCode = String.format("%s%s%02d%c", locationPrefix, baseLocation, index, position);
                 if (!spaceUsage.contains(locationCode)) {

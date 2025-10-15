@@ -1,6 +1,7 @@
 package com.example.maghouse.auth.controller;
 
 import com.example.maghouse.auth.registration.user.User;
+import com.example.maghouse.auth.registration.user.UserService;
 import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemResponse;
 import com.example.maghouse.mapper.ItemResponseToItemMapper;
@@ -18,12 +19,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,15 +30,25 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/warehouses/")
-@AllArgsConstructor
 @Tag(name = "Warehouse Structure", description = "Endpoints for creating warehouses and managing item storage locations.")
 @SecurityRequirement(name = "bearerAuth")
 @Slf4j
-public class WarehouseController {
+public class WarehouseController extends BaseController {
 
     private final WarehouseService warehouseService;
     private final WarehouseResponseToWarehouseMapper warehouseResponseToWarehouseMapper;
     private final ItemResponseToItemMapper itemResponseToItemMapper;
+
+    public WarehouseController(UserService userService,
+                                  WarehouseService warehouseService,
+                                  WarehouseResponseToWarehouseMapper warehouseResponseToWarehouseMapper,
+                                  ItemResponseToItemMapper itemResponseToItemMapper) {
+        super(userService);
+        this.warehouseService = warehouseService;
+        this.warehouseResponseToWarehouseMapper = warehouseResponseToWarehouseMapper;
+        this.itemResponseToItemMapper = itemResponseToItemMapper;
+    }
+
 
     @GetMapping
     @Operation(summary = "Retrieve all warehouses",
@@ -52,7 +60,7 @@ public class WarehouseController {
                     content = @Content)
     })
     public ResponseEntity<List<WarehouseResponse>> getAllWarehouses() {
-        User user = getAuthenticateUser();
+        User user = getAuthenticatedUser();
         log.info("User {} requested all warehouses", user.getEmail());
         List<WarehouseEntity> warehouses = warehouseService.getAllWarehouses();
         List<WarehouseResponse> responses = warehouses.stream()
@@ -75,7 +83,7 @@ public class WarehouseController {
     })
     public ResponseEntity<List<ItemResponse>> getItemsByLocationPrefix(
             @PathVariable WarehouseLocationRequest warehouseLocationRequest) {
-        User user = getAuthenticateUser();
+        User user = getAuthenticatedUser();
         log.info("User {} requested all warehouses", user.getEmail());
         List<ItemEntity> items = warehouseService.getAllItemsByLocationCodePrefix(
                 warehouseLocationRequest.getWarehouseLocation());
@@ -103,7 +111,7 @@ public class WarehouseController {
                     content = @Content)
     })
     public ResponseEntity<WarehouseResponse> create(@RequestBody WarehouseRequest warehouseRequest) {
-        User user = getAuthenticateUser();
+        User user = getAuthenticatedUser();
         log.info("User {} requested all warehouses", user.getEmail());
         WarehouseEntity warehouse = warehouseService.createWarehouse(warehouseRequest, user);
         WarehouseResponse warehouseResponse = warehouseResponseToWarehouseMapper.mapToWarehouse(warehouse);
@@ -126,7 +134,7 @@ public class WarehouseController {
     })
     public ResponseEntity<ItemResponse> assignSpaceType(@PathVariable Long itemId,
                                                         @RequestBody WarehouseSpaceTypeRequest warehouseSpaceTypeRequest) {
-        User user = getAuthenticateUser();
+        User user = getAuthenticatedUser();
         log.info("User {} requested all warehouses", user.getEmail());
         ItemEntity item = warehouseService.assignWarehouseSpaceType(warehouseSpaceTypeRequest, itemId, user);
         ItemResponse response = itemResponseToItemMapper.mapToItem(item);
@@ -147,7 +155,7 @@ public class WarehouseController {
     })
     public ResponseEntity<ItemResponse> assignWarehouseLocation(@PathVariable Long itemId,
                                                                 @RequestBody WarehouseLocationRequest warehouseLocationRequest) {
-        User user = getAuthenticateUser();
+        User user = getAuthenticatedUser();
         log.info("User {} requested all warehouses", user.getEmail());
         ItemEntity item = warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, itemId, user);
         ItemResponse response = itemResponseToItemMapper.mapToItem(item);
@@ -167,22 +175,10 @@ public class WarehouseController {
     })
     public ResponseEntity<ItemResponse> updateWarehouseLocation(@PathVariable Long itemId,
                                                                 @RequestBody WarehouseLocationRequest warehouseLocationRequest) {
-        User user = getAuthenticateUser();
+        User user = getAuthenticatedUser();
         log.info("User {} requested all warehouses", user.getEmail());
         ItemEntity item = warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId, user);
         ItemResponse response = itemResponseToItemMapper.mapToItem(item);
         return ResponseEntity.ok(response);
-    }
-
-    private User getAuthenticateUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            log.warn("Authentication failed - user not authenticated!");
-            throw new SecurityException("Authentication failed - user not authenticated!");
-        }
-
-        String email = authentication.getName();
-        log.debug("User authenticated: {}", email);
-        return warehouseService.getUserByEmail(email);
     }
 }
