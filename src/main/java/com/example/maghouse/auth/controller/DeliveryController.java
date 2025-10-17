@@ -1,5 +1,6 @@
 package com.example.maghouse.auth.controller;
 
+import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.delivery.DeliveryEntity;
 import com.example.maghouse.delivery.DeliveryRequest;
 import com.example.maghouse.delivery.DeliveryResponse;
@@ -7,6 +8,7 @@ import com.example.maghouse.delivery.DeliveryService;
 import com.example.maghouse.delivery.status.DeliveryStatus;
 import com.example.maghouse.delivery.status.DeliveryStatusRequest;
 import com.example.maghouse.mapper.DeliveryResponseToDeliveryMapper;
+import com.example.maghouse.security.AuthenticationHelper;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,6 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,13 +30,14 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/deliveries/")
-@RequiredArgsConstructor
 @Tag(name = "Delivery Management", description = "Endpoints for creating and updating delivery status.")
 @SecurityRequirement(name = "bearerAuth")
-public class DeliveryController {
+@RequiredArgsConstructor
+public class DeliveryController  {
 
     private final DeliveryService deliveryService;
     private final DeliveryResponseToDeliveryMapper deliveryResponseToDeliveryMapper;
+    private final AuthenticationHelper authenticationHelper;
 
     @GetMapping
     @Operation(summary = "Get all deliveries", description = "Retrieves a list of all deliveries.")
@@ -41,7 +45,8 @@ public class DeliveryController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved list of deliveries"),
             @ApiResponse(responseCode = "401", description = "Unauthorized access")
     })
-    public ResponseEntity<List<DeliveryResponse>> getAllDeliveries() {
+    public ResponseEntity<List<DeliveryResponse>> getAllDeliveries(Authentication authentication) {
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
         List<DeliveryEntity> deliveries = deliveryService.getAllDeliveries();
         List<DeliveryResponse> responses = deliveries.stream()
                 .map(deliveryResponseToDeliveryMapper::mapToResponse)
@@ -56,7 +61,9 @@ public class DeliveryController {
             @ApiResponse(responseCode = "404", description = "No deliveries found for the given status"),
             @ApiResponse(responseCode = "401", description = "Unauthorized access")
     })
-    public ResponseEntity<List<DeliveryResponse>> getDeliveriesByStatus(@PathVariable DeliveryStatus status) {
+    public ResponseEntity<List<DeliveryResponse>> getDeliveriesByStatus(@PathVariable DeliveryStatus status,
+                                                                        Authentication authentication) {
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
         List<DeliveryEntity> deliveries = deliveryService.getDeliveriesByStatus(status);
         if (deliveries.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -74,7 +81,9 @@ public class DeliveryController {
             @ApiResponse(responseCode = "404", description = "Delivery with the given number not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized access")
     })
-    public ResponseEntity<DeliveryResponse> getDeliveryByNumber(@PathVariable String deliveryNumber) {
+    public ResponseEntity<DeliveryResponse> getDeliveryByNumber(@PathVariable String deliveryNumber,
+                                                                Authentication authentication) {
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
         Optional<DeliveryEntity> delivery = deliveryService.getDeliveryByNumber(deliveryNumber);
         if (delivery.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -90,7 +99,9 @@ public class DeliveryController {
             @ApiResponse(responseCode = "404", description = "No deliveries found for the given supplier"),
             @ApiResponse(responseCode = "401", description = "Unauthorized access")
     })
-    public ResponseEntity<List<DeliveryResponse>> getDeliveriesBySupplier(@PathVariable String supplierName) {
+    public ResponseEntity<List<DeliveryResponse>> getDeliveriesBySupplier(@PathVariable String supplierName,
+                                                                          Authentication authentication) {
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
         List<DeliveryEntity> deliveries = deliveryService.getDeliveriesBySupplier(supplierName);
         if (deliveries.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -108,7 +119,9 @@ public class DeliveryController {
             @ApiResponse(responseCode = "404", description = "No deliveries found for the given location"),
             @ApiResponse(responseCode = "401", description = "Unauthorized access")
     })
-    public ResponseEntity<List<DeliveryResponse>> getDeliveriesByLocation(@PathVariable WarehouseLocation warehouseLocation) {
+    public ResponseEntity<List<DeliveryResponse>> getDeliveriesByLocation(@PathVariable WarehouseLocation warehouseLocation,
+                                                                          Authentication authentication) {
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
         List<DeliveryEntity> deliveries = deliveryService.getDeliveriesByLocation(warehouseLocation);
         if (deliveries.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -126,7 +139,9 @@ public class DeliveryController {
             @ApiResponse(responseCode = "404", description = "No deliveries found for the given item code"),
             @ApiResponse(responseCode = "401", description = "Unauthorized access")
     })
-    public ResponseEntity<List<DeliveryResponse>> getDeliveriesByItemCode(@PathVariable String itemCode) {
+    public ResponseEntity<List<DeliveryResponse>> getDeliveriesByItemCode(@PathVariable String itemCode,
+                                                                          Authentication authentication) {
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
         List<DeliveryEntity> deliveries = deliveryService.getDeliveriesByItemCode(itemCode);
         if (deliveries.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -144,7 +159,8 @@ public class DeliveryController {
             @ApiResponse(responseCode = "404", description = "Delivery with the given ID not found"),
             @ApiResponse(responseCode = "401", description = "Unauthorized access")
     })
-    public ResponseEntity<DeliveryResponse> getDeliveryById(@PathVariable Long id) {
+    public ResponseEntity<DeliveryResponse> getDeliveryById(@PathVariable Long id, Authentication authentication) {
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
         Optional<DeliveryEntity> delivery = deliveryService.getDeliveryById(id);
         if (delivery.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -164,11 +180,13 @@ public class DeliveryController {
             @ApiResponse(responseCode = "401", description = "Unauthorized access (missing or invalid token)",
                     content = @Content)
     })
-    public ResponseEntity<DeliveryResponse> create(@RequestBody  DeliveryRequest deliveryRequest){
+    public ResponseEntity<DeliveryResponse> create(@RequestBody  DeliveryRequest deliveryRequest,
+                                                   Authentication authentication){
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
         if (deliveryRequest == null) {
             throw new IllegalArgumentException("Delivery request cannot be null");
         }
-        DeliveryEntity deliveryEntity = deliveryService.createDelivery(deliveryRequest);
+        DeliveryEntity deliveryEntity = deliveryService.createDelivery(deliveryRequest, user );
         DeliveryResponse deliveryResponse = deliveryResponseToDeliveryMapper.mapToResponse(deliveryEntity);
         return ResponseEntity.status(HttpStatus.CREATED).body(deliveryResponse);
     }
@@ -187,7 +205,8 @@ public class DeliveryController {
                     content = @Content(schema = @Schema(implementation = Map.class)))
     })
     public ResponseEntity<DeliveryResponse> updateDeliveryStatus(@RequestBody DeliveryStatusRequest deliveryStatusRequest,
-                                         @PathVariable Long id){
+                                         @PathVariable Long id, Authentication authentication){
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
         if(deliveryStatusRequest == null || id == null) {
             throw new IllegalArgumentException("Delivery status request cannot be null");
         }

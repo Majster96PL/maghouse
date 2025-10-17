@@ -123,7 +123,7 @@ public class WarehouseServiceIntegrationTest {
         WarehouseRequest request = new WarehouseRequest();
         request.setWarehouseLocation(WarehouseLocation.Warsaw);
 
-        WarehouseEntity result = warehouseService.createWarehouse(request);
+        WarehouseEntity result = warehouseService.createWarehouse(request, user);
 
         assertNotNull(result);
         assertEquals(WarehouseLocation.Warsaw, result.getWarehouseLocation());
@@ -139,7 +139,7 @@ public class WarehouseServiceIntegrationTest {
 
         WarehouseSpaceTypeRequest request = new WarehouseSpaceTypeRequest(WarehouseSpaceType.DRAVER);
 
-        ItemEntity result = warehouseService.assignWarehouseSpaceType(request, item.getId());
+        ItemEntity result = warehouseService.assignWarehouseSpaceType(request, item.getId(), user);
 
         assertNotNull(result);
         assertNotNull(result.getLocationCode());
@@ -156,7 +156,7 @@ public class WarehouseServiceIntegrationTest {
                 new WarehouseLocationRequest(WarehouseLocation.Krakow);
 
         ItemEntity result = warehouseService.updatedItemsToWarehouseLocation(
-                warehouseLocationRequest, item.getId());
+                warehouseLocationRequest, item.getId(), user);
 
         assertNotNull(result);
         assertNotNull(result.getLocationCode());
@@ -174,7 +174,7 @@ public class WarehouseServiceIntegrationTest {
 
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(WarehouseLocation.Warsaw);
 
-        ItemEntity result = warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId());
+        ItemEntity result = warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, item.getId(), user);
 
         assertNotNull(result);
         assertEquals("WS02B", result.getLocationCode());
@@ -187,22 +187,22 @@ public class WarehouseServiceIntegrationTest {
         WarehouseSpaceTypeRequest warehouseSpaceTypeRequest = new WarehouseSpaceTypeRequest(WarehouseSpaceType.DRAVER);
         WarehouseRequest warehouseRequest = new WarehouseRequest();
 
-        SecurityContextHolder.getContext().setAuthentication(null);
+        User nullUser = null;
 
-        assertThrows(SecurityException.class,
-                () -> warehouseService.createWarehouse(warehouseRequest)
+        assertThrows(IllegalArgumentException.class, () ->
+                warehouseService.createWarehouse(warehouseRequest, nullUser)
         );
 
-        assertThrows(SecurityException.class,
-                () -> warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, 1L)
+        assertThrows(IllegalArgumentException.class,
+                () -> warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, 1L, nullUser)
         );
 
-        assertThrows(SecurityException.class,
-                () -> warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, 1L)
+        assertThrows(IllegalArgumentException.class,
+                () -> warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, 1L, nullUser)
         );
 
-        assertThrows(SecurityException.class,
-                () -> warehouseService.assignWarehouseSpaceType(warehouseSpaceTypeRequest, 1L)
+        assertThrows(IllegalArgumentException.class,
+                () -> warehouseService.assignWarehouseSpaceType(warehouseSpaceTypeRequest, 1L, nullUser)
         );
     }
 }

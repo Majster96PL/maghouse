@@ -2,7 +2,6 @@ package com.example.maghouse.auth.controller;
 
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.User;
-import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.delivery.DeliveryEntity;
 import com.example.maghouse.delivery.DeliveryRequest;
 import com.example.maghouse.delivery.DeliveryResponse;
@@ -10,59 +9,44 @@ import com.example.maghouse.delivery.DeliveryService;
 import com.example.maghouse.delivery.status.DeliveryStatus;
 import com.example.maghouse.delivery.status.DeliveryStatusRequest;
 import com.example.maghouse.mapper.DeliveryResponseToDeliveryMapper;
+import com.example.maghouse.security.AuthenticationHelper;
 import com.example.maghouse.warehouse.location.WarehouseLocation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class DeliveryControllerTest {
+@ExtendWith(MockitoExtension.class)
+class DeliveryControllerTest {
 
     @Mock
     private DeliveryResponseToDeliveryMapper deliveryResponseToDeliveryMapper;
+
     @Mock
     private DeliveryService deliveryService;
 
     @Mock
-    private UserRepository userRepository;
-
-    @Mock
-    private UserDetails userDetails;
-
-    @Mock
-    private SecurityContext securityContext;
-
-    @Mock
-    private Authentication authentication;
+    private AuthenticationHelper authenticationHelper;
 
     @InjectMocks
     private DeliveryController deliveryController;
 
     private User user;
+    private Authentication authentication;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
-        SecurityContextHolder.setContext(securityContext);
-        lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
-        lenient().when(authentication.isAuthenticated()).thenReturn(true);
-        lenient().when(authentication.getPrincipal()).thenReturn(userDetails);
-
         user = User.builder()
                 .id(1L)
                 .firstname("John")
@@ -72,8 +56,9 @@ public class DeliveryControllerTest {
                 .role(Role.MANAGER)
                 .build();
 
-        lenient().when(userDetails.getUsername()).thenReturn(user.getEmail());
-        lenient().when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        authentication = mock(Authentication.class);
+
+        lenient().when(authenticationHelper.getAuthenticatedUser(authentication)).thenReturn(user);
     }
 
     @Test
@@ -96,21 +81,24 @@ public class DeliveryControllerTest {
                 .user(user)
                 .item(null)
                 .build();
-        when(deliveryService.createDelivery(request)).thenReturn(exceptedDelivery);
+
+        when(deliveryService.createDelivery(request, user)).thenReturn(exceptedDelivery);
         when(deliveryResponseToDeliveryMapper.mapToResponse(any(DeliveryEntity.class))).thenReturn(new DeliveryResponse());
 
-        ResponseEntity<DeliveryResponse> result = deliveryController.create(request);
+        ResponseEntity<DeliveryResponse> result = deliveryController.create(request, authentication);
 
         assertNotNull(result);
         assertEquals(HttpStatus.CREATED, result.getStatusCode());
         assertEquals(new DeliveryResponse(), result.getBody());
-        verify(deliveryService).createDelivery(request);
+        verify(authenticationHelper).getAuthenticatedUser(authentication);
+        verify(deliveryService).createDelivery(request, user);
     }
 
     @Test
     void shouldThrowExceptionWhenCreatingDeliveryWithNullRequest(){
-        assertThrows(IllegalArgumentException.class, () -> deliveryController.create(null));
-        verify(deliveryService, never()).createDelivery(any());
+        assertThrows(IllegalArgumentException.class, () -> deliveryController.create(null, authentication));
+        verify(authenticationHelper).getAuthenticatedUser(authentication);
+        verify(deliveryService, never()).createDelivery(any(), any());
     }
 
     @Test
@@ -131,11 +119,13 @@ public class DeliveryControllerTest {
                 .build();
 
         when(deliveryService.updateDeliveryStatus(deliveryStatusRequest, id)).thenReturn(updatedDelivery);
+        when(deliveryResponseToDeliveryMapper.mapToResponse(updatedDelivery)).thenReturn(new DeliveryResponse());
 
-        ResponseEntity<DeliveryResponse> result = deliveryController.updateDeliveryStatus(deliveryStatusRequest, id);
+        ResponseEntity<DeliveryResponse> result = deliveryController.updateDeliveryStatus(deliveryStatusRequest, id, authentication);
 
         assertNotNull(result);
         assertEquals(HttpStatus.OK, result.getStatusCode());
+        verify(authenticationHelper).getAuthenticatedUser(authentication);
         verify(deliveryService).updateDeliveryStatus(deliveryStatusRequest, id);
     }
 
@@ -148,20 +138,22 @@ public class DeliveryControllerTest {
                 .thenThrow(new RuntimeException("Delivery not found!"));
 
         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                deliveryController.updateDeliveryStatus(deliveryStatusRequest, id)
+                deliveryController.updateDeliveryStatus(deliveryStatusRequest, id, authentication)
         );
 
         assertEquals("Delivery not found!", exception.getMessage());
+        verify(authenticationHelper).getAuthenticatedUser(authentication);
         verify(deliveryService).updateDeliveryStatus(deliveryStatusRequest, id);
     }
 
     @Test
-    void shouldThrowExceptionWhenUpdateDeliveryStatusRequestIsNull() throws Exception{
+    void shouldThrowExceptionWhenUpdateDeliveryStatusRequestIsNull() {
         Long id = 1L;
 
         assertThrows(IllegalArgumentException.class, () ->
-                deliveryController.updateDeliveryStatus(null, id));
+                deliveryController.updateDeliveryStatus(null, id, authentication));
 
+        verify(authenticationHelper).getAuthenticatedUser(authentication);
         verify(deliveryService, never()).updateDeliveryStatus(any(), any());
     }
 
@@ -170,13 +162,14 @@ public class DeliveryControllerTest {
         DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.DELIVERED);
 
         assertThrows(IllegalArgumentException.class, () ->
-                deliveryController.updateDeliveryStatus(deliveryStatusRequest, null));
+                deliveryController.updateDeliveryStatus(deliveryStatusRequest, null, authentication));
 
+        verify(authenticationHelper).getAuthenticatedUser(authentication);
         verify(deliveryService, never()).updateDeliveryStatus(any(), any());
     }
 
+    @Test
     void shouldThrowAllExceptionsWhenUserIsNotAuthenticated(){
-        when(securityContext.getAuthentication()).thenReturn(null);
 
         DeliveryRequest deliveryRequest = new DeliveryRequest(
                 "inpost",
@@ -185,19 +178,16 @@ public class DeliveryControllerTest {
                 100
         );
 
-        assertDoesNotThrow(() -> deliveryController.create(deliveryRequest));
+        assertDoesNotThrow(() -> deliveryController.create(deliveryRequest, authentication));
 
         Long id = 1L;
         DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
 
-        assertDoesNotThrow(() -> deliveryController.updateDeliveryStatus(deliveryStatusRequest, id));
+        assertDoesNotThrow(() -> deliveryController.updateDeliveryStatus(deliveryStatusRequest, id, authentication));
     }
 
     @Test
-    void shouldThrowAllExceptionsWhenUserNotFound(){
-        when(userDetails.getUsername()).thenReturn(user.getEmail());
-        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.empty());
-
+    void shouldThrowExceptionWhenAuthenticationHelperThrowsSecurityException() {
         DeliveryRequest deliveryRequest = new DeliveryRequest(
                 "inpost",
                 "ItemName",
@@ -205,11 +195,12 @@ public class DeliveryControllerTest {
                 100
         );
 
-        assertDoesNotThrow(() -> deliveryController.create(deliveryRequest));
+        when(authenticationHelper.getAuthenticatedUser(authentication))
+                .thenThrow(new SecurityException("Authentication failed"));
 
-        Long id = 1L;
-        DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
-
-        assertDoesNotThrow(() -> deliveryController.updateDeliveryStatus(deliveryStatusRequest, id));
+        assertThrows(SecurityException.class, () ->
+                deliveryController.create(deliveryRequest, authentication)
+        );
     }
+
 }

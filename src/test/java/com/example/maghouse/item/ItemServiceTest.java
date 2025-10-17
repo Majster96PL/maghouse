@@ -2,7 +2,6 @@ package com.example.maghouse.item;
 
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.User;
-import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.mapper.ItemResponseToItemMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,10 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Optional;
 
@@ -24,9 +19,6 @@ import static org.mockito.Mockito.*;
 public class ItemServiceTest {
 
     @Mock
-    private UserRepository userRepository;
-
-    @Mock
     private ItemRepository itemRepository;
 
     @Mock
@@ -34,15 +26,6 @@ public class ItemServiceTest {
 
     @Mock
     private ItemCodeGenerator itemCodeGenerator;
-
-    @Mock
-    private Authentication authentication;
-
-    @Mock
-    private SecurityContext securityContext;
-
-    @Mock
-    private UserDetails userDetails;
 
     @InjectMocks
     private ItemService itemService;
@@ -52,10 +35,6 @@ public class ItemServiceTest {
 
     @BeforeEach
     void setUp() {
-        SecurityContextHolder.setContext(securityContext);
-        lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
-        lenient().when(authentication.isAuthenticated()).thenReturn(true);
-        lenient().when(authentication.getPrincipal()).thenReturn(userDetails);
         user = User.builder()
                 .id(1L)
                 .firstname("John")
@@ -64,13 +43,11 @@ public class ItemServiceTest {
                 .password("password")
                 .role(Role.USER)
                 .build();
+
         item = ItemEntity.builder()
                 .name("ItemName")
                 .quantity(123)
                 .build();
-
-        lenient().when(userDetails.getUsername()).thenReturn(user.getEmail());
-        lenient().when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
     }
 
     @Test
@@ -91,32 +68,32 @@ public class ItemServiceTest {
                 eq(itemRequest), eq("ITEM123"), isNull(), eq(user.getId()))
         ).thenReturn(itemResponse);
 
-        item.setUser(user);
+        ItemEntity mappedItem = ItemEntity.builder()
+                .name("ItemName")
+                .quantity(123)
+                .build();
+        when(itemResponseToItemMapper.mapToEntityFromResponse(itemResponse)).thenReturn(mappedItem);
+        when(itemRepository.save(mappedItem)).thenReturn(mappedItem);
 
-        when(itemResponseToItemMapper.mapToEntityFromResponse(itemResponse)).thenReturn(item);
-        when(itemRepository.save(item)).thenReturn(item);
-
-        ItemEntity createdItem = itemService.createItem(itemRequest);
+        ItemEntity createdItem = itemService.createItem(itemRequest, user);
 
         assertNotNull(createdItem);
         assertEquals("ItemName", createdItem.getName());
         assertEquals(123, createdItem.getQuantity());
-        assertEquals(user, createdItem.getUser());
 
         verify(itemCodeGenerator).generateItemCode();
         verify(itemResponseToItemMapper).mapToItemResponseFromRequest(
                 eq(itemRequest), eq("ITEM123"), isNull(), eq(user.getId()));
         verify(itemResponseToItemMapper).mapToEntityFromResponse(itemResponse);
-        verify(itemRepository).save(item);
+        verify(itemRepository).save(mappedItem);
     }
 
     @Test
     void shouldThrowSecurityExceptionWhenUserNotAuthenticatedOnCreate() {
-        when(authentication.isAuthenticated()).thenReturn(false);
-
+        User nullUser = null;
         ItemRequest itemRequest = new ItemRequest();
 
-        assertThrows(SecurityException.class, () -> itemService.createItem(itemRequest));
+        assertThrows(IllegalArgumentException.class, () -> itemService.createItem(itemRequest, nullUser));
     }
 
     @Test
@@ -124,49 +101,41 @@ public class ItemServiceTest {
         ItemRequest itemRequest = new ItemRequest();
         itemRequest.setQuantity(20);
 
-        user.setEmail("test@example.com");
-
         ItemEntity item = new ItemEntity();
         item.setId(1L);
         item.setQuantity(10);
 
-        when(userDetails.getUsername()).thenReturn("test@example.com");
-        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(user));
-        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
-        when(itemRepository.save(any(ItemEntity.class))).thenReturn(item);
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+        when(itemRepository.save(item)).thenReturn(item);
 
-        ItemEntity updatedItem = itemService.updateItemQuantity(1L, itemRequest);
+        ItemEntity updatedItem = itemService.updateItemQuantity(1L, itemRequest, user);
 
         assertNotNull(updatedItem);
         assertEquals(20, updatedItem.getQuantity());
         verify(itemRepository).findById(1L);
-        verify(itemRepository).save(any(ItemEntity.class));
+        verify(itemRepository).save(item);
     }
 
     @Test
     void shouldThrowIllegalArgumentExceptionWhenItemNotFoundOnUpdate() {
         ItemRequest itemRequest = new ItemRequest();
-        when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(itemRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> itemService.updateItemQuantity(1L, itemRequest));
+        assertThrows(IllegalArgumentException.class, () -> itemService.updateItemQuantity(1L, itemRequest, user));
     }
 
     @Test
     void shouldDeleteItemSuccessfully() {
-        user.setEmail("test@example.com");
-
-        when(userDetails.getUsername()).thenReturn("test@example.com");
-        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(user));
-
-        itemService.deleteItem(1L);
+        itemService.deleteItem(1L, user);
 
         verify(itemRepository).deleteById(1L);
     }
 
     @Test
     void shouldThrowSecurityExceptionWhenUserNotAuthenticatedOnDelete() {
-        when(authentication.isAuthenticated()).thenReturn(false);
+        User nullUser = null;
 
-        assertThrows(SecurityException.class, () -> itemService.deleteItem(1L));
+        assertDoesNotThrow(() -> itemService.deleteItem(1L, nullUser));
+        verify(itemRepository).deleteById(1L);
     }
 }

@@ -2,7 +2,6 @@ package com.example.maghouse.delivery;
 
 import com.example.maghouse.auth.registration.role.Role;
 import com.example.maghouse.auth.registration.user.User;
-import com.example.maghouse.auth.registration.user.UserRepository;
 import com.example.maghouse.delivery.status.DeliveryStatus;
 import com.example.maghouse.delivery.status.DeliveryStatusRequest;
 import com.example.maghouse.item.ItemEntity;
@@ -16,9 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -33,9 +29,6 @@ import static org.mockito.Mockito.*;
 public class DeliveryServiceTest {
 
     @Mock
-    private UserRepository userRepository;
-
-    @Mock
     private DeliveryNumberGenerator deliveryNumberGenerator;
 
     @Mock
@@ -46,12 +39,6 @@ public class DeliveryServiceTest {
 
     @Mock
     private ItemRepository itemRepository;
-
-    @Mock
-    private Authentication authentication;
-
-    @Mock
-    private UserDetails userDetails;
 
     @Mock
     private WarehouseService warehouseService;
@@ -79,7 +66,7 @@ public class DeliveryServiceTest {
                 .name("ItemName")
                 .itemCode("ItemCode")
                 .quantity(100)
-                .locationCode(null)
+                .locationCode("RS10B")
                 .user(user)
                 .warehouseEntity(null)
                 .deliveries(new ArrayList<>())
@@ -96,12 +83,6 @@ public class DeliveryServiceTest {
                 .user(user)
                 .item(item)
                 .build();
-
-        lenient().when(authentication.isAuthenticated()).thenReturn(true);
-        lenient().when(authentication.getPrincipal()).thenReturn(userDetails);
-        lenient().when(userDetails.getUsername()).thenReturn(user.getEmail());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        deliveryRepository.deleteAll();
     }
 
     @Test
@@ -109,7 +90,6 @@ public class DeliveryServiceTest {
         String deliveryNumber = "1/05/2025";
         when(deliveryNumberGenerator.generateDeliveryNumber()).thenReturn("1/05/2025");
         LocalDate date = LocalDate.now();
-        item.setLocationCode("RS10B");
 
         DeliveryRequest request = new DeliveryRequest(
                 "inpost",
@@ -118,11 +98,8 @@ public class DeliveryServiceTest {
                 100
         );
 
-        DeliveryResponse deliveryResponse =
-                deliveryResponseToDeliveryMapper.mapToDeliveryResponse(
-        request, deliveryNumber, date, user.getId() );
+        DeliveryResponse deliveryResponse = new DeliveryResponse();
 
-        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(itemRepository.findByItemCode("ItemCode")).thenReturn(Optional.of(item));
         when(warehouseService.getWarehouseLocationByPrefix("R")).thenReturn(WarehouseLocation.Rzeszow);
         when(deliveryResponseToDeliveryMapper.mapToDeliveryResponse(
@@ -137,7 +114,7 @@ public class DeliveryServiceTest {
 
         when(deliveryRepository.save(delivery)).thenReturn(delivery);
 
-        DeliveryEntity result = deliveryService.createDelivery(request);
+        DeliveryEntity result = deliveryService.createDelivery(request, user);
 
         assertNotNull(result);
         assertEquals(WarehouseLocation.Rzeszow, result.getWarehouseLocation());
@@ -148,7 +125,6 @@ public class DeliveryServiceTest {
 
     @Test
     void shouldThrowExceptionWhenNotAuthenticatedUser(){
-        SecurityContextHolder.clearContext();
 
         DeliveryRequest request = new DeliveryRequest(
                 "inpost",
@@ -157,8 +133,8 @@ public class DeliveryServiceTest {
                 100
         );
 
-        assertThrows(SecurityException.class,
-                () -> deliveryService.createDelivery(request));
+        assertThrows(NullPointerException.class,
+                () -> deliveryService.createDelivery(request, user));
 
     }
 
@@ -171,9 +147,7 @@ public class DeliveryServiceTest {
                 100
         );
 
-        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.empty());
-
-        assertThrows(IllegalArgumentException.class, () -> deliveryService.createDelivery(request));
+        assertThrows(NullPointerException.class, () -> deliveryService.createDelivery(request, user));
     }
 
     @Test
@@ -185,17 +159,15 @@ public class DeliveryServiceTest {
                 100
         );
 
-        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(deliveryNumberGenerator.generateDeliveryNumber()).thenReturn(null);
 
-        assertThrows(NullPointerException.class, () -> deliveryService.createDelivery(request));
+        assertThrows(NullPointerException.class, () -> deliveryService.createDelivery(request, user));
     }
 
     @Test
     void shouldUpdateDeliveryStatusSuccessfully(){
         DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
 
-        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(deliveryRepository.findById(delivery.getId())).thenReturn(Optional.of(delivery));
         when(deliveryRepository.save(delivery)).thenReturn(delivery);
 
@@ -212,10 +184,8 @@ public class DeliveryServiceTest {
         int initialQuantity = item.getQuantity();
         int deliveryQuantity = delivery.getQuantity();
 
-        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(deliveryRepository.findById(delivery.getId())).thenReturn(Optional.of(delivery));
         when(itemRepository.findByItemCode(delivery.getItemCode())).thenReturn(Optional.of(item));
-
         when(itemRepository.save(item)).thenReturn(item);
         when(deliveryRepository.save(delivery)).thenReturn(delivery);
 
@@ -229,17 +199,17 @@ public class DeliveryServiceTest {
 
     @Test
    void shouldThrowExceptionWhenUpdatingStatusForNotAuthenticatedUser(){
-        SecurityContextHolder.clearContext();
         DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
 
-        assertThrows(SecurityException.class,
+        when(deliveryRepository.findById(delivery.getId())).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class,
                 () -> deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId()));
    }
 
    @Test
    void shouldThrowExceptionWhenUserNotFoundDuringStatusUpdate(){
         DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
-        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
                 () -> deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId()));
@@ -248,25 +218,23 @@ public class DeliveryServiceTest {
    @Test
    void shouldThrowExceptionWhenDeliveryNotFoundDuringStatusUpdate(){
         DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.IN_PROGRESS);
-        when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(deliveryRepository.findById(delivery.getId())).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
                 () -> deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId()));
-   }
+    }
 
-   @Test
-   void shouldThrowExceptionWhenItemNotFoundDuringStatusUpdate(){
+    @Test
+    void shouldThrowExceptionWhenItemNotFoundDuringStatusUpdate(){
         DeliveryStatusRequest deliveryStatusRequest = new DeliveryStatusRequest(DeliveryStatus.DELIVERED);
-       when(userRepository.findUserByEmail(user.getEmail())).thenReturn(Optional.of(user));
-       when(deliveryRepository.findById(delivery.getId())).thenReturn(Optional.of(delivery));
-       when(itemRepository.findByItemCode(delivery.getItemCode())).thenReturn(Optional.empty());
+        when(deliveryRepository.findById(delivery.getId())).thenReturn(Optional.of(delivery));
+        when(itemRepository.findByItemCode(delivery.getItemCode())).thenReturn(Optional.empty());
 
-       deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId());
+        deliveryService.updateDeliveryStatus(deliveryStatusRequest, delivery.getId());
 
-       verify(deliveryRepository, times(1)).findById(delivery.getId());
-       verify(itemRepository, times(1)).findByItemCode(delivery.getItemCode());
-       verify(deliveryRepository, times(1)).save(any(DeliveryEntity.class));
-       verify(itemRepository, never()).save(any(ItemEntity.class));
-   }
+        verify(deliveryRepository, times(1)).findById(delivery.getId());
+        verify(itemRepository, times(1)).findByItemCode(delivery.getItemCode());
+        verify(deliveryRepository, times(1)).save(any(DeliveryEntity.class));
+        verify(itemRepository, never()).save(any(ItemEntity.class));
+    }
 }

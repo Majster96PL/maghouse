@@ -5,9 +5,7 @@ import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.auth.registration.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +13,7 @@ import java.util.NoSuchElementException;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ItemService {
 
     private final UserRepository userRepository;
@@ -33,14 +32,10 @@ public class ItemService {
     }
 
     @Transactional
-    public ItemEntity createItem(ItemRequest itemRequest) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new SecurityException("User is not authenticated");
+    public ItemEntity createItem(ItemRequest itemRequest, User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
         }
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User user = userRepository.findUserByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User with email not found"));
         String code = itemCodeGenerator.generateItemCode();
 
         ItemResponse itemResponse = itemResponseToItemMapper.mapToItemResponseFromRequest(itemRequest, code, null, user.getId() );
@@ -49,15 +44,7 @@ public class ItemService {
         return itemRepository.save(item);
     }
 
-    public ItemEntity updateItemQuantity(Long itemId, ItemRequest itemRequest) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new SecurityException("User is not authenticated");
-        }
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User user = userRepository.findUserByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User with email not found"));
-
+    public ItemEntity updateItemQuantity(Long itemId, ItemRequest itemRequest, User user) {
         ItemEntity item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found"));
 
@@ -66,15 +53,7 @@ public class ItemService {
         return itemRepository.save(item);
     }
 
-    public void deleteItem(Long itemId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new SecurityException("User is not authenticated");
-        }
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        userRepository.findUserByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User with email not found"));
-
+    public void deleteItem(Long itemId, User user) {
         itemRepository.deleteById(itemId);
     }
 }

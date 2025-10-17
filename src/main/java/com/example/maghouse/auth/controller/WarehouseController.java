@@ -1,9 +1,11 @@
 package com.example.maghouse.auth.controller;
 
+import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemResponse;
 import com.example.maghouse.mapper.ItemResponseToItemMapper;
 import com.example.maghouse.mapper.WarehouseResponseToWarehouseMapper;
+import com.example.maghouse.security.AuthenticationHelper;
 import com.example.maghouse.warehouse.WarehouseEntity;
 import com.example.maghouse.warehouse.WarehouseRequest;
 import com.example.maghouse.warehouse.WarehouseResponse;
@@ -17,9 +19,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,14 +32,18 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/warehouses/")
-@AllArgsConstructor
 @Tag(name = "Warehouse Structure", description = "Endpoints for creating warehouses and managing item storage locations.")
 @SecurityRequirement(name = "bearerAuth")
+@RequiredArgsConstructor
+@Slf4j
 public class WarehouseController {
 
     private final WarehouseService warehouseService;
     private final WarehouseResponseToWarehouseMapper warehouseResponseToWarehouseMapper;
     private final ItemResponseToItemMapper itemResponseToItemMapper;
+    private final AuthenticationHelper authenticationHelper;
+
+
 
     @GetMapping
     @Operation(summary = "Retrieve all warehouses",
@@ -46,7 +54,9 @@ public class WarehouseController {
             @ApiResponse(responseCode = "403", description = "Forbidden (Access denied)",
                     content = @Content)
     })
-    public ResponseEntity<List<WarehouseResponse>> getAllWarehouses() {
+    public ResponseEntity<List<WarehouseResponse>> getAllWarehouses( Authentication authentication) {
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
+        log.info("User {} requested all warehouses", user.getEmail());
         List<WarehouseEntity> warehouses = warehouseService.getAllWarehouses();
         List<WarehouseResponse> responses = warehouses.stream()
                 .map(warehouseResponseToWarehouseMapper::mapToWarehouse)
@@ -67,8 +77,10 @@ public class WarehouseController {
                     content = @Content)
     })
     public ResponseEntity<List<ItemResponse>> getItemsByLocationPrefix(
-            @PathVariable WarehouseLocationRequest warehouseLocationRequest) {
-
+            @PathVariable WarehouseLocationRequest warehouseLocationRequest,
+            Authentication authentication) {
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
+        log.info("User {} requested all warehouses", user.getEmail());
         List<ItemEntity> items = warehouseService.getAllItemsByLocationCodePrefix(
                 warehouseLocationRequest.getWarehouseLocation());
 
@@ -94,8 +106,11 @@ public class WarehouseController {
             @ApiResponse(responseCode = "403", description = "Forbidden (admin:create required)",
                     content = @Content)
     })
-    public ResponseEntity<WarehouseResponse> create(@RequestBody WarehouseRequest warehouseRequest) {
-        WarehouseEntity warehouse = warehouseService.createWarehouse(warehouseRequest);
+    public ResponseEntity<WarehouseResponse> create(@RequestBody WarehouseRequest warehouseRequest,
+                                                    Authentication authentication) {
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
+        log.info("User {} requested all warehouses", user.getEmail());
+        WarehouseEntity warehouse = warehouseService.createWarehouse(warehouseRequest, user);
         WarehouseResponse warehouseResponse = warehouseResponseToWarehouseMapper.mapToWarehouse(warehouse);
         if (warehouseResponse == null) {
             throw new IllegalArgumentException("Mapper returned null for WarehouseResponse");
@@ -115,8 +130,11 @@ public class WarehouseController {
                     content = @Content)
     })
     public ResponseEntity<ItemResponse> assignSpaceType(@PathVariable Long itemId,
-                                                        @RequestBody WarehouseSpaceTypeRequest warehouseSpaceTypeRequest) {
-        ItemEntity item = warehouseService.assignWarehouseSpaceType(warehouseSpaceTypeRequest, itemId);
+                                                        @RequestBody WarehouseSpaceTypeRequest warehouseSpaceTypeRequest,
+                                                        Authentication authentication) {
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
+        log.info("User {} requested all warehouses", user.getEmail());
+        ItemEntity item = warehouseService.assignWarehouseSpaceType(warehouseSpaceTypeRequest, itemId, user);
         ItemResponse response = itemResponseToItemMapper.mapToItem(item);
         return ResponseEntity.ok(response);
 
@@ -134,8 +152,11 @@ public class WarehouseController {
                     content = @Content)
     })
     public ResponseEntity<ItemResponse> assignWarehouseLocation(@PathVariable Long itemId,
-                                                                @RequestBody WarehouseLocationRequest warehouseLocationRequest) {
-        ItemEntity item = warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, itemId);
+                                                                @RequestBody WarehouseLocationRequest warehouseLocationRequest,
+                                                                Authentication authentication) {
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
+        log.info("User {} requested all warehouses", user.getEmail());
+        ItemEntity item = warehouseService.assignItemsToWarehouseLocation(warehouseLocationRequest, itemId, user);
         ItemResponse response = itemResponseToItemMapper.mapToItem(item);
         return ResponseEntity.ok(response);
     }
@@ -152,8 +173,11 @@ public class WarehouseController {
                     content = @Content)
     })
     public ResponseEntity<ItemResponse> updateWarehouseLocation(@PathVariable Long itemId,
-                                                                @RequestBody WarehouseLocationRequest warehouseLocationRequest) {
-        ItemEntity item = warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId);
+                                                                @RequestBody WarehouseLocationRequest warehouseLocationRequest,
+                                                                Authentication authentication) {
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
+        log.info("User {} requested all warehouses", user.getEmail());
+        ItemEntity item = warehouseService.updatedItemsToWarehouseLocation(warehouseLocationRequest, itemId, user);
         ItemResponse response = itemResponseToItemMapper.mapToItem(item);
         return ResponseEntity.ok(response);
     }

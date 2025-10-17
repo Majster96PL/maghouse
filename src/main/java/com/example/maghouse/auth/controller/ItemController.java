@@ -1,10 +1,12 @@
 package com.example.maghouse.auth.controller;
 
+import com.example.maghouse.auth.registration.user.User;
 import com.example.maghouse.item.ItemEntity;
 import com.example.maghouse.item.ItemRequest;
 import com.example.maghouse.item.ItemResponse;
 import com.example.maghouse.item.ItemService;
 import com.example.maghouse.mapper.ItemResponseToItemMapper;
+import com.example.maghouse.security.AuthenticationHelper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,13 +26,14 @@ import java.util.stream.Collectors;
 
 @RequestMapping(path = "/items/")
 @RestController
-@RequiredArgsConstructor
 @Tag(name = "Item Management", description = "Endpoints for managing items and stock quantities in the warehouse.")
 @SecurityRequirement(name = "bearerAuth")
+@RequiredArgsConstructor
 public class ItemController {
 
     private final ItemService itemService;
     private final ItemResponseToItemMapper itemResponseToItemMapper;
+    private final AuthenticationHelper authenticationHelper;
 
     @GetMapping
     @Operation(summary = "Retrieve a list of all items",
@@ -40,7 +44,8 @@ public class ItemController {
             @ApiResponse(responseCode = "403", description = "Access denied",
                     content = @Content)
     })
-    public ResponseEntity<List<ItemResponse>> getAllItems() {
+    public ResponseEntity<List<ItemResponse>> getAllItems(Authentication authentication) {
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
         List<ItemEntity> items = itemService.getAllItems();
         List<ItemResponse> itemResponses = items.stream()
                 .map(itemResponseToItemMapper::mapToItem)
@@ -60,7 +65,9 @@ public class ItemController {
             @ApiResponse(responseCode = "404", description = "Item with the given ID was not found",
                     content = @Content(schema = @Schema(implementation = Map.class)))
     })
-    public ResponseEntity<ItemResponse> getItemByItemCode(@PathVariable("itemCode") String itemCode){
+    public ResponseEntity<ItemResponse> getItemByItemCode(@PathVariable("itemCode") String itemCode,
+                                                          Authentication authentication){
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
         var item = itemService.getItemByItemCode(itemCode);
         var response = itemResponseToItemMapper.mapToItem(item);
         return ResponseEntity.ok(response);
@@ -77,8 +84,10 @@ public class ItemController {
             @ApiResponse(responseCode = "403", description = "Access denied",
                     content = @Content)
     })
-    public ResponseEntity<ItemResponse> create(@RequestBody ItemRequest itemRequest) {
-        ItemEntity item = itemService.createItem(itemRequest);
+    public ResponseEntity<ItemResponse> create(@RequestBody ItemRequest itemRequest,
+                                               Authentication authentication) {
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
+        ItemEntity item = itemService.createItem(itemRequest, user );
         ItemResponse itemResponse = itemResponseToItemMapper.mapToItem(item);
         return ResponseEntity.status(HttpStatus.CREATED).body(itemResponse);
     }
@@ -96,8 +105,11 @@ public class ItemController {
             @ApiResponse(responseCode = "404", description = "Item with the given ID was not found",
                     content = @Content(schema = @Schema(implementation = Map.class)))
     })
-    public ResponseEntity<ItemResponse> updateItemQuantity(@PathVariable Long itemId, @RequestBody ItemRequest itemRequest) {
-        ItemEntity updatedItem = itemService.updateItemQuantity(itemId, itemRequest);
+    public ResponseEntity<ItemResponse> updateItemQuantity(@PathVariable Long itemId,
+                                                           @RequestBody ItemRequest itemRequest,
+                                                           Authentication authentication) {
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
+        ItemEntity updatedItem = itemService.updateItemQuantity(itemId, itemRequest, user);
         ItemResponse updatedItemResponse = itemResponseToItemMapper.mapToItem(updatedItem);
         return ResponseEntity.ok(updatedItemResponse);
     }
@@ -113,8 +125,9 @@ public class ItemController {
             @ApiResponse(responseCode = "404", description = "Item with the given ID was not found",
                     content = @Content(schema = @Schema(implementation = Map.class)))
     })
-    public ResponseEntity<Void> deleteItem(@PathVariable Long itemId) {
-        itemService.deleteItem(itemId);
+    public ResponseEntity<Void> deleteItem(@PathVariable Long itemId, Authentication authentication) {
+        User user = authenticationHelper.getAuthenticatedUser(authentication);
+        itemService.deleteItem(itemId, user);
         return ResponseEntity.noContent().build();
     }
 }
