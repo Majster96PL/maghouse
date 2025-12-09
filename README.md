@@ -105,7 +105,8 @@ POST maghouse/auth/login
 POST maghouse/auth/refresh
 ```
 
-![img.png](img.png)
+<img width="672" height="234" alt="image" src="https://github.com/user-attachments/assets/06394e02-7892-48ac-8588-c048da521154" />
+
 
 ##### **Item Management (Need to login)**
 
@@ -120,7 +121,8 @@ Retrieve item details by item code.
 ```http request
 GET /maghouse/items/{itemCode}
 ```
-![img_1.png](img_1.png)
+<img width="524" height="230" alt="image" src="https://github.com/user-attachments/assets/f91a269f-dc77-4b6d-8303-f8cac1e9651e" />
+
 
 Create new item.
 
@@ -149,7 +151,8 @@ Modifies the stock quantity for a specific item.
 ```http request
 PUT maghouse/items/{itemId}
 ```
-![img_2.png](img_2.png)
+<img width="515" height="192" alt="image" src="https://github.com/user-attachments/assets/5f9b1a10-707d-41ae-9348-7d6cca7ad6b2" />
+
 
 **REQUEST**
 
@@ -173,9 +176,11 @@ Removes an item permanently from the inventory.
 ```http request
 DELETE maghouse/items/{item}
 ```
-![img_3.png](img_3.png)
+<img width="477" height="195" alt="image" src="https://github.com/user-attachments/assets/79f2380e-2f53-4926-bddf-569b5ae45790" />
 
-![img_4.png](img_4.png)
+
+<img width="1290" height="338" alt="image" src="https://github.com/user-attachments/assets/b228a81c-aeb0-4971-bd47-a23a2cece91e" />
+
 
 ##### **Warehouse Management (Need to login)**
 
@@ -221,7 +226,8 @@ Assign a space type to an item.
 ```http request
 POST maghouse/warehouses/assign-space-type/{itemId}
 ```
-![img_5.png](img_5.png)
+<img width="492" height="208" alt="image" src="https://github.com/user-attachments/assets/51508fcc-f315-498b-83c8-3e7823c3159b" />
+
 
 **REQUEST**
 
@@ -245,7 +251,8 @@ Assigns the item's current stock to a specific physical location in the warehous
 POST maghouse/warehouses/assign-location/{itemId}
 ```
 
-![img_6.png](img_6.png)
+<img width="509" height="208" alt="image" src="https://github.com/user-attachments/assets/158f8b89-5f20-443d-abb3-87cf248227c6" />
+
 
 **REQUEST**
 
@@ -268,7 +275,8 @@ Moves an item's stock from its current location to a new one.
 ```http request
 PUT maghouse/warehouses/items/{itemId}/location
 ```
-![img_7.png](img_7.png)
+<img width="487" height="189" alt="image" src="https://github.com/user-attachments/assets/53060da3-d28e-44e8-a47f-032afa05e0ae" />
+
 
 **REQUEST**
 
@@ -307,7 +315,8 @@ Retrieves deliveries filtered by delivery status.
 GET maghouse/deliveries/status/{status}
 ```
 
-![img_8.png](img_8.png)
+<img width="370" height="231" alt="image" src="https://github.com/user-attachments/assets/a1354eac-edd1-470c-a49d-989814a310e9" />
+
 
 Retrieves a specific delivery by its unique delivery number.
 
@@ -383,7 +392,8 @@ Updates the status of a specific delivery by ID.
 PUT maghouse/deliveries/{id}
 ```
 
-![img_9.png](img_9.png)
+<img width="478" height="377" alt="image" src="https://github.com/user-attachments/assets/4c03600a-6352-4a25-84b0-8dd1780430c2" />
+
 
 ##### **Admin Management (Need to login by admin account)**
 
@@ -397,7 +407,8 @@ PUT maghouse/deliveries/{id}
   "password": "admin"
 }
 ```
-![img_10.png](img_10.png)
+<img width="493" height="394" alt="image" src="https://github.com/user-attachments/assets/9797a9ce-01d5-41cc-8f9f-f995fa3dedc2" />
+
 
 ## Documentation
 
