@@ -255,7 +255,7 @@ public class WarehouseService {
     private String generateBaseCodeSpaceType(WarehouseSpaceType warehouseSpaceType) {
         return switch (warehouseSpaceType) {
             case SHELF -> "S";
-            case DRAVER -> "D";
+            case DRAWER -> "D";
             case CONTAINER -> "C";
             default -> throw new IllegalArgumentException("Unknown warehouse space type!");
         };

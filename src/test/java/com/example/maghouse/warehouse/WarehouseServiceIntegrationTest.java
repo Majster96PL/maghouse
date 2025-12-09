@@ -137,7 +137,7 @@ public class WarehouseServiceIntegrationTest {
         ItemEntity item = createAndSaveTestItem();
         item.setLocationCode(null);
 
-        WarehouseSpaceTypeRequest request = new WarehouseSpaceTypeRequest(WarehouseSpaceType.DRAVER);
+        WarehouseSpaceTypeRequest request = new WarehouseSpaceTypeRequest(WarehouseSpaceType.DRAWER);
 
         ItemEntity result = warehouseService.assignWarehouseSpaceType(request, item.getId(), user);
 
@@ -184,7 +184,7 @@ public class WarehouseServiceIntegrationTest {
     @Test
     void shouldThrowAllWhenUserNotAuthenticated() {
         WarehouseLocationRequest warehouseLocationRequest = new WarehouseLocationRequest(WarehouseLocation.Krakow);
-        WarehouseSpaceTypeRequest warehouseSpaceTypeRequest = new WarehouseSpaceTypeRequest(WarehouseSpaceType.DRAVER);
+        WarehouseSpaceTypeRequest warehouseSpaceTypeRequest = new WarehouseSpaceTypeRequest(WarehouseSpaceType.DRAWER);
         WarehouseRequest warehouseRequest = new WarehouseRequest();
 
         User nullUser = null;

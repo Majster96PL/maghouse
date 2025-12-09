@@ -1,144 +1,405 @@
-# 📦 MagHouse – Full-Scale CRM for Warehouse Management
+# MagHouse
 
-**MagHouse** is a comprehensive backend CRM system built in **Java 17** using **Spring Boot**. It manages users, items, warehouseEntity spaces, and deliveries. The system uses **JWT-based authentication**, **role-based access control**, and includes **unit/integration tests**. Designed to be production-ready, it also supports future modules like Order and Swagger documentation.
-
----
-
-## 🧩 Modules
-
-### 👤 User Module
-- User registration and login
-- JWT-based authentication and token handling
-- Role-based access control (RBAC)
-
-### 📦 Item Module
-- Create, edit, delete items
-- Automatically generate unique item codes
-- Item categorization and metadata support
-
-### 🏢 Warehouse Module
-- Manage warehouseEntity spaces by `spaceType`
-- Support for 3 major city locations
-- Scalable for complex warehouseEntity operations
-
-### 🚚 Delivery Module
-- Create and manage delivery orders
-- Track order status: `CREATED`, `IN_PROGRESS`, `DELIVERED`, `CANCELLED`
-- Basic delivery lifecycle support
+**Maghouse** is a comprehensive backend CRM solution designed for warehouse management. The Spring Boot appication provides RESTful APIs for user management, inventory tracking with warehouse space allocation, and delivery processing. The system features JWT-based authentication with role-based access control, ensuring secure operations.
 
 ---
 
-## 🔐 Security
+## Features
 
-- JWT authentication (stateless sessions)
-- Role-based access control (Admin, User, etc.)
-- Protected API endpoints using Spring Security
-- Token-based login with secure authorization headers
+- User Management
+- Item Module
+- Warehouse Management
+- Delivery Module
 
 ---
 
-## ⚙️ Tech Stack
+## Tech Stack
 
 | Component        | Technology                     |
 |------------------|--------------------------------|
-| Language         | Java 17                        |
+| Language         | Java 22                        |
 | Framework        | Spring Boot                    |
 | Build Tool       | Maven                          |
+| Containerization | Docker                         |
 | Security         | Spring Security + JWT          |
 | Persistence      | JPA (H2 (testing) / PostgrSQL) |
 | Tests            | JUnit, Mockito                 |
 | API              | REST                           |
-| Documentation    | Swagger (planned)              |
+| Documentation    | Swagger                        |
 | Dev Tools        | Lombok, Spring DevTools        |
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
-### Prerequisites
-
-- Java 17+
-- Maven 3.6+
-
-### Clone and Build
+#### 1.
 
 ```bash
-git clone https://github.com/Majster96PL/maghouse.git
-cd maghouse
-./mvnw clean install
+ git clone https://github.com/Majster96PL/maghouse.git
 ```
-## 🚀 Run the Application
+#### 2. 
+
+###### Linux/Mac
 
 ```bash
-./mvnw spring-boot:run
+ DB_USER=your_user DB_PASSWORD=your_passwod docker compose up --build -d
 ```
-## Or run via the compiled JAR:
-```bash
-java -jar target/maghouse-1.0-SNAPSHOT.jar
+#### or
+
+###### Windows
+
+```shell
+ $env:DB_USER="your_user"; $env:DB_PASSWORD="your_password"; docker compose up --build -d
 ```
-## 🧪 Testing
-### The project includes:
 
-- Unit tests (logic and services)
-
-- Integration tests (REST endpoints)
-
-### Run all tests with:
+#### Run all tests
 
 ```bash
-./mvnw test
+ mvn clean test 
+```
+---
+
+## API Reference
+
+##### 
+Public endpoints for user registration, login, and token management.
+
+```http request
+  POST maghouse/auth/register
+```
+**REQUEST**
+
+| Parameter   | Type     | Description                       |
+|:------------|:---------|:----------------------------------|
+| `firstname` | `string` | **Required**. Your firstname      |
+| `lastname`  | `string` | **Required**. Your lastname       |
+| `email`     | `string` | **Required**. Your email          |
+| `password`  | `string` | **Required**. Your password       |
+| `role`      | `string` | **Required**. Default role (USER) |
+
+**RESPONSE**
+
+| Parameter       | Type     | Description                           |
+|:----------------|:---------|:--------------------------------------|
+| `access_token`  | `string` | **Required token for authorization**. |
+| `refresh_token` | `string` | Refresh token.                        |
+
+```http request
+POST maghouse/auth/login
+```
+**REQUEST**
+
+| Parameter   | Type       | Description                       |
+|:------------|:-----------|:----------------------------------|
+| `email`     | `string`   | **Required**. Your email          |
+| `password`  | `string`   | **Required**. Your password       |
+
+**RESPONSE**
+
+| Parameter       | Type     | Description                           |
+|:----------------|:---------|:--------------------------------------|
+| `access_token`  | `string` | **Required token for authorization**. |
+| `refresh_token` | `string` | Refresh token                         |  
+
+```http request
+POST maghouse/auth/refresh
 ```
 
-## 🌐 API Overview
-### All modules expose endpoints through a RESTful API. Working on `localhost`
+![img.png](img.png)
 
-### Endpoints
-- `PUT /auth/admin/update` - Update user
+##### **Item Management (Need to login)**
 
-- `PUT /auth/admin/change/{id}` - Change role user
+Retrieve a list of all items.
 
-- `POST /auth/register` – Register new user
+```http request
+GET maghouse/items/
+```
 
-- `POST /auht/login` – Authenticate and get JWT
+Retrieve item details by item code.
 
-- `GET /auth/{id}` - Get User by ID
+```http request
+GET /maghouse/items/{itemCode}
+```
+![img_1.png](img_1.png)
 
-- `POST /auth/refresh` - Refresh JWT token
+Create new item.
 
-- `POST /auth/item/create` – Create new item
+```http request
+POST maghouse/items/
+```
+**REQUEST**
 
-- `PUT /auth/item//update/{itemId}` – Update item
+| Parameter  | Type      | Description                  |
+|:-----------|:----------|:-----------------------------|
+| `name`     | `string`  | **Required** Your item name. |
+| `quantity` | `integer` | **Required** Your quantity.  |  
 
-- `DELETE /auth/item/delete/{itemId}` - Delete item
+**RESPONSE**
 
-- `POST /auth/maghouse/create` – Add a new warehouseEntity
+| Parameter      | Type       | Description               |
+|:---------------|:-----------|:--------------------------|
+| `name`         | `string`   | Your item name.           |
+| `itemCode`     | `string`   | Auto-generated item code. |
+| `quantity`     | `string`   | Your quantity.            |
+| `locationCode` | `string`   | `null`                    |
+| `userId`       | `long`     | User id.                  |
 
-- `POST /auth/warehouse/assign-space-type/{itemId}` - Assign space type to item
+Modifies the stock quantity for a specific item.
 
-- `POST /auth/warehouse/assign-location/{itemId}` - Assign warehouseEntity location to item
+```http request
+PUT maghouse/items/{itemId}
+```
+![img_2.png](img_2.png)
 
-- `PUT /auth/warehouse/update-location/{itemId}` - Update location
+**REQUEST**
 
-- `POST /auth/delivery/create` – Create a delivery order
+| Parameter  | Type      | Description                  |
+|:-----------|:----------|:-----------------------------|
+| `name`     | `string`  | **Required** Your item name. |
+| `quantity` | `integer` | **Required** Your quantity.  |  
 
-- `POST /auth/delivery/update-delivery-status/{id}` - Update delivery status
+**RESPONSE**
 
-### 📘 Full API documentation will be available via Swagger in a future release.
+| Parameter      | Type       | Description            |
+|:---------------|:-----------|:-----------------------|
+| `name`         | `string`   | Your item name.        |
+| `itemCode`     | `string`   | Your item code.        |
+| `quantity`     | `string`   | Your updated quantity. |
+| `locationCode` | `string`   | `null`                 |
+| `userId`       | `long`     | User id.               |
 
-## 📌 Roadmap
-- ✅ Modular architecture
-- ✅ JWT security
-- ✅ Unit & integration testing
-- 🔜 Order module
-- 🔜 Swagger/OpenAPI documentation
-- 🔜 Docker & PostgreSQL support
-- 🔜 CI/CD with GitHub Actions
+Removes an item permanently from the inventory.
 
-## 🧱 Architecture
-- Domain-driven modular structure
-- Clean DTO-to-entity separation
-- Centralized error handling
-- Stateless authentication flow
-- Prepared for containerization and cloud deployment
+```http request
+DELETE maghouse/items/{item}
+```
+![img_3.png](img_3.png)
 
+![img_4.png](img_4.png)
+
+##### **Warehouse Management (Need to login)**
+
+Retrieved a list of a defined warehouse structures.
+
+```http request
+GET maghouse/warehouses/
+```
+
+Retrieves a list of items assigned to a warehouse location (Warsaw, Krakow, Rzeszow).
+
+```http request
+GET maghouse/warehouses/items/by-location/{warehouseLocationRequest}
+```
+**REQUEST**
+
+| Parameter           | Type     | Description                                               |
+|:--------------------|:---------|:----------------------------------------------------------|
+| `warehouseLocation` | `string` | **Required** Warehouse Location (Warsaw, Krakow, Rzeszow) |
+
+Create a new warehouse.
+
+```http request
+POST maghouse/warehouses/
+```
+
+**REQUEST**
+
+| Parameter           | Type     | Description                                               |
+|:--------------------|:---------|:----------------------------------------------------------|
+| `warehouseLocation` | `string` | **Required** Warehouse Location (Warsaw, Krakow, Rzeszow) |
+
+**RESPONSE**
+
+| Parameter           | Type      | Description                                  |
+|:--------------------|:----------|:---------------------------------------------|
+| `warehouseLocation` | `string`  | Warehouse Location (Warsaw, Krakow, Rzeszow) |
+| `userId`            | `integer` | User id.                                     |
+| `itemsId`           | `integer` | Items id.                                    |
+
+Assign a space type to an item.
+
+```http request
+POST maghouse/warehouses/assign-space-type/{itemId}
+```
+![img_5.png](img_5.png)
+
+**REQUEST**
+
+| Parameter            | Type     | Description                                                  |
+|:---------------------|:---------|:-------------------------------------------------------------|
+| `warehouseSpaceType` | `string` | **Required** Warehouse Space Type (SHELF, DRAWER, CONTAINER) |
+
+**RESPONSE**
+
+| Parameter      | Type       | Description                        |
+|:---------------|:-----------|:-----------------------------------|
+| `name`         | `string`   | Your item name.                    |
+| `itemCode`     | `string`   | Your item code.                    |
+| `quantity`     | `string`   | Your  quantity.                    |
+| `locationCode` | `string`   | Item location (e.g S01A for SHELF) |
+| `userId`       | `long`     | User id.                           |
+
+Assigns the item's current stock to a specific physical location in the warehouse.
+
+```http request
+POST maghouse/warehouses/assign-location/{itemId}
+```
+
+![img_6.png](img_6.png)
+
+**REQUEST**
+
+| Parameter           | Type     | Description                                               |
+|:--------------------|:---------|:----------------------------------------------------------|
+| `warehouseLocation` | `string` | **Required** Warehouse Location (Warsaw, Krakow, Rzeszow) |
+
+**RESPONSE**
+
+| Parameter      | Type       | Description                          |
+|:---------------|:-----------|:-------------------------------------|
+| `name`         | `string`   | Your item name.                      |
+| `itemCode`     | `string`   | Your item code.                      |
+| `quantity`     | `string`   | Your  quantity.                      |
+| `locationCode` | `string`   | Item location (e.g WS01A for Warsaw) |
+| `userId`       | `long`     | User id.                             |
+
+Moves an item's stock from its current location to a new one.
+
+```http request
+PUT maghouse/warehouses/items/{itemId}/location
+```
+![img_7.png](img_7.png)
+
+**REQUEST**
+
+| Parameter           | Type     | Description                                               |
+|:--------------------|:---------|:----------------------------------------------------------|
+| `warehouseLocation` | `string` | **Required** Warehouse Location (Warsaw, Krakow, Rzeszow) |
+
+##### **Delivery Management (Need to login)**
+
+Retrieves a list of all deliveries.
+
+```http request
+GET maghouse/deliveries/
+```
+
+Retrieves a specific delivery by its ID.
+
+```http request
+GET maghouse/deliveries/{id}
+```
+Retrieves deliveries filtered by supplier name.
+
+```http request
+GET maghouse/deliveries/supplier/{supplierName}
+```
+
+**REQUEST**
+
+| Parameter      | Type     | Description                 |
+|:---------------|:---------|:----------------------------|
+| `supplierName` | `string` | **Required** Supplier name. |
+
+Retrieves deliveries filtered by delivery status.
+
+```http request
+GET maghouse/deliveries/status/{status}
+```
+
+![img_8.png](img_8.png)
+
+Retrieves a specific delivery by its unique delivery number.
+
+```http request
+GET maghouse/deliveries/number/{deliveryNumber}
+```
+
+**REQUEST**
+
+| Parameter        | Type     | Description                                    |
+|:-----------------|:---------|:-----------------------------------------------|
+| `deliveryNumber` | `string` | **Required** Delivery number (e.g 145/05/2025) |
+
+Retrieves deliveries filtered by warehouse location.
+
+```http request
+GET maghouse/deliveries/location/{warehouseLocation}
+```
+
+**REQUEST**
+
+| Parameter           | Type     | Description                                               |
+|:--------------------|:---------|:----------------------------------------------------------|
+| `warehouseLocation` | `string` | **Required** Warehouse Location (Warsaw, Krakow, Rzeszow) |
+
+Retrieves deliveries filtered by item code.
+
+```http request
+GET maghouse/deliveries/item/{itemCode}
+```
+
+**REQUEST**
+
+| Parameter  | Type     | Description                                   |
+|:-----------|:---------|:----------------------------------------------|
+| `itemCode` | `string` | **Required** Item code (e.g 1234-05-895-5879) |
+
+Creates a new delivery order based on the provided request data.
+
+```http request
+POST maghouse/deliveries/
+```
+
+**REQUEST**
+
+| Parameter      | Type      | Description                                   |
+|:---------------|:----------|:----------------------------------------------|
+| `supplierName` | `string`  | **Required** Supplier name.                   |
+| `itemName`     | `string`  | **Required** Item name.                       |
+| `itemCode`     | `string`  | **Required** Item code (e.g 1234-05-895-5879) |
+| `quantity`     | `integer` | **Required** Item quantity.                   |
+
+
+**RESPONSE**
+
+```json lines
+{
+  "supplier": "string",
+  "data": "data",
+  "numberDelivery": "string",
+  "itemName": "string",
+  "itemCode": "string",
+  "quantity": integer,
+  "deliveryStatus": "string",
+  "warehouseLocation": "string",
+  "userId": integer
+}
+```
+
+Updates the status of a specific delivery by ID.
+
+```http request
+PUT maghouse/deliveries/{id}
+```
+
+![img_9.png](img_9.png)
+
+##### **Admin Management (Need to login by admin account)**
+
+**The admin account is generated during running applications**
+
+**REQUEST FOR LOGIN**
+
+```json lines
+{
+  "email": "admin@maghouse.pl",
+  "password": "admin"
+}
+```
+![img_10.png](img_10.png)
+
+## Documentation
+
+[Local Documentation](http://localhost:8080/maghouse/swagger-ui/index.html#)
 
