@@ -1,63 +1,103 @@
-# MagHouse
+# 📦 MagHouse – Warehouse Management System
 
-**Maghouse** is a comprehensive backend CRM solution designed for warehouse management. The Spring Boot appication provides RESTful APIs for user management, inventory tracking with warehouse space allocation, and delivery processing. The system features JWT-based authentication with role-based access control, ensuring secure operations.
+![Java](https://img.shields.io/badge/Java-22-orange)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)
+![GitHub Actions](https://img.shields.io/badge/CI-GitHub_Actions-success)
+
+A backend **Warehouse Management System** built with **Java 22**, **Spring Boot**, **Spring Security**, **PostgreSQL**, and **Docker**.
+
+Developed as my engineering thesis, MagHouse demonstrates secure authentication, warehouse inventory management, warehouse space allocation, delivery processing, RESTful API development, automated testing and containerized deployment.
 
 ---
 
-## Features
+# ✨ Features
 
-- User Management
-- Item Module
+- JWT Authentication & Authorization
+- Role-Based Access Control
 - Warehouse Management
-- Delivery Module
+- Inventory Management
+- Delivery Management
+- RESTful API
+- Swagger Documentation
+- Docker Deployment
+- Unit Tests (JUnit + Mockito)
 
 ---
 
-## Tech Stack
+# 🏗 Architecture
 
-| Component        | Technology                     |
-|------------------|--------------------------------|
-| Language         | Java 22                        |
-| Framework        | Spring Boot                    |
-| Build Tool       | Maven                          |
-| Containerization | Docker                         |
-| Security         | Spring Security + JWT          |
-| Persistence      | JPA (H2 (testing) / PostgrSQL) |
-| Tests            | JUnit, Mockito                 |
-| API              | REST                           |
-| Documentation    | Swagger                        |
-| Dev Tools        | Lombok, Spring DevTools        |
+```text
+Client
+  │
+REST Controllers
+  │
+Services
+  │
+Repositories
+  │
+PostgreSQL
+```
 
 ---
 
-## Getting Started
+# 🛠 Tech Stack
 
-#### 1.
+| Category | Technology |
+|----------|------------|
+| Language | Java 22 |
+| Framework | Spring Boot |
+| Security | Spring Security, JWT |
+| ORM | Hibernate, Spring Data JPA |
+| Database | PostgreSQL, H2 |
+| Build | Maven |
+| Containerization | Docker |
+| Testing | JUnit 5, Mockito |
+| Documentation | Swagger / OpenAPI |
+| CI | GitHub Actions |
 
-```bash
- git clone https://github.com/Majster96PL/maghouse.git
-```
-#### 2. 
-
-###### Linux/Mac
-
-```bash
- DB_USER=your_user DB_PASSWORD=your_passwod docker compose up --build -d
-```
-#### or
-
-###### Windows
-
-```shell
- $env:DB_USER="your_user"; $env:DB_PASSWORD="your_password"; docker compose up --build -d
-```
-
-#### Run all tests
-
-```bash
- mvn clean test 
-```
 ---
+
+# 🚀 Getting Started
+
+```bash
+git clone https://github.com/Majster96PL/maghouse.git
+```
+
+Linux/macOS
+
+```bash
+DB_USER=your_user DB_PASSWORD=your_password docker compose up --build -d
+```
+
+Windows
+
+```powershell
+$env:DB_USER="your_user"
+$env:DB_PASSWORD="your_password"
+docker compose up --build -d
+```
+
+---
+
+# 🧪 Running Tests
+
+```bash
+mvn clean test
+```
+
+---
+
+# 🌐 API Overview
+
+The application exposes REST endpoints for:
+- Authentication
+- User Management
+- Inventory
+- Warehouse
+- Deliveries
+- Administration
 
 ## API Reference
 
@@ -410,7 +450,23 @@ PUT maghouse/deliveries/{id}
 <img width="493" height="394" alt="image" src="https://github.com/user-attachments/assets/9797a9ce-01d5-41cc-8f9f-f995fa3dedc2" />
 
 
-## Documentation
+# 📖 Swagger
 
-[Local Documentation](http://localhost:8080/maghouse/swagger-ui/index.html#)
+http://localhost:8080/maghouse/swagger-ui/index.html
+
+---
+
+# 🚀 Future Improvements
+
+- Redis
+- Kubernetes
+- Testcontainers
+- Monitoring
+- CI/CD improvements
+
+---
+
+# 📄 License
+
+MIT License.
 
